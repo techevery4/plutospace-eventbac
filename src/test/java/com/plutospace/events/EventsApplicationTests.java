@@ -1,3 +1,4 @@
+/* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events;
 
 import org.junit.jupiter.api.Test;
@@ -9,5 +10,4 @@ class EventsApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }

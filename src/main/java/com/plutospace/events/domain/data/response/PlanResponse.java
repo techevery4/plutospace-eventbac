@@ -1,12 +1,13 @@
+/* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.domain.data.response;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -14,9 +15,10 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PlanResponse {
 
-    private String id;
-    private String type;
-    private List<String> features = new ArrayList<>();
-    private Double priceNaira;
-    private Double priceUsd;
+	private String id;
+	private String type;
+	private String name;
+	private List<String> features;
+	private Double priceNaira;
+	private Double priceUsd;
 }

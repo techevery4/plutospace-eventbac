@@ -1,17 +1,17 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.commons.entities;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.data.annotation.*;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.*;
+
+import lombok.Getter;
+import lombok.Setter;
+
 @Getter
 @Setter
-
 public class BaseEntity implements Serializable {
 
 	@Serial

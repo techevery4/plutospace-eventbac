@@ -1,13 +1,14 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.commons.exception.handler;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter

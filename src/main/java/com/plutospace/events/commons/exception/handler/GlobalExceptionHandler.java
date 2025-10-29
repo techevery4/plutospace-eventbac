@@ -1,15 +1,17 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.commons.exception.handler;
 
-import com.plutospace.events.commons.exception.*;
-import io.swagger.v3.oas.annotations.Hidden;
+import java.util.Date;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.Date;
+import com.plutospace.events.commons.exception.*;
+
+import io.swagger.v3.oas.annotations.Hidden;
 
 @Hidden
 @ControllerAdvice

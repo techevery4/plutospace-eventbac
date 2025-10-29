@@ -1,13 +1,14 @@
 /* Developed by TechEveryWhere Engineering (C)2024 */
 package com.plutospace.events.commons.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.domain.Pageable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
