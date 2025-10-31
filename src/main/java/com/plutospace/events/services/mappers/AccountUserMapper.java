@@ -19,18 +19,18 @@ public class AccountUserMapper {
 	public AccountUserResponse toResponse(AccountUser accountUser) {
 		return AccountUserResponse.instance(accountUser.getId(), accountUser.getAccountId(), accountUser.getFirstName(),
 				accountUser.getLastName(), accountUser.getName(), accountUser.getEmail(), accountUser.getImageId(),
-				accountUser.getImageUrl(), accountUser.getCreatedOn());
+				accountUser.getImageUrl(), accountUser.getCreatedOn(), accountUser.getLastLogin());
 	}
 
 	public AccountUser toEntity(RegisterPersonalAccountRequest registerPersonalAccountRequest) {
 		return AccountUser.instance(null, registerPersonalAccountRequest.firstName(),
 				registerPersonalAccountRequest.lastName(), null, registerPersonalAccountRequest.email(), null, null,
-				null);
+				null, null);
 	}
 
 	public AccountUser toEntity(RegisterBusinessAccountRequest registerBusinessAccountRequest) {
 		return AccountUser.instance(null, null, null, registerBusinessAccountRequest.name(),
-				registerBusinessAccountRequest.email(), null, null, null);
+				registerBusinessAccountRequest.email(), null, null, null, null);
 	}
 
 	public CustomPageResponse<AccountUserResponse> toPagedResponse(Page<AccountUser> accountUsers) {

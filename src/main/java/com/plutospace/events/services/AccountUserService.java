@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
@@ -18,4 +19,9 @@ public interface AccountUserService {
 			throws NoSuchAlgorithmException, InvalidKeySpecException;
 
 	CustomPageResponse<AccountUserResponse> retrieveAllAccounts(int pageNo, int pageSize);
+
+	AccountUserResponse login(LoginAccountUserRequest loginAccountUserRequest)
+			throws NoSuchAlgorithmException, InvalidKeySpecException;
+
+	AccountUserResponse retrieveAccountUser(String id);
 }

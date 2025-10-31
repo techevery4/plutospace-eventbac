@@ -1,6 +1,8 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.domain.entities;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.plutospace.events.commons.entities.BaseEntity;
@@ -28,4 +30,6 @@ public class AccountUser extends BaseEntity {
 
 	private String imageId;
 	private String imageUrl;
+
+	private LocalDateTime lastLogin;
 }

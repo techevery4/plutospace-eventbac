@@ -3,6 +3,8 @@ package com.plutospace.events.services.implementations;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -10,12 +12,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.plutospace.events.commons.config.security.AES;
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.commons.definitions.GeneralConstants;
+import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
 import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.HashPassword;
 import com.plutospace.events.domain.data.PlanType;
+import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
@@ -29,6 +35,7 @@ import com.plutospace.events.services.AccountUserService;
 import com.plutospace.events.services.mappers.AccountUserMapper;
 import com.plutospace.events.validation.AccountUserValidator;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,9 +47,11 @@ public class AccountUserServiceImpl implements AccountUserService {
 	private final AccountRepository accountRepository;
 	private final AccountUserRepository accountUserRepository;
 	private final PlanRepository planRepository;
+	private final PropertyConstants propertyConstants;
 	private final AccountUserMapper accountUserMapper;
 	private final AccountUserValidator accountUserValidator;
 	private final HashPassword hashPassword;
+	private final HttpServletResponse headers;
 
 	@Override
 	public AccountUserResponse registerPersonalAccount(RegisterPersonalAccountRequest request)
@@ -121,7 +130,44 @@ public class AccountUserServiceImpl implements AccountUserService {
 		return accountUserMapper.toPagedResponse(accountUsers);
 	}
 
+	@Override
+	public AccountUserResponse login(LoginAccountUserRequest loginAccountUserRequest)
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
+		AccountUser accountUser = retrieveAccountUserByEmail(loginAccountUserRequest.email());
+
+		// Saving login time
+		accountUser.setLastLogin(LocalDateTime.now());
+		accountUserRepository.save(accountUser);
+
+		headers.setHeader(GeneralConstants.TOKEN_KEY,
+				generateEncryptedLoginToken(accountUser.getId(), accountUser.getAccountId()));
+
+		return accountUserMapper.toResponse(accountUser);
+	}
+
+	@Override
+	public AccountUserResponse retrieveAccountUser(String id) {
+		AccountUser accountUser = retrieveAccountUserById(id);
+
+		return accountUserMapper.toResponse(accountUser);
+	}
+
 	private Plan retrievePlanById(String id) {
 		return planRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Plan Not Found"));
+	}
+
+	private AccountUser retrieveAccountUserByEmail(String email) {
+		return accountUserRepository.findByEmailIgnoreCase(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
+	}
+
+	private AccountUser retrieveAccountUserById(String id) {
+		return accountUserRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
+	}
+
+	private String generateEncryptedLoginToken(String id, String accountId) {
+		long timestamp = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+		String originalString = timestamp + ":" + id + ":" + accountId;
+		return AES.encrypt(originalString, propertyConstants.getEventsEncryptionSecretKey());
 	}
 }

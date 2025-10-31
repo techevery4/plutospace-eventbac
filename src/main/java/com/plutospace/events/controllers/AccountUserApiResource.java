@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
@@ -20,8 +21,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-import static com.plutospace.events.commons.definitions.ApiResourceConstants.ACCOUNT_USERS;
-import static com.plutospace.events.commons.definitions.ApiResourceConstants.ACCOUNT_USERS_RESOURCE_ID;
+import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
 
 @RestController
 @RequestMapping(ACCOUNT_USERS)
@@ -64,5 +64,18 @@ public class AccountUserApiResource {
 	public ResponseEntity<CustomPageResponse<AccountUserResponse>> retrieveAllAccounts(
 			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
 		return ResponseEntity.ok(accountUserService.retrieveAllAccounts(pageNo, pageSize));
+	}
+
+	@GetMapping(path = RESOURCE_ID, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint retrieves a single account user")
+	public ResponseEntity<AccountUserResponse> retrieveAccountUser(@PathVariable String id) {
+		return ResponseEntity.ok(accountUserService.retrieveAccountUser(id));
+	}
+
+	@PostMapping(path = "/login", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint performs an account user login")
+	public ResponseEntity<AccountUserResponse> login(@RequestBody LoginAccountUserRequest loginAccountUserRequest)
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
+		return ResponseEntity.ok(accountUserService.login(loginAccountUserRequest));
 	}
 }
