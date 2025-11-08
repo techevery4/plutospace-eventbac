@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.plutospace.events.commons.entities.BaseEntity;
+import com.plutospace.events.domain.data.EventType;
 import com.plutospace.events.domain.data.LocationType;
 import com.plutospace.events.domain.data.VisibilityType;
 
@@ -22,6 +23,7 @@ public class Event extends BaseEntity {
 
 	private String name;
 	private String accountId;
+	private EventType type;
 	private String categoryId;
 	private String description;
 	private LocalDate date;
@@ -51,6 +53,7 @@ public class Event extends BaseEntity {
 	private String meetingLink;
 	private String qAndALink;
 	private String pollsLink;
+	private String registrationLink;
 
 	@Data
 	public static class Timezone {

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.plutospace.events.domain.data.EventType;
 import com.plutospace.events.domain.data.LocationType;
 import com.plutospace.events.domain.data.VisibilityType;
 import com.plutospace.events.domain.entities.Event;
@@ -24,10 +25,14 @@ public class EventResponse {
 	private String id;
 	private String name;
 	private String accountId;
+	private EventType type;
 	private String categoryId;
 	private EventCategoryResponse eventCategoryResponse;
 	private String description;
+
+	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate date;
+
 	private Long startTime;
 	private Long endTime;
 	private Event.Timezone timezone;
@@ -54,6 +59,7 @@ public class EventResponse {
 	private String meetingLink;
 	private String qAndALink;
 	private String pollsLink;
+	private String registrationLink;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdOn;

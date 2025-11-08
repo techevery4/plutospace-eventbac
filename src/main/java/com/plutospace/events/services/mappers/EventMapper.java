@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.domain.data.EventType;
 import com.plutospace.events.domain.data.LocationType;
 import com.plutospace.events.domain.data.VisibilityType;
 import com.plutospace.events.domain.data.request.CreateEventRequest;
@@ -20,20 +21,22 @@ import com.plutospace.events.domain.entities.Event;
 public class EventMapper {
 
 	public EventResponse toResponse(Event event, EventCategoryResponse eventCategoryResponse) {
-		return EventResponse.instance(event.getId(), event.getAccountId(), event.getName(), event.getCategoryId(),
-				eventCategoryResponse, event.getDescription(), event.getDate(), event.getStartTime(),
-				event.getEndTime(), event.getTimezone(), event.getLocationType(), event.getVirtualRoomName(),
-				event.getPhysicalAddress(), event.getAdditionalInstructions(), event.getVisibilityType(),
-				event.getRequireApproval(), event.getEnableRegistration(), event.getEnableWaitlist(),
-				event.getAttendeeSize(), event.getRegistrationCutOffTime(), event.getIsPaidEvent(), event.getAmount(),
-				event.getCurrency(), event.getConfirmationMessage(), event.getTermsAndConditions(),
-				event.getSendReminder(), event.getReminderHour(), event.getLogo(), event.getThumbnail(),
-				event.getMeetingLink(), event.getQAndALink(), event.getPollsLink(), event.getCreatedOn());
+		return EventResponse.instance(event.getId(), event.getName(), event.getAccountId(), event.getType(),
+				event.getCategoryId(), eventCategoryResponse, event.getDescription(), event.getDate(),
+				event.getStartTime(), event.getEndTime(), event.getTimezone(), event.getLocationType(),
+				event.getVirtualRoomName(), event.getPhysicalAddress(), event.getAdditionalInstructions(),
+				event.getVisibilityType(), event.getRequireApproval(), event.getEnableRegistration(),
+				event.getEnableWaitlist(), event.getAttendeeSize(), event.getRegistrationCutOffTime(),
+				event.getIsPaidEvent(), event.getAmount(), event.getCurrency(), event.getConfirmationMessage(),
+				event.getTermsAndConditions(), event.getSendReminder(), event.getReminderHour(), event.getLogo(),
+				event.getThumbnail(), event.getMeetingLink(), event.getQAndALink(), event.getPollsLink(),
+				event.getRegistrationLink(), event.getCreatedOn());
 	}
 
 	public Event toEntity(CreateEventRequest createEventRequest) {
 		LocationType locationType = LocationType.fromValue(createEventRequest.locationType());
 		VisibilityType visibilityType = VisibilityType.fromValue(createEventRequest.visibilityType());
+		EventType eventType = EventType.fromValue(createEventRequest.type());
 
 		Event.Timezone timezone = new Event.Timezone();
 		timezone.setRepresentation(createEventRequest.timezoneString());
@@ -45,7 +48,7 @@ public class EventMapper {
 		physicalAddress.setState(createEventRequest.state());
 		physicalAddress.setCountry(createEventRequest.country());
 
-		return Event.instance(createEventRequest.name(), createEventRequest.accountId(),
+		return Event.instance(createEventRequest.name(), createEventRequest.accountId(), eventType,
 				createEventRequest.categoryId(), createEventRequest.description(), createEventRequest.date(),
 				createEventRequest.startTime(), createEventRequest.endTime(), timezone, locationType,
 				createEventRequest.virtualRoomName(), physicalAddress, createEventRequest.additionalInstructions(),
@@ -55,7 +58,7 @@ public class EventMapper {
 				createEventRequest.amount(), createEventRequest.currency(), createEventRequest.confirmationMessage(),
 				createEventRequest.termsAndConditions(), createEventRequest.sendReminder(),
 				createEventRequest.reminderHour(), createEventRequest.logo(), createEventRequest.thumbnail(), null,
-				null, null);
+				null, null, null);
 	}
 
 	public CustomPageResponse<EventResponse> toPagedResponse(Page<Event> events,

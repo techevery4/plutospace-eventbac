@@ -14,18 +14,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.commons.definitions.GeneralConstants;
+import com.plutospace.events.commons.definitions.PropertyConstants;
+import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
+import com.plutospace.events.commons.utils.LinkGenerator;
+import com.plutospace.events.domain.data.LocationType;
 import com.plutospace.events.domain.data.request.CreateEventFormRequest;
 import com.plutospace.events.domain.data.request.CreateEventRequest;
+import com.plutospace.events.domain.data.request.CreateMeetingRequest;
 import com.plutospace.events.domain.data.response.EventCategoryResponse;
 import com.plutospace.events.domain.data.response.EventFormResponse;
 import com.plutospace.events.domain.data.response.EventResponse;
+import com.plutospace.events.domain.data.response.MeetingResponse;
 import com.plutospace.events.domain.entities.Event;
 import com.plutospace.events.domain.entities.EventForm;
 import com.plutospace.events.domain.repositories.EventFormRepository;
 import com.plutospace.events.domain.repositories.EventRepository;
 import com.plutospace.events.services.EventCategoryService;
 import com.plutospace.events.services.EventService;
+import com.plutospace.events.services.MeetingService;
 import com.plutospace.events.services.mappers.EventFormMapper;
 import com.plutospace.events.services.mappers.EventMapper;
 import com.plutospace.events.validation.EventFormValidator;
@@ -42,10 +50,13 @@ public class EventServiceImpl implements EventService {
 	private final EventRepository eventRepository;
 	private final EventFormRepository eventFormRepository;
 	private final EventCategoryService eventCategoryService;
+	private final MeetingService meetingService;
 	private final EventMapper eventMapper;
 	private final EventFormMapper eventFormMapper;
 	private final EventValidator eventValidator;
 	private final EventFormValidator eventFormValidator;
+	private final LinkGenerator linkGenerator;
+	private final PropertyConstants propertyConstants;
 
 	@Transactional
 	@Override
@@ -56,12 +67,33 @@ public class EventServiceImpl implements EventService {
 				.retrieveEventCategory(List.of(createEventRequest.categoryId()));
 		if (eventCategoryResponses.isEmpty())
 			throw new ResourceNotFoundException("Event Category Not Found");
+		if (createEventRequest.enableRegistration()
+				&& (createEventRequest.eventFormRequests() == null || createEventRequest.eventFormRequests().isEmpty()))
+			throw new GeneralPlatformDomainRuleException(
+					"Kindly customize your registration form for this event. It requires registration");
 
 		Event event = eventMapper.toEntity(createEventRequest);
 
 		try {
 			Event savedEvent = eventRepository.save(event);
-			createEventForms(createEventRequest.eventFormRequests(), savedEvent.getId());
+			if (event.getEnableRegistration()) {
+				String registrationLink = linkGenerator.generatePublicLink(savedEvent.getId(),
+						savedEvent.getAccountId(), GeneralConstants.EVENT_REGISTRATION,
+						propertyConstants.getEventsEncryptionSecretKey());
+				savedEvent.setRegistrationLink(registrationLink);
+				eventRepository.save(savedEvent);
+
+				createEventForms(createEventRequest.eventFormRequests(), savedEvent.getId());
+			}
+			if (!event.getLocationType().equals(LocationType.PHYSICAL)) {
+				CreateMeetingRequest createMeetingRequest = new CreateMeetingRequest("Meeting for " + event.getName(),
+						event.getAccountId(), event.getDescription(), event.getDate(), event.getDate(),
+						event.getStartTime(), event.getEndTime(), createEventRequest.timezoneValue(),
+						createEventRequest.timezoneString(), false, null, GeneralConstants.EVENT_MEETING_PARTICIPANTS);
+				MeetingResponse meetingResponse = meetingService.createMeeting(createMeetingRequest);
+				savedEvent.setMeetingLink(meetingResponse.getPublicId());
+				eventRepository.save(savedEvent);
+			}
 
 			return eventMapper.toResponse(savedEvent, eventCategoryResponses.get(0));
 		} catch (DataIntegrityViolationException e) {
