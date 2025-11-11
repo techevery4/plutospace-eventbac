@@ -18,4 +18,7 @@ public class ApiResourceConstants {
 	public static final String EVENT_CATEGORIES_RESOURCE_ID = EVENT_CATEGORIES + RESOURCE_ID;
 	public static final String MEETINGS = API_VERSION + "/meetings";
 	public static final String MEETINGS_RESOURCE_ID = MEETINGS + RESOURCE_ID;
+	public static final String ADMIN_USERS = API_VERSION + "/admin-users";
+	public static final String ADMIN_USERS_RESOURCE_ID = ADMIN_USERS + RESOURCE_ID;
+	public static final String CALENDARS = API_VERSION + "/calendars";
 }

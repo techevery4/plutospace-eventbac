@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.plutospace.events.domain.data.EventType;
 import com.plutospace.events.domain.data.LocationType;
 import com.plutospace.events.domain.data.VisibilityType;
@@ -19,7 +18,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor(staticName = "instance")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventResponse {
 
 	private String id;

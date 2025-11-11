@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.services.implementations;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
+import com.plutospace.events.commons.utils.DateConverter;
 import com.plutospace.events.commons.utils.LinkGenerator;
 import com.plutospace.events.domain.data.request.CreateMeetingRequest;
 import com.plutospace.events.domain.data.response.MeetingResponse;
@@ -33,12 +35,14 @@ public class MeetingServiceImpl implements MeetingService {
 	private final MeetingValidator meetingValidator;
 	private final LinkGenerator linkGenerator;
 	private final PropertyConstants propertyConstants;
+	private final DateConverter dateConverter;
 
 	@Override
-	public MeetingResponse createMeeting(CreateMeetingRequest createMeetingRequest) {
+	public MeetingResponse createMeeting(CreateMeetingRequest createMeetingRequest, String accountId) {
 		meetingValidator.validate(createMeetingRequest);
 
 		Meeting meeting = meetingMapper.toEntity(createMeetingRequest);
+		meeting.setAccountId(accountId);
 
 		try {
 			Meeting savedMeeting = meetingRepository.save(meeting);
@@ -73,6 +77,14 @@ public class MeetingServiceImpl implements MeetingService {
 		Meeting meeting = retrieveMeetingById(words[0]);
 
 		return meetingMapper.toResponse(meeting);
+	}
+
+	@Override
+	public List<MeetingResponse> retrieveMeetingsBetween(String accountId, Long startTime, Long endTime) {
+		LocalDateTime startDate = dateConverter.convertTimestamp(startTime);
+		LocalDateTime endDate = dateConverter.convertTimestamp(endTime);
+
+		return meetingRepository.findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(accountId, startDate, endDate);
 	}
 
 	private Meeting retrieveMeetingById(String id) {

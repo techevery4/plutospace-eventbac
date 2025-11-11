@@ -48,11 +48,11 @@ public class EventMapper {
 		physicalAddress.setState(createEventRequest.state());
 		physicalAddress.setCountry(createEventRequest.country());
 
-		return Event.instance(createEventRequest.name(), createEventRequest.accountId(), eventType,
-				createEventRequest.categoryId(), createEventRequest.description(), createEventRequest.date(),
-				createEventRequest.startTime(), createEventRequest.endTime(), timezone, locationType,
-				createEventRequest.virtualRoomName(), physicalAddress, createEventRequest.additionalInstructions(),
-				visibilityType, createEventRequest.requireApproval(), createEventRequest.enableRegistration(),
+		return Event.instance(createEventRequest.name(), null, eventType, createEventRequest.categoryId(),
+				createEventRequest.description(), createEventRequest.date(), createEventRequest.startTime(),
+				createEventRequest.endTime(), timezone, locationType, createEventRequest.virtualRoomName(),
+				physicalAddress, createEventRequest.additionalInstructions(), visibilityType,
+				createEventRequest.requireApproval(), createEventRequest.enableRegistration(),
 				createEventRequest.enableWaitlist(), createEventRequest.attendeeSize(),
 				createEventRequest.registrationCutOffTime(), createEventRequest.isPaidEvent(),
 				createEventRequest.amount(), createEventRequest.currency(), createEventRequest.confirmationMessage(),

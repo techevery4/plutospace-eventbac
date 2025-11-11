@@ -13,8 +13,11 @@ public class PropertyConstants {
 	@Value("${api.version}")
 	private String apiVersion;
 
-	@Value("${events.encryption-secret-key}")
+	@Value("${events-public.encryption-secret-key}")
 	private String eventsEncryptionSecretKey;
+
+	@Value("${events-login.encryption-secret-key}")
+	private String eventsLoginEncryptionSecretKey;
 
 	@Value("${events.iv-key}")
 	private String eventsIvKey;

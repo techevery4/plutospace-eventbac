@@ -9,12 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.plutospace.events.commons.definitions.GeneralConstants;
+import com.plutospace.events.commons.definitions.PropertyConstants;
+import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.request.CreateMeetingRequest;
 import com.plutospace.events.domain.data.response.MeetingResponse;
 import com.plutospace.events.services.MeetingService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
@@ -26,12 +30,17 @@ import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
 public class MeetingApiResource {
 
 	private final MeetingService meetingService;
+	private final SecurityMapper securityMapper;
+	private final PropertyConstants propertyConstants;
+	private final HttpServletRequest request;
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint creates a new meeting on PlutoSpace Events")
 	public ResponseEntity<MeetingResponse> createMeeting(@RequestBody CreateMeetingRequest createMeetingRequest,
 			UriComponentsBuilder uriComponentsBuilder) {
-		MeetingResponse meetingResponse = meetingService.createMeeting(createMeetingRequest);
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		MeetingResponse meetingResponse = meetingService.createMeeting(createMeetingRequest, accountId);
 
 		String location = uriComponentsBuilder.path(MEETINGS_RESOURCE_ID).buildAndExpand(meetingResponse.getId())
 				.toUriString();

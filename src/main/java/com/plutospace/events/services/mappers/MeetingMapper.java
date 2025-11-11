@@ -28,11 +28,11 @@ public class MeetingMapper {
 		timezone.setRepresentation(createMeetingRequest.getTimezoneString());
 		timezone.setValue(createMeetingRequest.getTimezoneValue());
 
-		return Meeting.instance(createMeetingRequest.getTitle(), createMeetingRequest.getAccountId(),
-				createMeetingRequest.getDescription(), createMeetingRequest.getStartDate(),
-				createMeetingRequest.getEndDate(), createMeetingRequest.getStartTime(),
-				createMeetingRequest.getEndTime(), timezone, createMeetingRequest.getIsRecurring(),
-				createMeetingRequest.getRecurringDaysOfTheWeek(), createMeetingRequest.getMaximumParticipants(), null);
+		return Meeting.instance(createMeetingRequest.getTitle(), null, createMeetingRequest.getDescription(),
+				createMeetingRequest.getStartDate(), createMeetingRequest.getEndDate(),
+				createMeetingRequest.getStartTime(), createMeetingRequest.getEndTime(), timezone,
+				createMeetingRequest.getIsRecurring(), createMeetingRequest.getRecurringDaysOfTheWeek(),
+				createMeetingRequest.getMaximumParticipants(), null);
 	}
 
 	public CustomPageResponse<MeetingResponse> toPagedResponse(Page<Meeting> meetings) {

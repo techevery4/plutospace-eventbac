@@ -10,11 +10,15 @@ import com.plutospace.events.domain.data.response.EventResponse;
 
 public interface EventService {
 
-	EventResponse createEvent(CreateEventRequest createEventRequest);
+	EventResponse createEvent(CreateEventRequest createEventRequest, String accountId);
 
 	CustomPageResponse<EventResponse> retrieveEvents(int pageNo, int pageSize);
+
+	CustomPageResponse<EventResponse> retrieveEventsForAccount(String accountId, int pageNo, int pageSize);
 
 	CustomPageResponse<EventFormResponse> retrieveEventForms(String id, int pageNo, int pageSize);
 
 	List<EventResponse> retrieveEvent(List<String> ids);
+
+	List<EventResponse> retrieveEventsBetween(String accountId, Long startTime, Long endTime);
 }

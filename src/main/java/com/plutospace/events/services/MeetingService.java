@@ -8,9 +8,11 @@ import com.plutospace.events.domain.data.response.MeetingResponse;
 
 public interface MeetingService {
 
-	MeetingResponse createMeeting(CreateMeetingRequest createMeetingRequest);
+	MeetingResponse createMeeting(CreateMeetingRequest createMeetingRequest, String accountId);
 
 	List<MeetingResponse> retrieveMeeting(List<String> ids);
 
 	MeetingResponse retrieveMeetingByPublicId(String publicId);
+
+	List<MeetingResponse> retrieveMeetingsBetween(String accountId, Long startTime, Long endTime);
 }

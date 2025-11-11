@@ -10,12 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor(staticName = "instance")
-public class PlanResponse {
+public class CalendarResponse {
 
-	private String id;
-	private String type;
-	private String name;
-	private List<String> features;
-	private Double priceNaira;
-	private Double priceUsd;
+	private List<MeetingResponse> meetingResponses;
+	private List<EventResponse> eventResponses;
 }

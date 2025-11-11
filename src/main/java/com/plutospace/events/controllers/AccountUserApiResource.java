@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.commons.definitions.GeneralConstants;
+import com.plutospace.events.commons.definitions.PropertyConstants;
+import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
@@ -19,6 +22,7 @@ import com.plutospace.events.services.AccountUserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
@@ -30,6 +34,9 @@ import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
 public class AccountUserApiResource {
 
 	private final AccountUserService accountUserService;
+	private final SecurityMapper securityMapper;
+	private final PropertyConstants propertyConstants;
+	private final HttpServletRequest request;
 
 	@PostMapping(path = "/personal", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint registers a new personal account user on PlutoSpace Events")
@@ -66,9 +73,11 @@ public class AccountUserApiResource {
 		return ResponseEntity.ok(accountUserService.retrieveAllAccounts(pageNo, pageSize));
 	}
 
-	@GetMapping(path = RESOURCE_ID, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/single", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves a single account user")
-	public ResponseEntity<AccountUserResponse> retrieveAccountUser(@PathVariable String id) {
+	public ResponseEntity<AccountUserResponse> retrieveAccountUser() {
+		String id = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
 		return ResponseEntity.ok(accountUserService.retrieveAccountUser(id));
 	}
 

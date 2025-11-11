@@ -4,7 +4,6 @@ package com.plutospace.events.services.implementations;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -12,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.plutospace.events.commons.config.security.AES;
 import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
@@ -20,6 +18,7 @@ import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleExceptio
 import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.HashPassword;
+import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.PlanType;
 import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
@@ -52,6 +51,7 @@ public class AccountUserServiceImpl implements AccountUserService {
 	private final AccountUserValidator accountUserValidator;
 	private final HashPassword hashPassword;
 	private final HttpServletResponse headers;
+	private final SecurityMapper securityMapper;
 
 	@Override
 	public AccountUserResponse registerPersonalAccount(RegisterPersonalAccountRequest request)
@@ -140,7 +140,8 @@ public class AccountUserServiceImpl implements AccountUserService {
 		accountUserRepository.save(accountUser);
 
 		headers.setHeader(GeneralConstants.TOKEN_KEY,
-				generateEncryptedLoginToken(accountUser.getId(), accountUser.getAccountId()));
+				securityMapper.generateEncryptedLoginTokenForUser(accountUser.getId(), accountUser.getAccountId(),
+						propertyConstants.getEventsLoginEncryptionSecretKey()));
 
 		return accountUserMapper.toResponse(accountUser);
 	}
@@ -163,11 +164,5 @@ public class AccountUserServiceImpl implements AccountUserService {
 
 	private AccountUser retrieveAccountUserById(String id) {
 		return accountUserRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
-	}
-
-	private String generateEncryptedLoginToken(String id, String accountId) {
-		long timestamp = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-		String originalString = timestamp + ":" + id + ":" + accountId;
-		return AES.encrypt(originalString, propertyConstants.getEventsEncryptionSecretKey());
 	}
 }

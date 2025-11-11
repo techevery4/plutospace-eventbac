@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.commons.definitions.GeneralConstants;
+import com.plutospace.events.commons.definitions.PropertyConstants;
+import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.request.CreateEventRequest;
 import com.plutospace.events.domain.data.response.EventFormResponse;
 import com.plutospace.events.domain.data.response.EventResponse;
@@ -17,6 +20,7 @@ import com.plutospace.events.services.EventService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
@@ -28,12 +32,17 @@ import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
 public class EventApiResource {
 
 	private final EventService eventService;
+	private final SecurityMapper securityMapper;
+	private final PropertyConstants propertyConstants;
+	private final HttpServletRequest request;
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint creates a new event on PlutoSpace Events")
 	public ResponseEntity<EventResponse> createEvent(@RequestBody CreateEventRequest createEventRequest,
 			UriComponentsBuilder uriComponentsBuilder) {
-		EventResponse eventResponse = eventService.createEvent(createEventRequest);
+		String id = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		EventResponse eventResponse = eventService.createEvent(createEventRequest, id);
 
 		String location = uriComponentsBuilder.path(EVENTS_RESOURCE_ID).buildAndExpand(eventResponse.getId())
 				.toUriString();
@@ -41,11 +50,20 @@ public class EventApiResource {
 		return ResponseEntity.created(uri).body(eventResponse);
 	}
 
-	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves events")
 	public ResponseEntity<CustomPageResponse<EventResponse>> retrieveEvents(@RequestParam(value = "pageNo") int pageNo,
 			@RequestParam(value = "pageSize") int pageSize) {
 		return ResponseEntity.ok(eventService.retrieveEvents(pageNo, pageSize));
+	}
+
+	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint retrieves events for a particular account")
+	public ResponseEntity<CustomPageResponse<EventResponse>> retrieveEventsForAccount(
+			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(eventService.retrieveEventsForAccount(accountId, pageNo, pageSize));
 	}
 
 	@GetMapping(path = RESOURCE_ID + "/forms", produces = MediaType.APPLICATION_JSON_VALUE)

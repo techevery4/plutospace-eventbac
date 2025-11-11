@@ -13,7 +13,6 @@ public class MeetingValidator {
 
 	public void validate(CreateMeetingRequest createMeetingRequest) {
 		String titleCannotBeNullValidationMessage = "Title cannot be empty";
-		String accountCannotBeNullValidationMessage = "Account owner cannot be empty";
 		String timezoneValueCannotBeNullValidationMessage = "Timezone must be selected";
 		String timezoneStringCannotBeNullValidationMessage = "Timezone must be passed";
 		String startDateCannotBeNullValidationMessage = "Start date cannot be empty";
@@ -25,9 +24,6 @@ public class MeetingValidator {
 
 		if (StringUtils.isBlank(createMeetingRequest.getTitle())) {
 			throw new GeneralPlatformDomainRuleException(titleCannotBeNullValidationMessage);
-		}
-		if (StringUtils.isBlank(createMeetingRequest.getAccountId())) {
-			throw new GeneralPlatformDomainRuleException(accountCannotBeNullValidationMessage);
 		}
 		if (ObjectUtils.isEmpty(createMeetingRequest.getTimezoneValue())) {
 			throw new GeneralPlatformDomainRuleException(timezoneValueCannotBeNullValidationMessage);

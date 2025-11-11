@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.services.implementations;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
+import com.plutospace.events.commons.utils.DateConverter;
 import com.plutospace.events.commons.utils.LinkGenerator;
 import com.plutospace.events.domain.data.LocationType;
 import com.plutospace.events.domain.data.request.CreateEventFormRequest;
@@ -57,10 +59,11 @@ public class EventServiceImpl implements EventService {
 	private final EventFormValidator eventFormValidator;
 	private final LinkGenerator linkGenerator;
 	private final PropertyConstants propertyConstants;
+	private final DateConverter dateConverter;
 
 	@Transactional
 	@Override
-	public EventResponse createEvent(CreateEventRequest createEventRequest) {
+	public EventResponse createEvent(CreateEventRequest createEventRequest, String accountId) {
 		eventValidator.validate(createEventRequest);
 
 		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService
@@ -73,6 +76,7 @@ public class EventServiceImpl implements EventService {
 					"Kindly customize your registration form for this event. It requires registration");
 
 		Event event = eventMapper.toEntity(createEventRequest);
+		event.setAccountId(accountId);
 
 		try {
 			Event savedEvent = eventRepository.save(event);
@@ -87,10 +91,10 @@ public class EventServiceImpl implements EventService {
 			}
 			if (!event.getLocationType().equals(LocationType.PHYSICAL)) {
 				CreateMeetingRequest createMeetingRequest = new CreateMeetingRequest("Meeting for " + event.getName(),
-						event.getAccountId(), event.getDescription(), event.getDate(), event.getDate(),
-						event.getStartTime(), event.getEndTime(), createEventRequest.timezoneValue(),
-						createEventRequest.timezoneString(), false, null, GeneralConstants.EVENT_MEETING_PARTICIPANTS);
-				MeetingResponse meetingResponse = meetingService.createMeeting(createMeetingRequest);
+						event.getDescription(), event.getDate(), event.getDate(), event.getStartTime(),
+						event.getEndTime(), createEventRequest.timezoneValue(), createEventRequest.timezoneString(),
+						false, null, GeneralConstants.EVENT_MEETING_PARTICIPANTS);
+				MeetingResponse meetingResponse = meetingService.createMeeting(createMeetingRequest, accountId);
 				savedEvent.setMeetingLink(meetingResponse.getPublicId());
 				eventRepository.save(savedEvent);
 			}
@@ -136,6 +140,24 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
+	public CustomPageResponse<EventResponse> retrieveEventsForAccount(String accountId, int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		Page<Event> events = eventRepository.findByAccountIdOrderByCreatedOnDesc(accountId, pageable);
+		if (events.getTotalElements() == 0)
+			return new CustomPageResponse<>();
+
+		List<String> categoryIds = events.getContent().stream().map(Event::getCategoryId).toList();
+		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService.retrieveEventCategory(categoryIds);
+		Map<String, EventCategoryResponse> eventCategoryResponseMap = new HashMap<>();
+		for (EventCategoryResponse eventCategoryResponse : eventCategoryResponses) {
+			eventCategoryResponseMap.putIfAbsent(eventCategoryResponse.getId(), eventCategoryResponse);
+		}
+
+		return eventMapper.toPagedResponse(events, eventCategoryResponseMap);
+	}
+
+	@Override
 	public CustomPageResponse<EventFormResponse> retrieveEventForms(String id, int pageNo, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNo, pageSize);
 
@@ -161,5 +183,13 @@ public class EventServiceImpl implements EventService {
 			EventCategoryResponse eventCategoryResponse = eventCategoryResponseMap.get(event.getCategoryId());
 			return eventMapper.toResponse(event, eventCategoryResponse);
 		}).toList();
+	}
+
+	@Override
+	public List<EventResponse> retrieveEventsBetween(String accountId, Long startTime, Long endTime) {
+		LocalDateTime startDate = dateConverter.convertTimestamp(startTime);
+		LocalDateTime endDate = dateConverter.convertTimestamp(endTime);
+
+		return eventRepository.findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(accountId, startDate, endDate);
 	}
 }
