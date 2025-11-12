@@ -5,7 +5,6 @@ import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-import com.plutospace.events.domain.data.response.OperationalResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +18,7 @@ import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
+import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.services.AccountUserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,8 +91,7 @@ public class AccountUserApiResource {
 
 	@GetMapping(path = "/check-user", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint checks if user already exists")
-	public ResponseEntity<OperationalResponse> checkIfUserExists(
-			@RequestParam(value = "email") String email) {
+	public ResponseEntity<OperationalResponse> checkIfUserExists(@RequestParam(value = "email") String email) {
 		return ResponseEntity.ok(accountUserService.checkIfUserExists(email));
 	}
 }

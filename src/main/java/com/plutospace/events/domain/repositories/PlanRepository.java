@@ -8,4 +8,7 @@ import com.plutospace.events.domain.entities.Plan;
 
 @Repository
 public interface PlanRepository extends BaseRepository<Plan, String> {
+	boolean existsByNameIgnoreCase(String name);
+
+	Plan findByNameIgnoreCase(String name);
 }

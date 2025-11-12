@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.domain.data.PlanType;
 import com.plutospace.events.domain.data.request.CreatePlanRequest;
@@ -37,6 +38,8 @@ public class PlanServiceImpl implements PlanService {
 	public PlanResponse createPlan(CreatePlanRequest request) {
 		planValidator.validate(request);
 		Plan plan = planMapper.toEntity(request);
+		if (planRepository.existsByNameIgnoreCase(request.name()))
+			throw new ResourceAlreadyExistsException("Plan already exists");
 
 		try {
 			Plan saved = planRepository.save(plan);
@@ -55,10 +58,16 @@ public class PlanServiceImpl implements PlanService {
 			plan.setType(PlanType.fromValue(request.type()));
 		if (ObjectUtils.isNotEmpty(request.features()))
 			plan.setFeatures(request.features());
-		if (request.priceNaira() <= 0)
+		if (request.priceNaira() > 0)
 			plan.setPriceNaira(request.priceNaira());
-		if (request.priceUsd() <= 0)
+		if (request.priceUsd() > 0)
 			plan.setPriceUsd(request.priceUsd());
+		if (StringUtils.isNotBlank(request.name())) {
+			Plan checkPlan = planRepository.findByNameIgnoreCase(request.name());
+			if (!checkPlan.getId().equals(request.id()))
+				throw new ResourceAlreadyExistsException("Plan already exists");
+		}
+
 		try {
 			Plan saved = planRepository.save(plan);
 
