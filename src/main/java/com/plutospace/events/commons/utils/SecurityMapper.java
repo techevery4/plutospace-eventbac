@@ -39,4 +39,16 @@ public class SecurityMapper {
 
 		return words[2];
 	}
+
+	public String retrieveAdminUserId(String token, String secretKey) {
+		if (token == null)
+			throw new UnauthorizedAccessException(
+					"You cannot complete this request as necessary credentials are missing. Kindly login again");
+		String decryptedToken = this.extractDetailsFromLoginToken(token, secretKey);
+		String[] words = decryptedToken.split(":");
+		if (words.length < 3)
+			throw new UnauthorizedAccessException("Your session has expired. Kindly login again to restart session");
+
+		return words[1];
+	}
 }

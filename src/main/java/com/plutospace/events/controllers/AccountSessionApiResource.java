@@ -43,4 +43,12 @@ public class AccountSessionApiResource {
 		return ResponseEntity.ok(accountSessionService.validateToken(request.getHeader(GeneralConstants.TOKEN_KEY),
 				request.getHeader("User-Agent")));
 	}
+
+	@GetMapping(path = "/terminate", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint terminates an account session")
+	public ResponseEntity<OperationalResponse> terminateSession()
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
+		return ResponseEntity.ok(accountSessionService.terminateSession(request.getHeader(GeneralConstants.TOKEN_KEY),
+				request.getHeader("User-Agent")));
+	}
 }

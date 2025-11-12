@@ -3,6 +3,7 @@ package com.plutospace.events.services;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 
 import com.plutospace.events.domain.data.request.ChangeAdminUserPasswordRequest;
 import com.plutospace.events.domain.data.request.CreateAdminUserRequest;
@@ -20,4 +21,6 @@ public interface AdminUserService {
 
 	AdminUserResponse login(LoginAdminUserRequest loginAdminUserRequest)
 			throws NoSuchAlgorithmException, InvalidKeySpecException;
+
+	List<AdminUserResponse> retrieveAdminUser(List<String> ids);
 }

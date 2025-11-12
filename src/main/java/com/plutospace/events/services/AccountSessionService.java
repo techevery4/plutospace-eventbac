@@ -18,4 +18,7 @@ public interface AccountSessionService {
 			throws NoSuchAlgorithmException, InvalidKeySpecException;
 
 	List<AccountSessionResponse> retrieveAccountSessions(String userId);
+
+	OperationalResponse terminateSession(String token, String userAgent)
+			throws NoSuchAlgorithmException, InvalidKeySpecException;
 }

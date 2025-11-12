@@ -89,4 +89,28 @@ public class AccountSessionServiceImpl implements AccountSessionService {
 
 		return accountSessions.stream().map(accountSessionMapper::toResponse).toList();
 	}
+
+	@Override
+	public OperationalResponse terminateSession(String token, String userAgent)
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
+		if (token == null)
+			throw new UnauthorizedAccessException(
+					"You cannot complete this request as necessary credentials are missing.");
+		String decryptedToken = securityMapper.extractDetailsFromLoginToken(token,
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		String[] words = decryptedToken.split(":");
+		if (words.length < 3)
+			throw new UnauthorizedAccessException("Your session is broken");
+
+		AccountSession accountSession = accountSessionRepository
+				.findByAccountIdAndUserIdAndUserAgentIgnoreCase(words[1], words[2], userAgent);
+		if (accountSession == null)
+			throw new UnauthorizedAccessException("Your session no longer exists");
+		if (!hashPassword.validatePass(token, accountSession.getToken()))
+			throw new UnauthorizedAccessException("This session is invalid.");
+
+		accountSessionRepository.delete(accountSession);
+
+		return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+	}
 }

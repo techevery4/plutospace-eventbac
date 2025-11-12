@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.domain.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -13,4 +14,6 @@ public interface AdminUserRepository extends BaseRepository<AdminUser, String> {
 	boolean existsByEmailIgnoreCase(String email);
 
 	Optional<AdminUser> findByEmailIgnoreCase(String email);
+
+	List<AdminUser> findByIdIn(List<String> ids);
 }

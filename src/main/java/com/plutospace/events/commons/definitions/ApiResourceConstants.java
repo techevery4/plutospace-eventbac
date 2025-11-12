@@ -22,4 +22,6 @@ public class ApiResourceConstants {
 	public static final String ADMIN_USERS_RESOURCE_ID = ADMIN_USERS + RESOURCE_ID;
 	public static final String CALENDARS = API_VERSION + "/calendars";
 	public static final String ACCOUNT_SESSIONS = API_VERSION + "/account-sessions";
+	public static final String ENQUIRIES = API_VERSION + "/enquiries";
+	public static final String ENQUIRIES_RESOURCE_ID = ENQUIRIES + RESOURCE_ID;
 }

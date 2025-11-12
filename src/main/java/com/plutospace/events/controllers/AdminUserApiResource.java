@@ -4,6 +4,7 @@ package com.plutospace.events.controllers;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -66,5 +67,11 @@ public class AdminUserApiResource {
 		String id = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
 		return ResponseEntity.ok(adminUserService.changeAdminUserPassword(changeAdminUserPasswordRequest, id));
+	}
+
+	@PostMapping(path = "/bulk-ids", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint retrieves bulk admin users by ids")
+	public ResponseEntity<List<AdminUserResponse>> retrieveAdminUser(@RequestBody List<String> ids) {
+		return ResponseEntity.ok(adminUserService.retrieveAdminUser(ids));
 	}
 }

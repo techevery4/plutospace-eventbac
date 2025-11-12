@@ -4,6 +4,8 @@ package com.plutospace.events.services.implementations;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -100,6 +102,15 @@ public class AdminUserServiceImpl implements AdminUserService {
 				adminUser.getId(), propertyConstants.getEventsLoginEncryptionSecretKey()));
 
 		return adminUserMapper.toResponse(adminUser);
+	}
+
+	@Override
+	public List<AdminUserResponse> retrieveAdminUser(List<String> ids) {
+		List<AdminUser> adminUsers = adminUserRepository.findByIdIn(ids);
+		if (adminUsers.isEmpty())
+			return new ArrayList<>();
+
+		return adminUsers.stream().map(adminUserMapper::toResponse).toList();
 	}
 
 	private AdminUser retrieveAdminUserByEmail(String email) {
