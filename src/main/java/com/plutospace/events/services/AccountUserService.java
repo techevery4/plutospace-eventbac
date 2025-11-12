@@ -9,6 +9,7 @@ import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
+import com.plutospace.events.domain.data.response.OperationalResponse;
 
 public interface AccountUserService {
 
@@ -24,4 +25,6 @@ public interface AccountUserService {
 			throws NoSuchAlgorithmException, InvalidKeySpecException;
 
 	AccountUserResponse retrieveAccountUser(String id);
+
+	OperationalResponse checkIfUserExists(String email);
 }

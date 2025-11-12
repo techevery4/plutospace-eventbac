@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
 
+import com.plutospace.events.domain.data.response.OperationalResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -161,6 +162,13 @@ public class AccountUserServiceImpl implements AccountUserService {
 		AccountUser accountUser = retrieveAccountUserById(id);
 
 		return accountUserMapper.toResponse(accountUser);
+	}
+
+	@Override
+	public OperationalResponse checkIfUserExists(String email) {
+		retrieveAccountUserByEmail(email);
+
+		return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
 	}
 
 	private Plan retrievePlanById(String id) {
