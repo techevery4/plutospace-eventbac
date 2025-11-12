@@ -1,9 +1,9 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.services;
 
-import com.plutospace.events.domain.data.response.CalendarResponse;
+import java.util.List;
 
 public interface CalendarService {
 
-	CalendarResponse retrieveCalendarBookingsBetween(String accountId, Long startTime, Long endTime);
+	List<Object> retrieveCalendarBookingsBetween(String accountId, Long startTime, Long endTime);
 }

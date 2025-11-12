@@ -20,6 +20,7 @@ import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.HashPassword;
 import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.PlanType;
+import com.plutospace.events.domain.data.request.CreateAccountSessionRequest;
 import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
@@ -30,10 +31,12 @@ import com.plutospace.events.domain.entities.Plan;
 import com.plutospace.events.domain.repositories.AccountRepository;
 import com.plutospace.events.domain.repositories.AccountUserRepository;
 import com.plutospace.events.domain.repositories.PlanRepository;
+import com.plutospace.events.services.AccountSessionService;
 import com.plutospace.events.services.AccountUserService;
 import com.plutospace.events.services.mappers.AccountUserMapper;
 import com.plutospace.events.validation.AccountUserValidator;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,10 +49,12 @@ public class AccountUserServiceImpl implements AccountUserService {
 	private final AccountRepository accountRepository;
 	private final AccountUserRepository accountUserRepository;
 	private final PlanRepository planRepository;
+	private final AccountSessionService accountSessionService;
 	private final PropertyConstants propertyConstants;
 	private final AccountUserMapper accountUserMapper;
 	private final AccountUserValidator accountUserValidator;
 	private final HashPassword hashPassword;
+	private final HttpServletRequest request;
 	private final HttpServletResponse headers;
 	private final SecurityMapper securityMapper;
 
@@ -139,9 +144,14 @@ public class AccountUserServiceImpl implements AccountUserService {
 		accountUser.setLastLogin(LocalDateTime.now());
 		accountUserRepository.save(accountUser);
 
-		headers.setHeader(GeneralConstants.TOKEN_KEY,
-				securityMapper.generateEncryptedLoginTokenForUser(accountUser.getId(), accountUser.getAccountId(),
-						propertyConstants.getEventsLoginEncryptionSecretKey()));
+		String token = securityMapper.generateEncryptedLoginTokenForUser(accountUser.getId(),
+				accountUser.getAccountId(), propertyConstants.getEventsLoginEncryptionSecretKey());
+		headers.setHeader(GeneralConstants.TOKEN_KEY, token);
+
+		String userAgent = request.getHeader("User-Agent");
+		CreateAccountSessionRequest createAccountSessionRequest = new CreateAccountSessionRequest(accountUser.getId(),
+				accountUser.getAccountId(), userAgent, token);
+		accountSessionService.createSession(createAccountSessionRequest);
 
 		return accountUserMapper.toResponse(accountUser);
 	}

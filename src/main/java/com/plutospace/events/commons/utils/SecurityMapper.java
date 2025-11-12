@@ -20,7 +20,7 @@ public class SecurityMapper {
 
 	public String generateEncryptedLoginTokenForUser(String id, String accountId, String secretKey) {
 		long timestamp = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-		String originalString = timestamp + ":" + id + ":" + accountId;
+		String originalString = timestamp + ":" + id + ":" + accountId + ":CUSTOMER";
 		return AES.encrypt(originalString, secretKey);
 	}
 
@@ -34,7 +34,7 @@ public class SecurityMapper {
 					"You cannot complete this request as necessary credentials are missing. Kindly login again");
 		String decryptedToken = this.extractDetailsFromLoginToken(token, secretKey);
 		String[] words = decryptedToken.split(":");
-		if (words.length < 3)
+		if (words.length < 4)
 			throw new UnauthorizedAccessException("Your session has expired. Kindly login again to restart session");
 
 		return words[2];
