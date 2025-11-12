@@ -5,6 +5,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
 
+import com.plutospace.events.commons.exception.LoginDisputeException;
+import com.plutospace.events.domain.data.AdminUserStatus;
 import com.plutospace.events.domain.data.response.OperationalResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -140,6 +142,9 @@ public class AccountUserServiceImpl implements AccountUserService {
 	public AccountUserResponse login(LoginAccountUserRequest loginAccountUserRequest)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		AccountUser accountUser = retrieveAccountUserByEmail(loginAccountUserRequest.email());
+
+		if (!hashPassword.validatePass(loginAccountUserRequest.password(), accountUser.getPassword()))
+			throw new LoginDisputeException("Username or Password Incorrect");
 
 		// Saving login time
 		accountUser.setLastLogin(LocalDateTime.now());

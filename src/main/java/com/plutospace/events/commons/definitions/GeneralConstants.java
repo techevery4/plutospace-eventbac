@@ -11,7 +11,7 @@ public class GeneralConstants {
 	public static final String ENCRYPTION_TYPE = "AES";
 	public static final String CONTENT_TYPE = "UTF-8";
 	public static final String MESSAGE_DIGEST = "SHA-1";
-	public static final int ENCRYPTION_KEY_LENGTH = 48;
+	public static final int ENCRYPTION_KEY_LENGTH = 32;
 	public static final String TOKEN_KEY = "x-token-ch";
 	public static final String Q_AND_A = "Q_AND_A";
 	public static final String MEETING = "MEETING";
