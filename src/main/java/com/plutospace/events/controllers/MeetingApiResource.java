@@ -25,7 +25,7 @@ import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
 
 @RestController
 @RequestMapping(MEETINGS)
-@Tag(name = "Meetings Endpoints", description = "These endpoints manages meetings on PlutoSpace Events")
+@Tag(name = "Meeting Endpoints", description = "These endpoints manages meetings on PlutoSpace Events")
 @RequiredArgsConstructor
 public class MeetingApiResource {
 

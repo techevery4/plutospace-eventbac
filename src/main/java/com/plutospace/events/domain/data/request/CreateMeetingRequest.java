@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.domain.data.request;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,12 +18,12 @@ public class CreateMeetingRequest {
 	private String description;
 	private LocalDate startDate;
 	private LocalDate endDate;
-	private Long startTime;
-	private Long endTime;
+	private String startTime;
+	private String endTime;
 	private Integer timezoneValue;
 	private String timezoneString;
 	private Boolean isRecurring;
-	private List<String> recurringDaysOfTheWeek;
+	private List<DayOfWeek> recurringDaysOfTheWeek;
 	private Integer maximumParticipants;
 
 	private Boolean muteParticipantsOnEntry;

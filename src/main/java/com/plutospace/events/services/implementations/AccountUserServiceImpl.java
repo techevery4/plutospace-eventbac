@@ -4,6 +4,7 @@ package com.plutospace.events.services.implementations;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -173,6 +174,13 @@ public class AccountUserServiceImpl implements AccountUserService {
 		retrieveAccountUserByEmail(email);
 
 		return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+	}
+
+	@Override
+	public List<AccountUserResponse> retrieveAccountUserByEmail(List<String> emails) {
+		List<AccountUser> accountUsers = accountUserRepository.findByEmailIgnoreCaseIn(emails);
+
+		return accountUsers.stream().map(accountUserMapper::toResponse).toList();
 	}
 
 	private Plan retrievePlanById(String id) {

@@ -1,8 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.domain.entities;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -20,13 +19,9 @@ public class Meeting extends BaseEntity {
 	private String title;
 	private String accountId;
 	private String description;
-	private LocalDate startDate;
-	private LocalDate endDate;
-	private Long startTime;
-	private Long endTime;
+	private LocalDateTime startTime;
+	private LocalDateTime endTime;
 	private Timezone timezone;
-	private Boolean isRecurring;
-	private List<String> recurringDaysOfTheWeek;
 	private Integer maximumParticipants;
 	private String publicId;
 

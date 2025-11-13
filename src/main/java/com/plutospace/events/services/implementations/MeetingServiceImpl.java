@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.services.implementations;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,14 @@ public class MeetingServiceImpl implements MeetingService {
 	public MeetingResponse createMeeting(CreateMeetingRequest createMeetingRequest, String accountId) {
 		meetingValidator.validate(createMeetingRequest);
 
-		Meeting meeting = meetingMapper.toEntity(createMeetingRequest);
+		LocalDateTime firstStartTime = dateConverter.mergeLocalDateAndTimeString(createMeetingRequest.getStartDate(),
+				createMeetingRequest.getStartTime());
+		LocalDateTime firstEndTime = dateConverter.mergeLocalDateAndTimeString(createMeetingRequest.getStartDate(),
+				createMeetingRequest.getStartTime());
+		if (firstStartTime.isAfter(firstEndTime))
+			throw new GeneralPlatformDomainRuleException("Start time selected cannot be after end time");
+
+		Meeting meeting = meetingMapper.toEntity(createMeetingRequest, firstStartTime, firstEndTime);
 		meeting.setAccountId(accountId);
 
 		try {
@@ -50,6 +58,37 @@ public class MeetingServiceImpl implements MeetingService {
 					GeneralConstants.MEETING, propertyConstants.getEventsEncryptionSecretKey());
 			savedMeeting.setPublicId(publicLink);
 			meetingRepository.save(savedMeeting);
+
+			if (createMeetingRequest.getIsRecurring()) {
+				List<Meeting> recurringMeetings = new ArrayList<>();
+				for (DayOfWeek dayOfWeek : createMeetingRequest.getRecurringDaysOfTheWeek()) {
+					List<LocalDateTime> startTimes = dateConverter.getDateTimeBetween(
+							createMeetingRequest.getStartDate(), createMeetingRequest.getEndDate(), dayOfWeek,
+							createMeetingRequest.getStartTime());
+					List<LocalDateTime> endTimes = dateConverter.getDateTimeBetween(createMeetingRequest.getStartDate(),
+							createMeetingRequest.getEndDate(), dayOfWeek, createMeetingRequest.getEndTime());
+					for (int i = 0; i < startTimes.size(); i++) {
+						Meeting aMeeting = new Meeting();
+						aMeeting.setAccountId(savedMeeting.getAccountId());
+						aMeeting.setDescription(savedMeeting.getDescription());
+						aMeeting.setTitle(savedMeeting.getTitle());
+						aMeeting.setEndTime(endTimes.get(i));
+						aMeeting.setPublicId(publicLink);
+						aMeeting.setTimezone(meeting.getTimezone());
+						aMeeting.setStartTime(startTimes.get(i));
+						aMeeting.setEnableWaitingRoom(savedMeeting.getEnableWaitingRoom());
+						aMeeting.setMaximumParticipants(savedMeeting.getMaximumParticipants());
+						aMeeting.setMuteParticipantsOnEntry(savedMeeting.getMuteParticipantsOnEntry());
+
+						recurringMeetings.add(aMeeting);
+					}
+				}
+
+				recurringMeetings.remove(0); // remove the first meeting because it was already created
+
+				if (!recurringMeetings.isEmpty())
+					meetingRepository.saveAll(recurringMeetings);
+			}
 
 			return meetingMapper.toResponse(savedMeeting);
 		} catch (DataIntegrityViolationException e) {
@@ -85,6 +124,13 @@ public class MeetingServiceImpl implements MeetingService {
 		LocalDateTime endDate = dateConverter.convertTimestamp(endTime);
 
 		return meetingRepository.findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(accountId, startDate, endDate);
+	}
+
+	@Override
+	public MeetingResponse retrieveMeeting(String id) {
+		Meeting existingMeeting = retrieveMeetingById(id);
+
+		return meetingMapper.toResponse(existingMeeting);
 	}
 
 	private Meeting retrieveMeetingById(String id) {

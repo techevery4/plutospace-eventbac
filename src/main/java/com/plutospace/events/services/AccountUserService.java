@@ -3,6 +3,7 @@ package com.plutospace.events.services;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
@@ -27,4 +28,6 @@ public interface AccountUserService {
 	AccountUserResponse retrieveAccountUser(String id);
 
 	OperationalResponse checkIfUserExists(String email);
+
+	List<AccountUserResponse> retrieveAccountUserByEmail(List<String> emails);
 }

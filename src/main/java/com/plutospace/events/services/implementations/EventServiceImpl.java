@@ -90,10 +90,14 @@ public class EventServiceImpl implements EventService {
 				createEventForms(createEventRequest.eventFormRequests(), savedEvent.getId());
 			}
 			if (!event.getLocationType().equals(LocationType.PHYSICAL)) {
+				LocalDateTime startTime = dateConverter.convertTimestamp(event.getStartTime());
+				LocalDateTime endTime = dateConverter.convertTimestamp(event.getEndTime());
 				CreateMeetingRequest createMeetingRequest = new CreateMeetingRequest("Meeting for " + event.getName(),
-						event.getDescription(), event.getDate(), event.getDate(), event.getStartTime(),
-						event.getEndTime(), createEventRequest.timezoneValue(), createEventRequest.timezoneString(),
-						false, null, GeneralConstants.EVENT_MEETING_PARTICIPANTS, true, true);
+						event.getDescription(), event.getDate(), event.getDate(),
+						dateConverter.convertLocalDateTimeToTimestring(startTime),
+						dateConverter.convertLocalDateTimeToTimestring(endTime), createEventRequest.timezoneValue(),
+						createEventRequest.timezoneString(), false, null, GeneralConstants.EVENT_MEETING_PARTICIPANTS,
+						true, true);
 				MeetingResponse meetingResponse = meetingService.createMeeting(createMeetingRequest, accountId);
 				savedEvent.setMeetingLink(meetingResponse.getPublicId());
 				eventRepository.save(savedEvent);

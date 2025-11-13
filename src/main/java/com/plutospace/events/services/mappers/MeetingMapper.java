@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.services.mappers;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -17,23 +18,19 @@ public class MeetingMapper {
 
 	public MeetingResponse toResponse(Meeting meeting) {
 		return MeetingResponse.instance(meeting.getId(), meeting.getTitle(), meeting.getAccountId(),
-				meeting.getDescription(), meeting.getStartDate(), meeting.getEndDate(), meeting.getStartTime(),
-				meeting.getEndTime(), meeting.getTimezone(), meeting.getIsRecurring(),
-				meeting.getRecurringDaysOfTheWeek(), meeting.getMaximumParticipants(), meeting.getPublicId(),
-				meeting.getMuteParticipantsOnEntry(), meeting.getEnableWaitingRoom(), meeting.getCreatedOn());
+				meeting.getDescription(), meeting.getStartTime(), meeting.getEndTime(), meeting.getTimezone(),
+				meeting.getMaximumParticipants(), meeting.getPublicId(), meeting.getMuteParticipantsOnEntry(),
+				meeting.getEnableWaitingRoom(), meeting.getCreatedOn());
 	}
 
-	public Meeting toEntity(CreateMeetingRequest createMeetingRequest) {
+	public Meeting toEntity(CreateMeetingRequest createMeetingRequest, LocalDateTime startTime, LocalDateTime endTime) {
 		Meeting.Timezone timezone = new Meeting.Timezone();
 		timezone.setRepresentation(createMeetingRequest.getTimezoneString());
 		timezone.setValue(createMeetingRequest.getTimezoneValue());
 
-		return Meeting.instance(createMeetingRequest.getTitle(), null, createMeetingRequest.getDescription(),
-				createMeetingRequest.getStartDate(), createMeetingRequest.getEndDate(),
-				createMeetingRequest.getStartTime(), createMeetingRequest.getEndTime(), timezone,
-				createMeetingRequest.getIsRecurring(), createMeetingRequest.getRecurringDaysOfTheWeek(),
-				createMeetingRequest.getMaximumParticipants(), null, createMeetingRequest.getMuteParticipantsOnEntry(),
-				createMeetingRequest.getEnableWaitingRoom());
+		return Meeting.instance(createMeetingRequest.getTitle(), null, createMeetingRequest.getDescription(), startTime,
+				endTime, timezone, createMeetingRequest.getMaximumParticipants(), null,
+				createMeetingRequest.getMuteParticipantsOnEntry(), createMeetingRequest.getEnableWaitingRoom());
 	}
 
 	public CustomPageResponse<MeetingResponse> toPagedResponse(Page<Meeting> meetings) {

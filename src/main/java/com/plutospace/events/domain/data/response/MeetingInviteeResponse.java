@@ -4,7 +4,7 @@ package com.plutospace.events.domain.data.response;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.plutospace.events.domain.entities.Meeting;
+import com.plutospace.events.domain.data.MeetingAcceptanceStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,25 +13,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor(staticName = "instance")
-public class MeetingResponse {
+public class MeetingInviteeResponse {
 
 	private String id;
-	private String title;
-	private String accountId;
-	private String description;
+	private String meetingId;
+	private String email;
+	private AccountUserResponse accountUserResponse;
+	private MeetingAcceptanceStatus meetingAcceptanceStatus;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private LocalDateTime startTime;
-
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private LocalDateTime endTime;
-
-	private Meeting.Timezone timezone;
-	private Integer maximumParticipants;
-	private String publicId;
-
-	private Boolean muteParticipantsOnEntry;
-	private Boolean enableWaitingRoom;
+	private LocalDateTime lastStatusTime;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdOn;

@@ -15,4 +15,6 @@ public interface MeetingService {
 	MeetingResponse retrieveMeetingByPublicId(String publicId);
 
 	List<MeetingResponse> retrieveMeetingsBetween(String accountId, Long startTime, Long endTime);
+
+	MeetingResponse retrieveMeeting(String id);
 }

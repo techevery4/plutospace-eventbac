@@ -20,7 +20,6 @@ public class MeetingValidator {
 		String startTimeCannotBeNullValidationMessage = "Start time must be passed";
 		String endTimeCannotBeNullValidationMessage = "End time must be passed";
 		String dateCannotBeInvalidValidationMessage = "Start date cannot be greater than end date";
-		String timeCannotBeInvalidValidationMessage = "Start time cannot be greater than end time";
 
 		if (StringUtils.isBlank(createMeetingRequest.getTitle())) {
 			throw new GeneralPlatformDomainRuleException(titleCannotBeNullValidationMessage);
@@ -45,9 +44,6 @@ public class MeetingValidator {
 		}
 		if (createMeetingRequest.getStartDate().isAfter(createMeetingRequest.getEndDate())) {
 			throw new GeneralPlatformDomainRuleException(dateCannotBeInvalidValidationMessage);
-		}
-		if (createMeetingRequest.getStartTime() >= createMeetingRequest.getEndTime()) {
-			throw new GeneralPlatformDomainRuleException(timeCannotBeInvalidValidationMessage);
 		}
 	}
 }
