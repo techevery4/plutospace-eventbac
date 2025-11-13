@@ -20,7 +20,7 @@ public class MeetingMapper {
 				meeting.getDescription(), meeting.getStartDate(), meeting.getEndDate(), meeting.getStartTime(),
 				meeting.getEndTime(), meeting.getTimezone(), meeting.getIsRecurring(),
 				meeting.getRecurringDaysOfTheWeek(), meeting.getMaximumParticipants(), meeting.getPublicId(),
-				meeting.getCreatedOn());
+				meeting.getMuteParticipantsOnEntry(), meeting.getEnableWaitingRoom(), meeting.getCreatedOn());
 	}
 
 	public Meeting toEntity(CreateMeetingRequest createMeetingRequest) {
@@ -32,7 +32,8 @@ public class MeetingMapper {
 				createMeetingRequest.getStartDate(), createMeetingRequest.getEndDate(),
 				createMeetingRequest.getStartTime(), createMeetingRequest.getEndTime(), timezone,
 				createMeetingRequest.getIsRecurring(), createMeetingRequest.getRecurringDaysOfTheWeek(),
-				createMeetingRequest.getMaximumParticipants(), null);
+				createMeetingRequest.getMaximumParticipants(), null, createMeetingRequest.getMuteParticipantsOnEntry(),
+				createMeetingRequest.getEnableWaitingRoom());
 	}
 
 	public CustomPageResponse<MeetingResponse> toPagedResponse(Page<Meeting> meetings) {

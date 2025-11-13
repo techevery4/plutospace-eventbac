@@ -30,6 +30,9 @@ public class Meeting extends BaseEntity {
 	private Integer maximumParticipants;
 	private String publicId;
 
+	private Boolean muteParticipantsOnEntry;
+	private Boolean enableWaitingRoom;
+
 	@Data
 	public static class Timezone {
 		private Integer value;

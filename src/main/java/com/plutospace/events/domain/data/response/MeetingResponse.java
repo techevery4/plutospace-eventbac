@@ -36,6 +36,9 @@ public class MeetingResponse {
 	private Integer maximumParticipants;
 	private String publicId;
 
+	private Boolean muteParticipantsOnEntry;
+	private Boolean enableWaitingRoom;
+
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdOn;
 }

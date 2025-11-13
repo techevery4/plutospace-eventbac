@@ -24,4 +24,7 @@ public class CreateMeetingRequest {
 	private Boolean isRecurring;
 	private List<String> recurringDaysOfTheWeek;
 	private Integer maximumParticipants;
+
+	private Boolean muteParticipantsOnEntry;
+	private Boolean enableWaitingRoom;
 }
