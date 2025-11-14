@@ -4,6 +4,7 @@ package com.plutospace.events.controllers;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -93,5 +94,11 @@ public class AccountUserApiResource {
 	@Operation(description = "This endpoint checks if user already exists")
 	public ResponseEntity<OperationalResponse> checkIfUserExists(@RequestParam(value = "email") String email) {
 		return ResponseEntity.ok(accountUserService.checkIfUserExists(email));
+	}
+
+	@PostMapping(path = "/bulk-ids", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint retrieves bulk account users by ids")
+	public ResponseEntity<List<AccountUserResponse>> retrieveAccountUser(@RequestBody List<String> ids) {
+		return ResponseEntity.ok(accountUserService.retrieveAccountUser(ids));
 	}
 }

@@ -30,4 +30,6 @@ public interface AccountUserService {
 	OperationalResponse checkIfUserExists(String email);
 
 	List<AccountUserResponse> retrieveAccountUserByEmail(List<String> emails);
+
+	List<AccountUserResponse> retrieveAccountUser(List<String> ids);
 }

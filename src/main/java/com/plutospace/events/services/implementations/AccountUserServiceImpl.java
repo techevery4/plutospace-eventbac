@@ -183,6 +183,13 @@ public class AccountUserServiceImpl implements AccountUserService {
 		return accountUsers.stream().map(accountUserMapper::toResponse).toList();
 	}
 
+	@Override
+	public List<AccountUserResponse> retrieveAccountUser(List<String> ids) {
+		List<AccountUser> accountUsers = accountUserRepository.findByIdIn(ids);
+
+		return accountUsers.stream().map(accountUserMapper::toResponse).toList();
+	}
+
 	private Plan retrievePlanById(String id) {
 		return planRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Plan Not Found"));
 	}

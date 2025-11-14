@@ -21,4 +21,6 @@ public interface EventService {
 	List<EventResponse> retrieveEvent(List<String> ids);
 
 	List<EventResponse> retrieveEventsBetween(String accountId, Long startTime, Long endTime);
+
+	EventResponse retrieveEvent(String id);
 }

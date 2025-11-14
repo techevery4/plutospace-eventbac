@@ -25,4 +25,5 @@ public class ApiResourceConstants {
 	public static final String ENQUIRIES = API_VERSION + "/enquiries";
 	public static final String ENQUIRIES_RESOURCE_ID = ENQUIRIES + RESOURCE_ID;
 	public static final String MEETING_INVITEES = API_VERSION + "/meeting-invitees";
+	public static final String EVENT_REGISTRATIONS = API_VERSION + "/event-registrations";
 }

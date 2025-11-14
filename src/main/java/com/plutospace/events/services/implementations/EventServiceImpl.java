@@ -196,4 +196,19 @@ public class EventServiceImpl implements EventService {
 
 		return eventRepository.findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(accountId, startDate, endDate);
 	}
+
+	@Override
+	public EventResponse retrieveEvent(String id) {
+		Event existingEvent = retrieveEventById(id);
+		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService
+				.retrieveEventCategory(List.of(existingEvent.getCategoryId()));
+		if (eventCategoryResponses.isEmpty())
+			throw new ResourceNotFoundException("Event Category Not Found");
+
+		return eventMapper.toResponse(existingEvent, eventCategoryResponses.get(0));
+	}
+
+	private Event retrieveEventById(String id) {
+		return eventRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Event Not Found"));
+	}
 }

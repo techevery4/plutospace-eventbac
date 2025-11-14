@@ -17,6 +17,8 @@ public interface AccountUserRepository extends BaseRepository<AccountUser, Strin
 
 	Optional<AccountUser> findByEmailIgnoreCase(String email);
 
-	@Query("SELECT u FROM User u WHERE LOWER(u.email) IN :emails")
+	@Query("SELECT u FROM AccountUser u WHERE LOWER(u.email) IN :emails")
 	List<AccountUser> findByEmailIgnoreCaseIn(@Param("emails") List<String> emails);
+
+	List<AccountUser> findByIdIn(List<String> ids);
 }
