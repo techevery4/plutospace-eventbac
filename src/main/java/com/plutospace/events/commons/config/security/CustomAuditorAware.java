@@ -43,6 +43,6 @@ public class CustomAuditorAware implements AuditorAware<String> {
 	}
 
 	private String extractOrgIDAndUserID(String token) {
-		return AES.decrypt(token, propertyConstants.getEventsEncryptionSecretKey());
+		return AES.decrypt(token, propertyConstants.getEventsLoginEncryptionSecretKey());
 	}
 }
