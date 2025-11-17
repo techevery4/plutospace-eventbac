@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.domain.data.PlanType;
-import com.plutospace.events.domain.data.request.CreatePlanRequest;
+import com.plutospace.events.domain.data.request.PlanRequest;
 import com.plutospace.events.domain.data.response.PlanResponse;
 import com.plutospace.events.domain.entities.Plan;
 
@@ -18,13 +18,13 @@ public class PlanMapper {
 
 	public PlanResponse toResponse(Plan plan) {
 		return PlanResponse.instance(plan.getId(), plan.getType().name(), plan.getName(), plan.getFeatures(),
-				plan.getPriceNaira(), plan.getPriceUsd());
+				plan.getPriceNaira(), plan.getPriceUsd(), plan.getCreatedOn());
 	}
 
-	public Plan toEntity(CreatePlanRequest createPlanRequest) {
-		PlanType planType = PlanType.fromValue(createPlanRequest.type());
-		return Plan.instance(planType, createPlanRequest.name(), createPlanRequest.features(),
-				createPlanRequest.priceNaira(), createPlanRequest.priceUsd());
+	public Plan toEntity(PlanRequest planRequest) {
+		PlanType planType = PlanType.fromValue(planRequest.getType());
+		return Plan.instance(planType, planRequest.getName(), planRequest.getFeatures(), planRequest.getPriceNaira(),
+				planRequest.getPriceUsd());
 	}
 
 	public CustomPageResponse<PlanResponse> toPagedResponse(Page<Plan> plans) {

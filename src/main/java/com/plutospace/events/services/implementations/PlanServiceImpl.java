@@ -1,7 +1,6 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.services.implementations;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -12,9 +11,7 @@ import org.springframework.stereotype.Service;
 import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
-import com.plutospace.events.domain.data.PlanType;
-import com.plutospace.events.domain.data.request.CreatePlanRequest;
-import com.plutospace.events.domain.data.request.UpdatePlanRequest;
+import com.plutospace.events.domain.data.request.PlanRequest;
 import com.plutospace.events.domain.data.response.PlanResponse;
 import com.plutospace.events.domain.entities.Plan;
 import com.plutospace.events.domain.repositories.PlanRepository;
@@ -35,10 +32,10 @@ public class PlanServiceImpl implements PlanService {
 	private final PlanMapper planMapper;
 
 	@Override
-	public PlanResponse createPlan(CreatePlanRequest request) {
+	public PlanResponse createPlan(PlanRequest request) {
 		planValidator.validate(request);
 		Plan plan = planMapper.toEntity(request);
-		if (planRepository.existsByNameIgnoreCase(request.name()))
+		if (planRepository.existsByNameIgnoreCase(request.getName()))
 			throw new ResourceAlreadyExistsException("Plan already exists");
 
 		try {
@@ -51,20 +48,12 @@ public class PlanServiceImpl implements PlanService {
 	}
 
 	@Override
-	public PlanResponse updatePlan(UpdatePlanRequest request) {
+	public PlanResponse updatePlan(PlanRequest request, String id) {
 		planValidator.validate(request);
-		Plan plan = retrievePlanById(request.id());
-		if (StringUtils.isNotBlank(request.type()))
-			plan.setType(PlanType.fromValue(request.type()));
-		if (ObjectUtils.isNotEmpty(request.features()))
-			plan.setFeatures(request.features());
-		if (request.priceNaira() > 0)
-			plan.setPriceNaira(request.priceNaira());
-		if (request.priceUsd() > 0)
-			plan.setPriceUsd(request.priceUsd());
-		if (StringUtils.isNotBlank(request.name())) {
-			Plan checkPlan = planRepository.findByNameIgnoreCase(request.name());
-			if (!checkPlan.getId().equals(request.id()))
+		Plan plan = retrievePlanById(id);
+		if (StringUtils.isNotBlank(request.getName())) {
+			Plan checkPlan = planRepository.findByNameIgnoreCase(request.getName());
+			if (!checkPlan.getId().equals(id))
 				throw new ResourceAlreadyExistsException("Plan already exists");
 		}
 

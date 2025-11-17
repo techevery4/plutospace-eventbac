@@ -2,15 +2,14 @@
 package com.plutospace.events.services;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
-import com.plutospace.events.domain.data.request.CreatePlanRequest;
-import com.plutospace.events.domain.data.request.UpdatePlanRequest;
+import com.plutospace.events.domain.data.request.PlanRequest;
 import com.plutospace.events.domain.data.response.PlanResponse;
 
 public interface PlanService {
 
-	PlanResponse createPlan(CreatePlanRequest request);
+	PlanResponse createPlan(PlanRequest request);
 
-	PlanResponse updatePlan(UpdatePlanRequest request);
+	PlanResponse updatePlan(PlanRequest request, String id);
 
 	PlanResponse retrievePlan(String id);
 
