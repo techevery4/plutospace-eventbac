@@ -4,7 +4,9 @@ package com.plutospace.events.services.implementations;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -26,8 +28,10 @@ import com.plutospace.events.domain.data.request.CreateAccountSessionRequest;
 import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
+import com.plutospace.events.domain.data.response.AccountResponse;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
+import com.plutospace.events.domain.data.response.PlanResponse;
 import com.plutospace.events.domain.entities.Account;
 import com.plutospace.events.domain.entities.AccountUser;
 import com.plutospace.events.domain.entities.Plan;
@@ -36,6 +40,7 @@ import com.plutospace.events.domain.repositories.AccountUserRepository;
 import com.plutospace.events.domain.repositories.PlanRepository;
 import com.plutospace.events.services.AccountSessionService;
 import com.plutospace.events.services.AccountUserService;
+import com.plutospace.events.services.PlanService;
 import com.plutospace.events.services.mappers.AccountUserMapper;
 import com.plutospace.events.validation.AccountUserValidator;
 
@@ -53,6 +58,7 @@ public class AccountUserServiceImpl implements AccountUserService {
 	private final AccountUserRepository accountUserRepository;
 	private final PlanRepository planRepository;
 	private final AccountSessionService accountSessionService;
+	private final PlanService planService;
 	private final PropertyConstants propertyConstants;
 	private final AccountUserMapper accountUserMapper;
 	private final AccountUserValidator accountUserValidator;
@@ -190,6 +196,50 @@ public class AccountUserServiceImpl implements AccountUserService {
 		return accountUsers.stream().map(accountUserMapper::toResponse).toList();
 	}
 
+	@Override
+	public AccountResponse retrieveMyAccount(String id) {
+		Account account = retrieveAccountById(id);
+		List<AccountUserResponse> accountUserResponses = retrieveAccountUser(List.of(account.getAccountOwner()));
+		List<PlanResponse> planResponses = planService.retrievePlan(List.of(account.getPlanId()));
+
+		return accountUserMapper.toResponse(account, accountUserResponses.get(0), planResponses.get(0));
+	}
+
+	@Override
+	public CustomPageResponse<AccountResponse> retrieveAccounts(int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		Page<Account> accounts = accountRepository.findAllByOrderByCreatedOnDesc(pageable);
+		if (accounts.getTotalElements() == 0)
+			return new CustomPageResponse<>();
+
+		List<String> accountUserIds = accounts.getContent().stream().map(Account::getAccountOwner).toList();
+		List<String> planIds = accounts.getContent().stream().map(Account::getPlanId).toList();
+		List<AccountUserResponse> accountUserResponses = retrieveAccountUser(accountUserIds);
+		List<PlanResponse> planResponses = planService.retrievePlan(planIds);
+
+		Map<String, AccountUserResponse> accountUserResponseMap = new HashMap<>();
+		for (AccountUserResponse accountUserResponse : accountUserResponses) {
+			accountUserResponseMap.putIfAbsent(accountUserResponse.getId(), accountUserResponse);
+		}
+		Map<String, PlanResponse> planResponseMap = new HashMap<>();
+		for (PlanResponse planResponse : planResponses) {
+			planResponseMap.putIfAbsent(planResponse.getId(), planResponse);
+		}
+
+		return accountUserMapper.toPagedResponse(accounts, accountUserResponseMap, planResponseMap);
+	}
+
+	@Override
+	public CustomPageResponse<AccountUserResponse> retrieveAllUsersTiedToAnAccount(String id, int pageNo,
+			int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		Page<AccountUser> accountUsers = accountUserRepository.findByAccountIdOrderByLastNameAsc(id, pageable);
+
+		return accountUserMapper.toPagedResponse(accountUsers);
+	}
+
 	private Plan retrievePlanById(String id) {
 		return planRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Plan Not Found"));
 	}
@@ -201,5 +251,9 @@ public class AccountUserServiceImpl implements AccountUserService {
 
 	private AccountUser retrieveAccountUserById(String id) {
 		return accountUserRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
+	}
+
+	private Account retrieveAccountById(String id) {
+		return accountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Account Not Found"));
 	}
 }

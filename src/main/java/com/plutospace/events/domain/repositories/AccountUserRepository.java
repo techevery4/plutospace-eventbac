@@ -4,6 +4,8 @@ package com.plutospace.events.domain.repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,4 +23,6 @@ public interface AccountUserRepository extends BaseRepository<AccountUser, Strin
 	List<AccountUser> findByEmailIgnoreCaseIn(@Param("emails") List<String> emails);
 
 	List<AccountUser> findByIdIn(List<String> ids);
+
+	Page<AccountUser> findByAccountIdOrderByLastNameAsc(String accountId, Pageable pageable);
 }

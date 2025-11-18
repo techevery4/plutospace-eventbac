@@ -20,6 +20,7 @@ public class Plan extends BaseEntity {
 	private Features features;
 	private Double priceNaira;
 	private Double priceUsd;
+	private Boolean isActive; // can be activated or deactivated
 
 	@Data
 	public static class Features {

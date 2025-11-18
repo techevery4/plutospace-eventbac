@@ -18,6 +18,7 @@ import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
+import com.plutospace.events.domain.data.response.AccountResponse;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.services.AccountUserService;
@@ -78,7 +79,7 @@ public class AccountUserApiResource {
 	@GetMapping(path = "/single", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves a single account user")
 	public ResponseEntity<AccountUserResponse> retrieveAccountUser() {
-		String id = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+		String id = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
 		return ResponseEntity.ok(accountUserService.retrieveAccountUser(id));
 	}
@@ -100,5 +101,28 @@ public class AccountUserApiResource {
 	@Operation(description = "This endpoint retrieves bulk account users by ids")
 	public ResponseEntity<List<AccountUserResponse>> retrieveAccountUser(@RequestBody List<String> ids) {
 		return ResponseEntity.ok(accountUserService.retrieveAccountUser(ids));
+	}
+
+	@GetMapping(path = "/my-account", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint retrieves my account information")
+	public ResponseEntity<AccountResponse> retrieveMyAccount() {
+		String id = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(accountUserService.retrieveMyAccount(id));
+	}
+
+	@GetMapping(path = "/all-accounts", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint retrieves all accounts")
+	public ResponseEntity<CustomPageResponse<AccountResponse>> retrieveAccounts(
+			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+		return ResponseEntity.ok(accountUserService.retrieveAccounts(pageNo, pageSize));
+	}
+
+	@GetMapping(path = "/{accountId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint retrieves all users tied to an account")
+	public ResponseEntity<CustomPageResponse<AccountUserResponse>> retrieveAllUsersTiedToAnAccount(
+			@PathVariable String accountId, @RequestParam(value = "pageNo") int pageNo,
+			@RequestParam(value = "pageSize") int pageSize) {
+		return ResponseEntity.ok(accountUserService.retrieveAllUsersTiedToAnAccount(accountId, pageNo, pageSize));
 	}
 }

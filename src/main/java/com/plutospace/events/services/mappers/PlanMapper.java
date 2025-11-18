@@ -18,13 +18,13 @@ public class PlanMapper {
 
 	public PlanResponse toResponse(Plan plan) {
 		return PlanResponse.instance(plan.getId(), plan.getType().name(), plan.getName(), plan.getFeatures(),
-				plan.getPriceNaira(), plan.getPriceUsd(), plan.getCreatedOn());
+				plan.getPriceNaira(), plan.getPriceUsd(), plan.getIsActive(), plan.getCreatedOn());
 	}
 
 	public Plan toEntity(PlanRequest planRequest) {
 		PlanType planType = PlanType.fromValue(planRequest.getType());
 		return Plan.instance(planType, planRequest.getName(), planRequest.getFeatures(), planRequest.getPriceNaira(),
-				planRequest.getPriceUsd());
+				planRequest.getPriceUsd(), true);
 	}
 
 	public CustomPageResponse<PlanResponse> toPagedResponse(Page<Plan> plans) {

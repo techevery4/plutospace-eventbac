@@ -4,7 +4,6 @@ package com.plutospace.events.domain.data.response;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.plutospace.events.domain.entities.Plan;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,15 +12,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor(staticName = "instance")
-public class PlanResponse {
+public class AccountResponse {
 
 	private String id;
-	private String type;
-	private String name;
-	private Plan.Features features;
-	private Double priceNaira;
-	private Double priceUsd;
-	private Boolean isActive; // can be activated or deactivated
+	private String planId;
+	private PlanResponse planResponse;
+	private String accountOwner; // id of the customer that created the account
+	private AccountUserResponse accountOwnerResponse;
+	private Long numberOfMembers;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdOn;

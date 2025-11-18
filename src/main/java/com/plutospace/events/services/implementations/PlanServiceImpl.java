@@ -1,6 +1,8 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.services.implementations;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -9,9 +11,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.commons.definitions.GeneralConstants;
+import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
 import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
+import com.plutospace.events.domain.data.PlanType;
 import com.plutospace.events.domain.data.request.PlanRequest;
+import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.data.response.PlanResponse;
 import com.plutospace.events.domain.entities.Plan;
 import com.plutospace.events.domain.repositories.PlanRepository;
@@ -78,6 +84,57 @@ public class PlanServiceImpl implements PlanService {
 		Page<Plan> plans = planRepository.findAll(pageable);
 
 		return planMapper.toPagedResponse(plans);
+	}
+
+	@Override
+	public List<PlanResponse> retrievePlan(List<String> ids) {
+		List<Plan> plans = planRepository.findByIdIn(ids);
+
+		return plans.stream().map(planMapper::toResponse).toList();
+	}
+
+	@Override
+	public CustomPageResponse<PlanResponse> retrieveActivePlanByType(String type, int pageNo, int pageSize) {
+		PlanType planType = PlanType.fromValue(type);
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		Page<Plan> plans = planRepository.findByTypeAndIsActiveOrderByPriceNairaDesc(planType, true, pageable);
+
+		return planMapper.toPagedResponse(plans);
+	}
+
+	@Override
+	public OperationalResponse setPlanAsActive(String id) {
+		Plan existingPlan = retrievePlanById(id);
+		if (existingPlan.getIsActive())
+			throw new GeneralPlatformDomainRuleException("Plan Already Active");
+
+		existingPlan.setIsActive(true);
+
+		try {
+			planRepository.save(existingPlan);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public OperationalResponse setPlanAsInactive(String id) {
+		Plan existingPlan = retrievePlanById(id);
+		if (!existingPlan.getIsActive())
+			throw new GeneralPlatformDomainRuleException("Plan Already inactive");
+
+		existingPlan.setIsActive(false);
+
+		try {
+			planRepository.save(existingPlan);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
 	}
 
 	private Plan retrievePlanById(String id) {

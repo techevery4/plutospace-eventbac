@@ -9,6 +9,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
+import com.plutospace.events.domain.data.response.AccountResponse;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
 
@@ -32,4 +33,10 @@ public interface AccountUserService {
 	List<AccountUserResponse> retrieveAccountUserByEmail(List<String> emails);
 
 	List<AccountUserResponse> retrieveAccountUser(List<String> ids);
+
+	AccountResponse retrieveMyAccount(String id);
+
+	CustomPageResponse<AccountResponse> retrieveAccounts(int pageNo, int pageSize);
+
+	CustomPageResponse<AccountUserResponse> retrieveAllUsersTiedToAnAccount(String id, int pageNo, int pageSize);
 }

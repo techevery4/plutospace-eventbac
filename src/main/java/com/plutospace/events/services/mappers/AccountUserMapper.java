@@ -2,6 +2,7 @@
 package com.plutospace.events.services.mappers;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,10 @@ import org.springframework.stereotype.Component;
 import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
+import com.plutospace.events.domain.data.response.AccountResponse;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
+import com.plutospace.events.domain.data.response.PlanResponse;
+import com.plutospace.events.domain.entities.Account;
 import com.plutospace.events.domain.entities.AccountUser;
 
 @Component
@@ -20,6 +24,12 @@ public class AccountUserMapper {
 		return AccountUserResponse.instance(accountUser.getId(), accountUser.getAccountId(), accountUser.getFirstName(),
 				accountUser.getLastName(), accountUser.getName(), accountUser.getEmail(), accountUser.getImageId(),
 				accountUser.getImageUrl(), accountUser.getCreatedOn(), accountUser.getLastLogin());
+	}
+
+	public AccountResponse toResponse(Account account, AccountUserResponse accountUserResponse,
+			PlanResponse planResponse) {
+		return AccountResponse.instance(account.getId(), account.getPlanId(), planResponse, account.getAccountOwner(),
+				accountUserResponse, account.getNumberOfMembers(), account.getCreatedOn());
 	}
 
 	public AccountUser toEntity(RegisterPersonalAccountRequest registerPersonalAccountRequest) {
@@ -39,5 +49,17 @@ public class AccountUserMapper {
 		long totalElements = accountUsers.getTotalElements();
 		Pageable pageable = accountUsers.getPageable();
 		return CustomPageResponse.resolvePageResponse(accountUserResponses, totalElements, pageable);
+	}
+
+	public CustomPageResponse<AccountResponse> toPagedResponse(Page<Account> accounts,
+			Map<String, AccountUserResponse> accountUserResponseMap, Map<String, PlanResponse> planResponseMap) {
+		List<AccountResponse> accountResponses = accounts.getContent().stream().map(account -> {
+			PlanResponse planResponse = planResponseMap.get(account.getPlanId());
+			AccountUserResponse accountUserResponse = accountUserResponseMap.get(account.getAccountOwner());
+			return toResponse(account, accountUserResponse, planResponse);
+		}).toList();
+		long totalElements = accounts.getTotalElements();
+		Pageable pageable = accounts.getPageable();
+		return CustomPageResponse.resolvePageResponse(accountResponses, totalElements, pageable);
 	}
 }
