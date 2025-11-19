@@ -7,6 +7,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.domain.data.request.CreateEventCategoryRequest;
 import com.plutospace.events.domain.data.request.UpdateEventCategoryRequest;
 import com.plutospace.events.domain.data.response.EventCategoryResponse;
+import com.plutospace.events.domain.data.response.OperationalResponse;
 
 public interface EventCategoryService {
 
@@ -19,4 +20,6 @@ public interface EventCategoryService {
 	List<EventCategoryResponse> retrieveAllEventCategories();
 
 	List<EventCategoryResponse> retrieveEventCategory(List<String> ids);
+
+	OperationalResponse deleteEventCategory(String id);
 }

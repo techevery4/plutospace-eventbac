@@ -13,6 +13,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.domain.data.request.CreateEventCategoryRequest;
 import com.plutospace.events.domain.data.request.UpdateEventCategoryRequest;
 import com.plutospace.events.domain.data.response.EventCategoryResponse;
+import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.services.EventCategoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,5 +68,11 @@ public class EventCategoryApiResource {
 	@Operation(description = "This endpoint retrieves bulk event categories by ids")
 	public ResponseEntity<List<EventCategoryResponse>> retrieveEventCategory(@RequestBody List<String> ids) {
 		return ResponseEntity.ok(eventCategoryService.retrieveEventCategory(ids));
+	}
+
+	@DeleteMapping(path = RESOURCE_ID, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint deletes an event category")
+	public ResponseEntity<OperationalResponse> deleteEventCategory(@PathVariable String id) {
+		return ResponseEntity.ok(eventCategoryService.deleteEventCategory(id));
 	}
 }

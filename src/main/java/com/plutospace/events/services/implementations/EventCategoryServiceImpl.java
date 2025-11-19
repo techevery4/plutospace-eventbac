@@ -12,11 +12,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.domain.data.request.CreateEventCategoryRequest;
 import com.plutospace.events.domain.data.request.UpdateEventCategoryRequest;
 import com.plutospace.events.domain.data.response.EventCategoryResponse;
+import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.entities.EventCategory;
 import com.plutospace.events.domain.repositories.EventCategoryRepository;
 import com.plutospace.events.services.EventCategoryService;
@@ -101,6 +103,19 @@ public class EventCategoryServiceImpl implements EventCategoryService {
 			return new ArrayList<>();
 
 		return eventCategories.stream().map(eventCategoryMapper::toResponse).toList();
+	}
+
+	@Override
+	public OperationalResponse deleteEventCategory(String id) {
+		EventCategory eventCategory = retrieveEventCategoryById(id);
+
+		try {
+			eventCategoryRepository.delete(eventCategory);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
 	}
 
 	private EventCategory retrieveEventCategoryById(String id) {
