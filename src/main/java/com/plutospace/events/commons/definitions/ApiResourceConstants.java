@@ -29,4 +29,6 @@ public class ApiResourceConstants {
 	public static final String PERMISSIONS = API_VERSION + "/permissions";
 	public static final String PERMISSIONS_RESOURCE_ID = PERMISSIONS + RESOURCE_ID;
 	public static final String ADMIN_PERMISSIONS = API_VERSION + "/admin-permissions";
+	public static final String FREE_SLOTS = API_VERSION + "/free-slots";
+	public static final String FREE_SLOTS_RESOURCE_ID = FREE_SLOTS + RESOURCE_ID;
 }

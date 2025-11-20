@@ -50,17 +50,18 @@ public class MeetingInviteeServiceImpl implements MeetingInviteeService {
 
 		List<MeetingInvitee> meetingInvitees = new ArrayList<>();
 		Map<String, String> emailMaps = new HashMap<>();
-		for (String email : createMeetingInviteRequest.getEmails()) {
-			if (emailMaps.containsKey(email))
+		for (CreateMeetingInviteRequest.Invitee invitee : createMeetingInviteRequest.getInvitees()) {
+			if (emailMaps.containsKey(invitee.getEmail()))
 				continue;
 			if (meetingInviteeRepository.existsByMeetingIdAndEmailIgnoreCase(createMeetingInviteRequest.getMeetingId(),
-					email))
-				throw new GeneralPlatformDomainRuleException(email + " already sent an invite to this meeting");
+					invitee.getEmail()))
+				throw new GeneralPlatformDomainRuleException(
+						invitee.getEmail() + " already sent an invite to this meeting");
 
-			MeetingInvitee meetingInvitee = meetingInviteeMapper.toEntity(email,
-					createMeetingInviteRequest.getMeetingId());
+			MeetingInvitee meetingInvitee = meetingInviteeMapper.toEntity(invitee.getFirstName(), invitee.getLastName(),
+					invitee.getEmail(), createMeetingInviteRequest.getMeetingId());
 			meetingInvitees.add(meetingInvitee);
-			emailMaps.putIfAbsent(email, email);
+			emailMaps.putIfAbsent(invitee.getEmail(), invitee.getEmail());
 		}
 
 		try {

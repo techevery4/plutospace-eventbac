@@ -13,5 +13,12 @@ import lombok.NoArgsConstructor;
 public class CreateMeetingInviteRequest {
 
 	private String meetingId;
-	private List<String> emails;
+	private List<Invitee> invitees;
+
+	@Data
+	public static class Invitee {
+		private String firstName;
+		private String lastName;
+		private String email;
+	}
 }

@@ -18,6 +18,8 @@ import lombok.*;
 public class MeetingInvitee extends BaseEntity {
 
 	private String meetingId;
+	private String firstName;
+	private String lastName;
 	private String email;
 	private MeetingAcceptanceStatus meetingAcceptanceStatus;
 	private LocalDateTime lastStatusTime;

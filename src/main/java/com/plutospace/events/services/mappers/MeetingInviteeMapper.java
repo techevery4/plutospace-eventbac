@@ -19,12 +19,13 @@ public class MeetingInviteeMapper {
 
 	public MeetingInviteeResponse toResponse(MeetingInvitee meetingInvitee, AccountUserResponse accountUserResponse) {
 		return MeetingInviteeResponse.instance(meetingInvitee.getId(), meetingInvitee.getMeetingId(),
-				meetingInvitee.getEmail(), accountUserResponse, meetingInvitee.getMeetingAcceptanceStatus(),
-				meetingInvitee.getLastStatusTime(), meetingInvitee.getCreatedOn());
+				meetingInvitee.getFirstName(), meetingInvitee.getLastName(), meetingInvitee.getEmail(),
+				accountUserResponse, meetingInvitee.getMeetingAcceptanceStatus(), meetingInvitee.getLastStatusTime(),
+				meetingInvitee.getCreatedOn());
 	}
 
-	public MeetingInvitee toEntity(String email, String meetingId) {
-		return MeetingInvitee.instance(meetingId, email, MeetingAcceptanceStatus.PENDING, null);
+	public MeetingInvitee toEntity(String firstName, String lastName, String email, String meetingId) {
+		return MeetingInvitee.instance(meetingId, firstName, lastName, email, MeetingAcceptanceStatus.PENDING, null);
 	}
 
 	public CustomPageResponse<MeetingInviteeResponse> toPagedResponse(Page<MeetingInvitee> meetingInvitees,

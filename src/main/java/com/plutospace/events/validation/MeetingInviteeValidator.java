@@ -23,12 +23,13 @@ public class MeetingInviteeValidator {
 		if (StringUtils.isBlank(createMeetingInviteRequest.getMeetingId())) {
 			throw new GeneralPlatformDomainRuleException(meetingCannotBeNullValidationMessage);
 		}
-		if (createMeetingInviteRequest.getEmails().isEmpty()) {
+		if (createMeetingInviteRequest.getInvitees().isEmpty()) {
 			throw new GeneralPlatformDomainRuleException(emailsCannotBeNullValidationMessage);
 		}
-		for (String email : createMeetingInviteRequest.getEmails()) {
-			if (!validateEmail(email)) {
-				throw new GeneralPlatformDomainRuleException(email + emailCannotBeInvalidValidationMessage);
+		for (CreateMeetingInviteRequest.Invitee invitee : createMeetingInviteRequest.getInvitees()) {
+			if (!validateEmail(invitee.getEmail())) {
+				throw new GeneralPlatformDomainRuleException(
+						invitee.getEmail() + emailCannotBeInvalidValidationMessage);
 			}
 		}
 	}
