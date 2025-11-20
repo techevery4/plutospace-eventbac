@@ -45,7 +45,7 @@ public class FreeSlotApiResource {
 				propertyConstants.getEventsLoginEncryptionSecretKey());
 		FreeSlotResponse freeSlotResponse = freeSlotService.createFreeSlot(saveFreeSlotRequest, accountId);
 
-		String location = uriComponentsBuilder.path(ENQUIRIES_RESOURCE_ID).buildAndExpand(freeSlotResponse.getId())
+		String location = uriComponentsBuilder.path(FREE_SLOTS_RESOURCE_ID).buildAndExpand(freeSlotResponse.getId())
 				.toUriString();
 		URI uri = URI.create(location);
 		return ResponseEntity.created(uri).body(freeSlotResponse);
