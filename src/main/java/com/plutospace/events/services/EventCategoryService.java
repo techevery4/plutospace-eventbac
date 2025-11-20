@@ -22,4 +22,6 @@ public interface EventCategoryService {
 	List<EventCategoryResponse> retrieveEventCategory(List<String> ids);
 
 	OperationalResponse deleteEventCategory(String id);
+
+	CustomPageResponse<EventCategoryResponse> searchEventCategory(String text, int pageNo, int pageSize);
 }

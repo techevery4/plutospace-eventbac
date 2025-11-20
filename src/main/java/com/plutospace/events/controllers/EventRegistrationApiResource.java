@@ -8,8 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
-import com.plutospace.events.commons.definitions.PropertyConstants;
-import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.request.CreateEventRegistrationRequest;
 import com.plutospace.events.domain.data.response.EventRegistrationLogResponse;
 import com.plutospace.events.domain.data.response.EventRegistrationResponse;
@@ -18,7 +16,6 @@ import com.plutospace.events.services.EventRegistrationService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
@@ -30,9 +27,6 @@ import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
 public class EventRegistrationApiResource {
 
 	private final EventRegistrationService eventRegistrationService;
-	private final SecurityMapper securityMapper;
-	private final PropertyConstants propertyConstants;
-	private final HttpServletRequest request;
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint registers for an event")
@@ -44,8 +38,8 @@ public class EventRegistrationApiResource {
 	@GetMapping(path = "/{eventId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves registrations for an event")
 	public ResponseEntity<CustomPageResponse<EventRegistrationResponse>> retrieveEventRegistrations(
-			@PathVariable String eventId, @RequestParam(value = "pageNo") int pageNo,
-			@RequestParam(value = "pageSize") int pageSize) {
+			@PathVariable String eventId, @RequestParam(name = "pageNo") int pageNo,
+			@RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(eventRegistrationService.retrieveEventRegistrations(eventId, pageNo, pageSize));
 	}
 
@@ -58,7 +52,7 @@ public class EventRegistrationApiResource {
 	@GetMapping(path = RESOURCE_ID + "/decline", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint declines a registration for an event")
 	public ResponseEntity<OperationalResponse> declineRegistration(@PathVariable String id,
-			@RequestParam(value = "reason") String reason) {
+			@RequestParam(name = "reason") String reason) {
 		return ResponseEntity.ok(eventRegistrationService.declineRegistration(id, reason));
 	}
 
@@ -71,7 +65,7 @@ public class EventRegistrationApiResource {
 	@GetMapping(path = RESOURCE_ID + "/deny-entry", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint denies entry to an attendee for an event")
 	public ResponseEntity<OperationalResponse> denyAttendeeEntry(@PathVariable String id,
-			@RequestParam(value = "reason") String reason) {
+			@RequestParam(name = "reason") String reason) {
 		return ResponseEntity.ok(eventRegistrationService.denyAttendeeEntry(id, reason));
 	}
 

@@ -39,4 +39,6 @@ public interface AccountUserService {
 	CustomPageResponse<AccountResponse> retrieveAccounts(int pageNo, int pageSize);
 
 	CustomPageResponse<AccountUserResponse> retrieveAllUsersTiedToAnAccount(String id, int pageNo, int pageSize);
+
+	CustomPageResponse<AccountUserResponse> searchAccountUser(String text, int pageNo, int pageSize);
 }

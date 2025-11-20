@@ -38,6 +38,7 @@ import com.plutospace.events.domain.entities.Plan;
 import com.plutospace.events.domain.repositories.AccountRepository;
 import com.plutospace.events.domain.repositories.AccountUserRepository;
 import com.plutospace.events.domain.repositories.PlanRepository;
+import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.AccountSessionService;
 import com.plutospace.events.services.AccountUserService;
 import com.plutospace.events.services.PlanService;
@@ -59,6 +60,7 @@ public class AccountUserServiceImpl implements AccountUserService {
 	private final PlanRepository planRepository;
 	private final AccountSessionService accountSessionService;
 	private final PlanService planService;
+	private final DatabaseSearchService databaseSearchService;
 	private final PropertyConstants propertyConstants;
 	private final AccountUserMapper accountUserMapper;
 	private final AccountUserValidator accountUserValidator;
@@ -236,6 +238,16 @@ public class AccountUserServiceImpl implements AccountUserService {
 		Pageable pageable = PageRequest.of(pageNo, pageSize);
 
 		Page<AccountUser> accountUsers = accountUserRepository.findByAccountIdOrderByLastNameAsc(id, pageable);
+
+		return accountUserMapper.toPagedResponse(accountUsers);
+	}
+
+	@Override
+	public CustomPageResponse<AccountUserResponse> searchAccountUser(String text, int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		List<String> fields = List.of("firstName", "lastName", "name", "email");
+		Page<AccountUser> accountUsers = databaseSearchService.findByDynamicFilter(text, fields, pageable);
 
 		return accountUserMapper.toPagedResponse(accountUsers);
 	}

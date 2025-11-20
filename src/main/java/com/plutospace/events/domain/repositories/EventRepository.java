@@ -20,4 +20,6 @@ public interface EventRepository extends BaseRepository<Event, String> {
 			LocalDateTime startDate, LocalDateTime endDate);
 
 	Page<Event> findByAccountIdOrderByCreatedOnDesc(String accountId, Pageable pageable);
+
+	long countByCategoryId(String categoryId);
 }

@@ -58,7 +58,7 @@ public class PermissionApiResource {
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves all permissions")
 	public ResponseEntity<CustomPageResponse<PermissionResponse>> retrievePermissions(
-			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(permissionService.retrievePermissions(pageNo, pageSize));
 	}
 

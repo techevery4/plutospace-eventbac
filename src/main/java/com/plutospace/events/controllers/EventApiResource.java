@@ -52,15 +52,15 @@ public class EventApiResource {
 
 	@GetMapping(path = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves events")
-	public ResponseEntity<CustomPageResponse<EventResponse>> retrieveEvents(@RequestParam(value = "pageNo") int pageNo,
-			@RequestParam(value = "pageSize") int pageSize) {
+	public ResponseEntity<CustomPageResponse<EventResponse>> retrieveEvents(@RequestParam(name = "pageNo") int pageNo,
+			@RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(eventService.retrieveEvents(pageNo, pageSize));
 	}
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves events for a particular account")
 	public ResponseEntity<CustomPageResponse<EventResponse>> retrieveEventsForAccount(
-			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
 		return ResponseEntity.ok(eventService.retrieveEventsForAccount(accountId, pageNo, pageSize));
@@ -69,7 +69,7 @@ public class EventApiResource {
 	@GetMapping(path = RESOURCE_ID + "/forms", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves forms of a particular event")
 	public ResponseEntity<CustomPageResponse<EventFormResponse>> retrieveEventForms(@PathVariable String id,
-			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(eventService.retrieveEventForms(id, pageNo, pageSize));
 	}
 

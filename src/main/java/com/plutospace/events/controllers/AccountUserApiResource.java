@@ -72,7 +72,7 @@ public class AccountUserApiResource {
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves all account users")
 	public ResponseEntity<CustomPageResponse<AccountUserResponse>> retrieveAllAccounts(
-			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(accountUserService.retrieveAllAccounts(pageNo, pageSize));
 	}
 
@@ -93,7 +93,7 @@ public class AccountUserApiResource {
 
 	@GetMapping(path = "/check-user", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint checks if user already exists")
-	public ResponseEntity<OperationalResponse> checkIfUserExists(@RequestParam(value = "email") String email) {
+	public ResponseEntity<OperationalResponse> checkIfUserExists(@RequestParam(name = "email") String email) {
 		return ResponseEntity.ok(accountUserService.checkIfUserExists(email));
 	}
 
@@ -114,15 +114,23 @@ public class AccountUserApiResource {
 	@GetMapping(path = "/all-accounts", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves all accounts")
 	public ResponseEntity<CustomPageResponse<AccountResponse>> retrieveAccounts(
-			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(accountUserService.retrieveAccounts(pageNo, pageSize));
 	}
 
 	@GetMapping(path = "/{accountId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves all users tied to an account")
 	public ResponseEntity<CustomPageResponse<AccountUserResponse>> retrieveAllUsersTiedToAnAccount(
-			@PathVariable String accountId, @RequestParam(value = "pageNo") int pageNo,
-			@RequestParam(value = "pageSize") int pageSize) {
+			@PathVariable String accountId, @RequestParam(name = "pageNo") int pageNo,
+			@RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(accountUserService.retrieveAllUsersTiedToAnAccount(accountId, pageNo, pageSize));
+	}
+
+	@GetMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through account users")
+	public ResponseEntity<CustomPageResponse<AccountUserResponse>> searchAccountUser(
+			@RequestParam(name = "text") String text, @RequestParam(name = "pageNo") int pageNo,
+			@RequestParam(name = "pageSize") int pageSize) {
+		return ResponseEntity.ok(accountUserService.searchAccountUser(text, pageNo, pageSize));
 	}
 }

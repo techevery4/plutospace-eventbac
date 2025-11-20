@@ -35,22 +35,22 @@ public class MeetingInviteeApiResource {
 	@GetMapping(path = "/{meetingId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves all meeting invitees")
 	public ResponseEntity<CustomPageResponse<MeetingInviteeResponse>> retrieveMeetingInvitees(
-			@PathVariable String meetingId, @RequestParam(value = "pageNo") int pageNo,
-			@RequestParam(value = "pageSize") int pageSize) {
+			@PathVariable String meetingId, @RequestParam(name = "pageNo") int pageNo,
+			@RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(meetingInviteeService.retrieveMeetingInvitees(meetingId, pageNo, pageSize));
 	}
 
 	@GetMapping(path = "/{meetingId}/check", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint checks if invite already sent to a specific email")
 	public ResponseEntity<OperationalResponse> checkIfAlreadyInvited(@PathVariable String meetingId,
-			@RequestParam(value = "email") String email) {
+			@RequestParam(name = "email") String email) {
 		return ResponseEntity.ok(meetingInviteeService.checkIfAlreadyInvited(meetingId, email));
 	}
 
 	@GetMapping(path = "/{meetingId}/change-status", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint changes the status of an invitee")
 	public ResponseEntity<OperationalResponse> changeInviteeStatus(@PathVariable String meetingId,
-			@RequestParam(value = "email") String email, @RequestParam(value = "status") String status) {
+			@RequestParam(name = "email") String email, @RequestParam(name = "status") String status) {
 		return ResponseEntity.ok(meetingInviteeService.changeInviteeStatus(meetingId, email, status));
 	}
 }

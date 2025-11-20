@@ -71,7 +71,7 @@ public class FreeSlotApiResource {
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves all my free slots")
 	public ResponseEntity<CustomPageResponse<FreeSlotResponse>> retrieveMyFreeSlots(
-			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
 		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
@@ -81,8 +81,8 @@ public class FreeSlotApiResource {
 
 	@GetMapping(path = "/available-slots", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves available slots")
-	public ResponseEntity<List<FreeSlotResponse>> retrieveMyAvailableSlots(@RequestParam(value = "pid") String pid,
-			@RequestParam(value = "startTime") Long startTime, @RequestParam(value = "endTime") Long endTime) {
+	public ResponseEntity<List<FreeSlotResponse>> retrieveMyAvailableSlots(@RequestParam(name = "pid") String pid,
+			@RequestParam(name = "startTime") Long startTime, @RequestParam(name = "endTime") Long endTime) {
 		return ResponseEntity.ok(freeSlotService.retrieveMyAvailableSlots(pid, startTime, endTime));
 	}
 

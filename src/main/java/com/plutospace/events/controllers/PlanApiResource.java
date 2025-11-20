@@ -56,8 +56,8 @@ public class PlanApiResource {
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves all plans")
-	public ResponseEntity<CustomPageResponse<PlanResponse>> retrieveAllPlans(@RequestParam(value = "pageNo") int pageNo,
-			@RequestParam(value = "pageSize") int pageSize) {
+	public ResponseEntity<CustomPageResponse<PlanResponse>> retrieveAllPlans(@RequestParam(name = "pageNo") int pageNo,
+			@RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(planService.retrieveAllPlans(pageNo, pageSize));
 	}
 
@@ -70,7 +70,7 @@ public class PlanApiResource {
 	@GetMapping(path = "/{type}/active-type", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves all active plans by type")
 	public ResponseEntity<CustomPageResponse<PlanResponse>> retrieveActivePlanByType(@PathVariable String type,
-			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(planService.retrieveActivePlanByType(type, pageNo, pageSize));
 	}
 

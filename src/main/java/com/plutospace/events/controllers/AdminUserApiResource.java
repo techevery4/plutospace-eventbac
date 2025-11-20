@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.utils.SecurityMapper;
@@ -73,5 +74,13 @@ public class AdminUserApiResource {
 	@Operation(description = "This endpoint retrieves bulk admin users by ids")
 	public ResponseEntity<List<AdminUserResponse>> retrieveAdminUser(@RequestBody List<String> ids) {
 		return ResponseEntity.ok(adminUserService.retrieveAdminUser(ids));
+	}
+
+	@GetMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through admin users")
+	public ResponseEntity<CustomPageResponse<AdminUserResponse>> searchAdminUser(
+			@RequestParam(name = "text") String text, @RequestParam(name = "pageNo") int pageNo,
+			@RequestParam(name = "pageSize") int pageSize) {
+		return ResponseEntity.ok(adminUserService.searchAdminUser(text, pageNo, pageSize));
 	}
 }

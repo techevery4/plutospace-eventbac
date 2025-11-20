@@ -17,4 +17,6 @@ public interface EnquiryService {
 	OperationalResponse markAsTreated(String id, String userId);
 
 	OperationalResponse markAsNotTreated(String id, String userId);
+
+	CustomPageResponse<EnquiryResponse> searchEnquiry(String text, int pageNo, int pageSize);
 }

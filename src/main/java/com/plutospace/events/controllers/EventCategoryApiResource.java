@@ -54,7 +54,7 @@ public class EventCategoryApiResource {
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves event categories")
 	public ResponseEntity<CustomPageResponse<EventCategoryResponse>> retrieveEventCategories(
-			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(eventCategoryService.retrieveEventCategories(pageNo, pageSize));
 	}
 
@@ -74,5 +74,13 @@ public class EventCategoryApiResource {
 	@Operation(description = "This endpoint deletes an event category")
 	public ResponseEntity<OperationalResponse> deleteEventCategory(@PathVariable String id) {
 		return ResponseEntity.ok(eventCategoryService.deleteEventCategory(id));
+	}
+
+	@GetMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through event categories")
+	public ResponseEntity<CustomPageResponse<EventCategoryResponse>> searchEventCategory(
+			@RequestParam(name = "text") String text, @RequestParam(name = "pageNo") int pageNo,
+			@RequestParam(name = "pageSize") int pageSize) {
+		return ResponseEntity.ok(eventCategoryService.searchEventCategory(text, pageNo, pageSize));
 	}
 }

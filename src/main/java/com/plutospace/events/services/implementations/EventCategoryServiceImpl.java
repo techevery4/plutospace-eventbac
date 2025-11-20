@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
+import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
 import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.domain.data.request.CreateEventCategoryRequest;
@@ -21,6 +22,8 @@ import com.plutospace.events.domain.data.response.EventCategoryResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.entities.EventCategory;
 import com.plutospace.events.domain.repositories.EventCategoryRepository;
+import com.plutospace.events.domain.repositories.EventRepository;
+import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.EventCategoryService;
 import com.plutospace.events.services.mappers.EventCategoryMapper;
 import com.plutospace.events.validation.EventCategoryValidator;
@@ -34,6 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 public class EventCategoryServiceImpl implements EventCategoryService {
 
 	private final EventCategoryRepository eventCategoryRepository;
+	private final EventRepository eventRepository;
+	private final DatabaseSearchService databaseSearchService;
 	private final EventCategoryMapper eventCategoryMapper;
 	private final EventCategoryValidator eventCategoryValidator;
 
@@ -108,6 +113,9 @@ public class EventCategoryServiceImpl implements EventCategoryService {
 	@Override
 	public OperationalResponse deleteEventCategory(String id) {
 		EventCategory eventCategory = retrieveEventCategoryById(id);
+		if (eventRepository.countByCategoryId(id) != 0)
+			throw new GeneralPlatformDomainRuleException(
+					"This event category cannot be deleted because it is already in use");
 
 		try {
 			eventCategoryRepository.delete(eventCategory);
@@ -116,6 +124,17 @@ public class EventCategoryServiceImpl implements EventCategoryService {
 		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityViolationException(e.getLocalizedMessage());
 		}
+	}
+
+	@Override
+	public CustomPageResponse<EventCategoryResponse> searchEventCategory(String text, int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		List<String> fields = List.of("description", "name");
+		Page<EventCategory> eventCategories = databaseSearchService.findEventCategoryByDynamicFilter(text, fields,
+				pageable);
+
+		return eventCategoryMapper.toPagedResponse(eventCategories);
 	}
 
 	private EventCategory retrieveEventCategoryById(String id) {

@@ -8,8 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
@@ -26,6 +30,7 @@ import com.plutospace.events.domain.data.response.AdminUserResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.entities.AdminUser;
 import com.plutospace.events.domain.repositories.AdminUserRepository;
+import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.AdminUserService;
 import com.plutospace.events.services.mappers.AdminUserMapper;
 import com.plutospace.events.validation.AdminUserValidator;
@@ -40,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminUserServiceImpl implements AdminUserService {
 
 	private final AdminUserRepository adminUserRepository;
+	private final DatabaseSearchService databaseSearchService;
 	private final AdminUserValidator adminUserValidator;
 	private final AdminUserMapper adminUserMapper;
 	private final HashPassword hashPassword;
@@ -111,6 +117,72 @@ public class AdminUserServiceImpl implements AdminUserService {
 			return new ArrayList<>();
 
 		return adminUsers.stream().map(adminUserMapper::toResponse).toList();
+	}
+
+	@Override
+	public OperationalResponse activateAdminUser(String id) {
+		AdminUser adminUser = retrieveAdminUserById(id);
+		if (adminUser.getIsPendingUser())
+			throw new GeneralPlatformDomainRuleException(
+					"You cannot activate a user who has not accepted the invitation");
+		if (adminUser.getStatus().equals(AdminUserStatus.ACTIVE))
+			throw new GeneralPlatformDomainRuleException("User is already activated");
+
+		adminUser.setStatus(AdminUserStatus.ACTIVE);
+
+		try {
+			adminUserRepository.save(adminUser);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public OperationalResponse deactivateAdminUser(String id) {
+		AdminUser adminUser = retrieveAdminUserById(id);
+		if (adminUser.getIsPendingUser())
+			throw new GeneralPlatformDomainRuleException(
+					"You cannot deactivate a user who has not accepted the invitation");
+		if (adminUser.getStatus().equals(AdminUserStatus.INACTIVE))
+			throw new GeneralPlatformDomainRuleException("User is already deactivated");
+
+		adminUser.setStatus(AdminUserStatus.INACTIVE);
+
+		try {
+			adminUserRepository.save(adminUser);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public OperationalResponse deletePendingAdminUser(String id) {
+		AdminUser adminUser = retrieveAdminUserById(id);
+		if (!adminUser.getIsPendingUser())
+			throw new GeneralPlatformDomainRuleException(
+					"This user has already accepted invitation and can only be deactivated");
+
+		try {
+			adminUserRepository.delete(adminUser);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public CustomPageResponse<AdminUserResponse> searchAdminUser(String text, int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		List<String> fields = List.of("firstName", "lastName", "email");
+		Page<AdminUser> adminUsers = databaseSearchService.findAdminUserByDynamicFilter(text, fields, pageable);
+
+		return adminUserMapper.toPagedResponse(adminUsers);
 	}
 
 	private AdminUser retrieveAdminUserByEmail(String email) {

@@ -56,7 +56,7 @@ public class MeetingApiResource {
 
 	@GetMapping(path = "/details", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves meeting by the public id")
-	public ResponseEntity<MeetingResponse> retrieveMeetingByPublicId(@RequestParam(value = "pid") String pid) {
+	public ResponseEntity<MeetingResponse> retrieveMeetingByPublicId(@RequestParam(name = "pid") String pid) {
 		return ResponseEntity.ok(meetingService.retrieveMeetingByPublicId(pid));
 	}
 }

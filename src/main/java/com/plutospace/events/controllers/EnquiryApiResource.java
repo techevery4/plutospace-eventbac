@@ -50,14 +50,14 @@ public class EnquiryApiResource {
 	@GetMapping(path = "/pending", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves pending enquiries")
 	public ResponseEntity<CustomPageResponse<EnquiryResponse>> retrievePendingEnquiries(
-			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(enquiryService.retrievePendingEnquiries(pageNo, pageSize));
 	}
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves all enquiries")
 	public ResponseEntity<CustomPageResponse<EnquiryResponse>> retrieveEnquiries(
-			@RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize) {
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(enquiryService.retrieveEnquiries(pageNo, pageSize));
 	}
 
@@ -75,5 +75,12 @@ public class EnquiryApiResource {
 		String userId = securityMapper.retrieveAdminUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
 		return ResponseEntity.ok(enquiryService.markAsNotTreated(id, userId));
+	}
+
+	@GetMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through enquiries")
+	public ResponseEntity<CustomPageResponse<EnquiryResponse>> searchEnquiry(@RequestParam(name = "text") String text,
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+		return ResponseEntity.ok(enquiryService.searchEnquiry(text, pageNo, pageSize));
 	}
 }

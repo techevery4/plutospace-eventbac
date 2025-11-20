@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
+import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.domain.data.request.ChangeAdminUserPasswordRequest;
 import com.plutospace.events.domain.data.request.CreateAdminUserRequest;
 import com.plutospace.events.domain.data.request.LoginAdminUserRequest;
@@ -23,4 +24,12 @@ public interface AdminUserService {
 			throws NoSuchAlgorithmException, InvalidKeySpecException;
 
 	List<AdminUserResponse> retrieveAdminUser(List<String> ids);
+
+	OperationalResponse activateAdminUser(String id);
+
+	OperationalResponse deactivateAdminUser(String id);
+
+	OperationalResponse deletePendingAdminUser(String id);
+
+	CustomPageResponse<AdminUserResponse> searchAdminUser(String text, int pageNo, int pageSize);
 }
