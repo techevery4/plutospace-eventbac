@@ -248,6 +248,7 @@ public class AccountUserServiceImpl implements AccountUserService {
 
 		List<String> fields = List.of("firstName", "lastName", "name", "email");
 		Page<AccountUser> accountUsers = databaseSearchService.findByDynamicFilter(text, fields, pageable);
+		log.info("users {}", accountUsers);
 
 		return accountUserMapper.toPagedResponse(accountUsers);
 	}

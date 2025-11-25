@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.intelligence.search;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -19,7 +20,9 @@ import com.plutospace.events.domain.entities.Enquiry;
 import com.plutospace.events.domain.entities.EventCategory;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DatabaseSearchService {
@@ -32,9 +35,13 @@ public class DatabaseSearchService {
 		if (searchText != null && !searchText.trim().isEmpty()) {
 			// Create a regex for "like %text%" equivalent (case-insensitive)
 			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
 			for (String field : fields) {
-				query.addCriteria(Criteria.where(field).regex(pattern));
+				criteriaList.add(Criteria.where(field).regex(pattern));
 			}
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			query.addCriteria(fullSearchCriteria);
 		}
 
 		// Count total documents matching the criteria for pagination
@@ -55,9 +62,13 @@ public class DatabaseSearchService {
 
 		if (StringUtils.isNotBlank(searchText)) {
 			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
 			for (String field : fields) {
-				query.addCriteria(Criteria.where(field).regex(pattern));
+				criteriaList.add(Criteria.where(field).regex(pattern));
 			}
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			query.addCriteria(fullSearchCriteria);
 		}
 
 		long total = mongoTemplate.count(query, AdminUser.class);
@@ -74,9 +85,13 @@ public class DatabaseSearchService {
 
 		if (StringUtils.isNotBlank(searchText)) {
 			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
 			for (String field : fields) {
-				query.addCriteria(Criteria.where(field).regex(pattern));
+				criteriaList.add(Criteria.where(field).regex(pattern));
 			}
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			query.addCriteria(fullSearchCriteria);
 		}
 
 		long total = mongoTemplate.count(query, Enquiry.class);
@@ -94,9 +109,13 @@ public class DatabaseSearchService {
 
 		if (StringUtils.isNotBlank(searchText)) {
 			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
 			for (String field : fields) {
-				query.addCriteria(Criteria.where(field).regex(pattern));
+				criteriaList.add(Criteria.where(field).regex(pattern));
 			}
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			query.addCriteria(fullSearchCriteria);
 		}
 
 		long total = mongoTemplate.count(query, EventCategory.class);
