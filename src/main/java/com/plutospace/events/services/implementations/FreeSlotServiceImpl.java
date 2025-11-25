@@ -28,6 +28,7 @@ import com.plutospace.events.domain.data.response.MeetingResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.entities.FreeSlot;
 import com.plutospace.events.domain.repositories.FreeSlotRepository;
+import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.FreeSlotService;
 import com.plutospace.events.services.MeetingInviteeService;
 import com.plutospace.events.services.MeetingService;
@@ -43,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FreeSlotServiceImpl implements FreeSlotService {
 
 	private final FreeSlotRepository freeSlotRepository;
+	private final DatabaseSearchService databaseSearchService;
 	private final MeetingService meetingService;
 	private final MeetingInviteeService meetingInviteeService;
 	private final FreeSlotMapper freeSlotMapper;
@@ -171,6 +173,17 @@ public class FreeSlotServiceImpl implements FreeSlotService {
 		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityViolationException(e.getLocalizedMessage());
 		}
+	}
+
+	@Override
+	public CustomPageResponse<FreeSlotResponse> searchFreeSlot(String accountId, String text, int pageNo,
+			int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		List<String> fields = List.of("title", "timezone.representation");
+		Page<FreeSlot> freeSlots = databaseSearchService.findFreeSlotByDynamicFilter(accountId, text, fields, pageable);
+
+		return freeSlotMapper.toPagedResponse(freeSlots);
 	}
 
 	private static CreateMeetingInviteRequest getCreateMeetingInviteRequest(BookFreeSlotRequest bookFreeSlotRequest,

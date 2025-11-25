@@ -67,4 +67,12 @@ public class PermissionApiResource {
 	public ResponseEntity<List<PermissionResponse>> retrievePermission(@RequestBody List<String> ids) {
 		return ResponseEntity.ok(permissionService.retrievePermission(ids));
 	}
+
+	@GetMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through permissions")
+	public ResponseEntity<CustomPageResponse<PermissionResponse>> searchPermission(
+			@RequestParam(name = "text") String text, @RequestParam(name = "pageNo") int pageNo,
+			@RequestParam(name = "pageSize") int pageSize) {
+		return ResponseEntity.ok(permissionService.searchPermission(text, pageNo, pageSize));
+	}
 }

@@ -23,4 +23,6 @@ public interface EventService {
 	List<EventResponse> retrieveEventsBetween(String accountId, Long startTime, Long endTime);
 
 	EventResponse retrieveEvent(String id);
+
+	CustomPageResponse<EventResponse> searchEvent(String accountId, String text, int pageNo, int pageSize);
 }

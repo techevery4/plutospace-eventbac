@@ -21,6 +21,7 @@ import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.data.response.PermissionResponse;
 import com.plutospace.events.domain.entities.Permission;
 import com.plutospace.events.domain.repositories.PermissionRepository;
+import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.PermissionService;
 import com.plutospace.events.services.mappers.PermissionMapper;
 import com.plutospace.events.validation.PermissionValidator;
@@ -34,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PermissionServiceImpl implements PermissionService {
 
 	private final PermissionRepository permissionRepository;
+	private final DatabaseSearchService databaseSearchService;
 	private final PermissionMapper permissionMapper;
 	private final PermissionValidator permissionValidator;
 
@@ -134,6 +136,16 @@ public class PermissionServiceImpl implements PermissionService {
 		List<Permission> permissions = permissionRepository.findByIdIn(ids);
 
 		return permissions.stream().map(permissionMapper::toResponse).toList();
+	}
+
+	@Override
+	public CustomPageResponse<PermissionResponse> searchPermission(String text, int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		List<String> fields = List.of("name", "module", "description", "endpoint", "method");
+		Page<Permission> permissions = databaseSearchService.findPermissionByDynamicFilter(text, fields, pageable);
+
+		return permissionMapper.toPagedResponse(permissions);
 	}
 
 	private Permission retrievePermissionById(String id) {

@@ -21,6 +21,7 @@ import com.plutospace.events.domain.data.request.CreateMeetingInviteRequest;
 import com.plutospace.events.domain.data.response.*;
 import com.plutospace.events.domain.entities.MeetingInvitee;
 import com.plutospace.events.domain.repositories.MeetingInviteeRepository;
+import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.AccountUserService;
 import com.plutospace.events.services.MeetingInviteeService;
 import com.plutospace.events.services.MeetingService;
@@ -36,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MeetingInviteeServiceImpl implements MeetingInviteeService {
 
 	private final MeetingInviteeRepository meetingInviteeRepository;
+	private final DatabaseSearchService databaseSearchService;
 	private final MeetingService meetingService;
 	private final AccountUserService accountUserService;
 	private final MeetingInviteeMapper meetingInviteeMapper;
@@ -122,5 +124,27 @@ public class MeetingInviteeServiceImpl implements MeetingInviteeService {
 		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityViolationException(e.getLocalizedMessage());
 		}
+	}
+
+	@Override
+	public CustomPageResponse<MeetingInviteeResponse> searchMeetingInvitee(String meetingId, String text, int pageNo,
+			int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		List<String> fields = List.of("firstName", "lastName", "email", "meetingAcceptanceStatus");
+		Page<MeetingInvitee> meetingInvitees = databaseSearchService.findMeetingInviteeByDynamicFilter(meetingId, text,
+				fields, pageable);
+		if (meetingInvitees.getTotalElements() == 0)
+			return new CustomPageResponse<>();
+
+		List<String> accountUserEmails = meetingInvitees.getContent().stream().map(MeetingInvitee::getEmail).toList();
+		List<AccountUserResponse> accountUserResponses = accountUserService
+				.retrieveAccountUserByEmail(accountUserEmails);
+		Map<String, AccountUserResponse> accountUserResponseMap = new HashMap<>();
+		for (AccountUserResponse accountUserResponse : accountUserResponses) {
+			accountUserResponseMap.putIfAbsent(accountUserResponse.getId(), accountUserResponse);
+		}
+
+		return meetingInviteeMapper.toPagedResponse(meetingInvitees, accountUserResponseMap);
 	}
 }

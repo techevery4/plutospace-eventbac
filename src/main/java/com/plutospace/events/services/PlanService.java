@@ -25,4 +25,6 @@ public interface PlanService {
 	OperationalResponse setPlanAsActive(String id);
 
 	OperationalResponse setPlanAsInactive(String id);
+
+	CustomPageResponse<PlanResponse> searchPlan(String text, int pageNo, int pageSize);
 }

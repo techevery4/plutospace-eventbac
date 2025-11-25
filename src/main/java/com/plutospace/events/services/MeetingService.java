@@ -3,6 +3,7 @@ package com.plutospace.events.services;
 
 import java.util.List;
 
+import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.domain.data.request.CreateMeetingRequest;
 import com.plutospace.events.domain.data.response.MeetingResponse;
 
@@ -17,4 +18,6 @@ public interface MeetingService {
 	List<MeetingResponse> retrieveMeetingsBetween(String accountId, Long startTime, Long endTime);
 
 	MeetingResponse retrieveMeeting(String id);
+
+	CustomPageResponse<MeetingResponse> searchMeeting(String accountId, String text, int pageNo, int pageSize);
 }

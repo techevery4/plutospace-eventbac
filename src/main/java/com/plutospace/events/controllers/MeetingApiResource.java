@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.utils.SecurityMapper;
@@ -58,5 +59,14 @@ public class MeetingApiResource {
 	@Operation(description = "This endpoint retrieves meeting by the public id")
 	public ResponseEntity<MeetingResponse> retrieveMeetingByPublicId(@RequestParam(name = "pid") String pid) {
 		return ResponseEntity.ok(meetingService.retrieveMeetingByPublicId(pid));
+	}
+
+	@GetMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through meetings")
+	public ResponseEntity<CustomPageResponse<MeetingResponse>> searchMeeting(@RequestParam(name = "text") String text,
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(meetingService.searchMeeting(accountId, text, pageNo, pageSize));
 	}
 }

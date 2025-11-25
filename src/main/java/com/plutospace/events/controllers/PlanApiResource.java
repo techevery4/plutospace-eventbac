@@ -85,4 +85,11 @@ public class PlanApiResource {
 	public ResponseEntity<OperationalResponse> setPlanAsInactive(@PathVariable String id) {
 		return ResponseEntity.ok(planService.setPlanAsInactive(id));
 	}
+
+	@GetMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through plans")
+	public ResponseEntity<CustomPageResponse<PlanResponse>> searchPlan(@RequestParam(name = "text") String text,
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+		return ResponseEntity.ok(planService.searchPlan(text, pageNo, pageSize));
+	}
 }

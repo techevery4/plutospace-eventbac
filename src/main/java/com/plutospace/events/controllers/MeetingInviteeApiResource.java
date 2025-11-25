@@ -53,4 +53,12 @@ public class MeetingInviteeApiResource {
 			@RequestParam(name = "email") String email, @RequestParam(name = "status") String status) {
 		return ResponseEntity.ok(meetingInviteeService.changeInviteeStatus(meetingId, email, status));
 	}
+
+	@GetMapping(path = "/{meetingId}/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through meeting invitees")
+	public ResponseEntity<CustomPageResponse<MeetingInviteeResponse>> searchMeetingInvitee(
+			@PathVariable String meetingId, @RequestParam(name = "text") String text,
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+		return ResponseEntity.ok(meetingInviteeService.searchMeetingInvitee(meetingId, text, pageNo, pageSize));
+	}
 }

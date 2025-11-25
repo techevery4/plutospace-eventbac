@@ -25,14 +25,12 @@ import com.plutospace.events.domain.data.LocationType;
 import com.plutospace.events.domain.data.request.CreateEventFormRequest;
 import com.plutospace.events.domain.data.request.CreateEventRequest;
 import com.plutospace.events.domain.data.request.CreateMeetingRequest;
-import com.plutospace.events.domain.data.response.EventCategoryResponse;
-import com.plutospace.events.domain.data.response.EventFormResponse;
-import com.plutospace.events.domain.data.response.EventResponse;
-import com.plutospace.events.domain.data.response.MeetingResponse;
+import com.plutospace.events.domain.data.response.*;
 import com.plutospace.events.domain.entities.Event;
 import com.plutospace.events.domain.entities.EventForm;
 import com.plutospace.events.domain.repositories.EventFormRepository;
 import com.plutospace.events.domain.repositories.EventRepository;
+import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.EventCategoryService;
 import com.plutospace.events.services.EventService;
 import com.plutospace.events.services.MeetingService;
@@ -51,6 +49,7 @@ public class EventServiceImpl implements EventService {
 
 	private final EventRepository eventRepository;
 	private final EventFormRepository eventFormRepository;
+	private final DatabaseSearchService databaseSearchService;
 	private final EventCategoryService eventCategoryService;
 	private final MeetingService meetingService;
 	private final EventMapper eventMapper;
@@ -206,6 +205,29 @@ public class EventServiceImpl implements EventService {
 			throw new ResourceNotFoundException("Event Category Not Found");
 
 		return eventMapper.toResponse(existingEvent, eventCategoryResponses.get(0));
+	}
+
+	@Override
+	public CustomPageResponse<EventResponse> searchEvent(String accountId, String text, int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		List<String> fields = List.of("name", "description", "timezone.representation", "locationType",
+				"virtualRoomName", "physicalAddress.street", "physicalAddress.city", "physicalAddress.state",
+				"physicalAddress.country", "additionalInstructions", "visibilityType", "currency",
+				"confirmationMessage", "termsAndConditions", "meetingLink", "qAndALink", "pollsLink",
+				"registrationLink");
+		Page<Event> events = databaseSearchService.findEventByDynamicFilter(accountId, text, fields, pageable);
+		if (events.getTotalElements() == 0)
+			return new CustomPageResponse<>();
+
+		List<String> categoryIds = events.getContent().stream().map(Event::getCategoryId).toList();
+		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService.retrieveEventCategory(categoryIds);
+		Map<String, EventCategoryResponse> eventCategoryResponseMap = new HashMap<>();
+		for (EventCategoryResponse eventCategoryResponse : eventCategoryResponses) {
+			eventCategoryResponseMap.putIfAbsent(eventCategoryResponse.getId(), eventCategoryResponse);
+		}
+
+		return eventMapper.toPagedResponse(events, eventCategoryResponseMap);
 	}
 
 	private Event retrieveEventById(String id) {

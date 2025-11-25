@@ -21,6 +21,7 @@ import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.data.response.PlanResponse;
 import com.plutospace.events.domain.entities.Plan;
 import com.plutospace.events.domain.repositories.PlanRepository;
+import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.PlanService;
 import com.plutospace.events.services.mappers.PlanMapper;
 import com.plutospace.events.validation.PlanValidator;
@@ -36,6 +37,7 @@ public class PlanServiceImpl implements PlanService {
 	private final PlanValidator planValidator;
 	private final PlanRepository planRepository;
 	private final PlanMapper planMapper;
+	private final DatabaseSearchService databaseSearchService;
 
 	@Override
 	public PlanResponse createPlan(PlanRequest request) {
@@ -135,6 +137,16 @@ public class PlanServiceImpl implements PlanService {
 		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityViolationException(e.getLocalizedMessage());
 		}
+	}
+
+	@Override
+	public CustomPageResponse<PlanResponse> searchPlan(String text, int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		List<String> fields = List.of("name", "type");
+		Page<Plan> plans = databaseSearchService.findPlanByDynamicFilter(text, fields, pageable);
+
+		return planMapper.toPagedResponse(plans);
 	}
 
 	private Plan retrievePlanById(String id) {

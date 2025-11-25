@@ -7,8 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
@@ -19,6 +23,7 @@ import com.plutospace.events.domain.data.request.CreateMeetingRequest;
 import com.plutospace.events.domain.data.response.MeetingResponse;
 import com.plutospace.events.domain.entities.Meeting;
 import com.plutospace.events.domain.repositories.MeetingRepository;
+import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.MeetingService;
 import com.plutospace.events.services.mappers.MeetingMapper;
 import com.plutospace.events.validation.MeetingValidator;
@@ -32,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MeetingServiceImpl implements MeetingService {
 
 	private final MeetingRepository meetingRepository;
+	private final DatabaseSearchService databaseSearchService;
 	private final MeetingMapper meetingMapper;
 	private final MeetingValidator meetingValidator;
 	private final LinkGenerator linkGenerator;
@@ -123,7 +129,10 @@ public class MeetingServiceImpl implements MeetingService {
 		LocalDateTime startDate = dateConverter.convertTimestamp(startTime);
 		LocalDateTime endDate = dateConverter.convertTimestamp(endTime);
 
-		return meetingRepository.findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(accountId, startDate, endDate);
+		List<Meeting> meetings = meetingRepository.findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(accountId,
+				startDate, endDate);
+
+		return meetings.stream().map(meetingMapper::toResponse).toList();
 	}
 
 	@Override
@@ -131,6 +140,16 @@ public class MeetingServiceImpl implements MeetingService {
 		Meeting existingMeeting = retrieveMeetingById(id);
 
 		return meetingMapper.toResponse(existingMeeting);
+	}
+
+	@Override
+	public CustomPageResponse<MeetingResponse> searchMeeting(String accountId, String text, int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		List<String> fields = List.of("title", "description", "timezone.representation", "publicId");
+		Page<Meeting> meetings = databaseSearchService.findMeetingByDynamicFilter(accountId, text, fields, pageable);
+
+		return meetingMapper.toPagedResponse(meetings);
 	}
 
 	private Meeting retrieveMeetingById(String id) {

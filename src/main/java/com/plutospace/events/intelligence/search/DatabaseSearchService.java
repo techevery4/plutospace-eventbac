@@ -14,10 +14,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import com.plutospace.events.domain.entities.AccountUser;
-import com.plutospace.events.domain.entities.AdminUser;
-import com.plutospace.events.domain.entities.Enquiry;
-import com.plutospace.events.domain.entities.EventCategory;
+import com.plutospace.events.domain.entities.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -125,5 +122,155 @@ public class DatabaseSearchService {
 
 		// Return a Page object
 		return new PageImpl<>(eventCategories, pageable, total);
+	}
+
+	public Page<Event> findEventByDynamicFilter(String accountId, String searchText, List<String> fields,
+			Pageable pageable) {
+		Query query = new Query();
+
+		if (StringUtils.isNotBlank(searchText)) {
+			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
+			for (String field : fields) {
+				criteriaList.add(Criteria.where(field).regex(pattern));
+			}
+
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			Criteria accountCriteria = Criteria.where("accountId").is(accountId).andOperator(fullSearchCriteria);
+			query.addCriteria(accountCriteria);
+		}
+
+		long total = mongoTemplate.count(query, Event.class);
+		query.with(pageable);
+
+		List<Event> events = mongoTemplate.find(query, Event.class);
+
+		// Return a Page object
+		return new PageImpl<>(events, pageable, total);
+	}
+
+	public Page<FreeSlot> findFreeSlotByDynamicFilter(String accountId, String searchText, List<String> fields,
+			Pageable pageable) {
+		Query query = new Query();
+
+		if (StringUtils.isNotBlank(searchText)) {
+			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
+			for (String field : fields) {
+				criteriaList.add(Criteria.where(field).regex(pattern));
+			}
+
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			Criteria accountCriteria = Criteria.where("accountId").is(accountId).andOperator(fullSearchCriteria);
+			query.addCriteria(accountCriteria);
+		}
+
+		long total = mongoTemplate.count(query, FreeSlot.class);
+		query.with(pageable);
+
+		List<FreeSlot> freeSlots = mongoTemplate.find(query, FreeSlot.class);
+
+		// Return a Page object
+		return new PageImpl<>(freeSlots, pageable, total);
+	}
+
+	public Page<Meeting> findMeetingByDynamicFilter(String accountId, String searchText, List<String> fields,
+			Pageable pageable) {
+		Query query = new Query();
+
+		if (StringUtils.isNotBlank(searchText)) {
+			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
+			for (String field : fields) {
+				criteriaList.add(Criteria.where(field).regex(pattern));
+			}
+
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			Criteria accountCriteria = Criteria.where("accountId").is(accountId).andOperator(fullSearchCriteria);
+			query.addCriteria(accountCriteria);
+		}
+
+		long total = mongoTemplate.count(query, Meeting.class);
+		query.with(pageable);
+
+		List<Meeting> meetings = mongoTemplate.find(query, Meeting.class);
+
+		// Return a Page object
+		return new PageImpl<>(meetings, pageable, total);
+	}
+
+	public Page<MeetingInvitee> findMeetingInviteeByDynamicFilter(String meetingId, String searchText,
+			List<String> fields, Pageable pageable) {
+		Query query = new Query();
+
+		if (StringUtils.isNotBlank(searchText)) {
+			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
+			for (String field : fields) {
+				criteriaList.add(Criteria.where(field).regex(pattern));
+			}
+
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			Criteria accountCriteria = Criteria.where("meetingId").is(meetingId).andOperator(fullSearchCriteria);
+			query.addCriteria(accountCriteria);
+		}
+
+		long total = mongoTemplate.count(query, MeetingInvitee.class);
+		query.with(pageable);
+
+		List<MeetingInvitee> meetingInvitees = mongoTemplate.find(query, MeetingInvitee.class);
+
+		// Return a Page object
+		return new PageImpl<>(meetingInvitees, pageable, total);
+	}
+
+	public Page<Permission> findPermissionByDynamicFilter(String searchText, List<String> fields, Pageable pageable) {
+		Query query = new Query();
+
+		if (StringUtils.isNotBlank(searchText)) {
+			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
+			for (String field : fields) {
+				criteriaList.add(Criteria.where(field).regex(pattern));
+			}
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			query.addCriteria(fullSearchCriteria);
+		}
+
+		long total = mongoTemplate.count(query, Permission.class);
+		query.with(pageable);
+
+		List<Permission> permissions = mongoTemplate.find(query, Permission.class);
+
+		// Return a Page object
+		return new PageImpl<>(permissions, pageable, total);
+	}
+
+	public Page<Plan> findPlanByDynamicFilter(String searchText, List<String> fields, Pageable pageable) {
+		Query query = new Query();
+
+		if (StringUtils.isNotBlank(searchText)) {
+			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
+			for (String field : fields) {
+				criteriaList.add(Criteria.where(field).regex(pattern));
+			}
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			query.addCriteria(fullSearchCriteria);
+		}
+
+		long total = mongoTemplate.count(query, Plan.class);
+		query.with(pageable);
+
+		List<Plan> plans = mongoTemplate.find(query, Plan.class);
+
+		// Return a Page object
+		return new PageImpl<>(plans, pageable, total);
 	}
 }

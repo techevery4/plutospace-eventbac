@@ -78,4 +78,13 @@ public class EventApiResource {
 	public ResponseEntity<List<EventResponse>> retrieveEvent(@RequestBody List<String> ids) {
 		return ResponseEntity.ok(eventService.retrieveEvent(ids));
 	}
+
+	@GetMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through events")
+	public ResponseEntity<CustomPageResponse<EventResponse>> searchEvent(@RequestParam(name = "text") String text,
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+		String id = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(eventService.searchEvent(id, text, pageNo, pageSize));
+	}
 }

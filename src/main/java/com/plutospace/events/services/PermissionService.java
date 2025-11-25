@@ -19,4 +19,6 @@ public interface PermissionService {
 	CustomPageResponse<PermissionResponse> retrievePermissions(int pageNo, int pageSize);
 
 	List<PermissionResponse> retrievePermission(List<String> ids);
+
+	CustomPageResponse<PermissionResponse> searchPermission(String text, int pageNo, int pageSize);
 }

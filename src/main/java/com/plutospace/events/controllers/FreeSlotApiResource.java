@@ -97,4 +97,13 @@ public class FreeSlotApiResource {
 	public ResponseEntity<OperationalResponse> updateFreeSlot(@RequestBody BookFreeSlotRequest bookFreeSlotRequest) {
 		return ResponseEntity.ok(freeSlotService.bookFreeSlot(bookFreeSlotRequest));
 	}
+
+	@GetMapping(path = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through free slots")
+	public ResponseEntity<CustomPageResponse<FreeSlotResponse>> searchFreeSlot(@RequestParam(name = "text") String text,
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(freeSlotService.searchFreeSlot(accountId, text, pageNo, pageSize));
+	}
 }
