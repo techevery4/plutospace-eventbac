@@ -4,6 +4,8 @@ package com.plutospace.events.domain.repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.plutospace.events.commons.repositories.BaseRepository;
@@ -16,4 +18,6 @@ public interface AdminUserRepository extends BaseRepository<AdminUser, String> {
 	Optional<AdminUser> findByEmailIgnoreCase(String email);
 
 	List<AdminUser> findByIdIn(List<String> ids);
+
+	Page<AdminUser> findAllByOrderByCreatedOnDesc(Pageable pageable);
 }

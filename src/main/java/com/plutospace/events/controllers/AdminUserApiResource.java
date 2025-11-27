@@ -83,4 +83,11 @@ public class AdminUserApiResource {
 			@RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(adminUserService.searchAdminUser(text, pageNo, pageSize));
 	}
+
+	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint retrieves all admin users")
+	public ResponseEntity<CustomPageResponse<AdminUserResponse>> retrieveAdminUsers(
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+		return ResponseEntity.ok(adminUserService.retrieveAdminUsers(pageNo, pageSize));
+	}
 }

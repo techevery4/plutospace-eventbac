@@ -32,4 +32,6 @@ public interface AdminUserService {
 	OperationalResponse deletePendingAdminUser(String id);
 
 	CustomPageResponse<AdminUserResponse> searchAdminUser(String text, int pageNo, int pageSize);
+
+	CustomPageResponse<AdminUserResponse> retrieveAdminUsers(int pageNo, int pageSize);
 }

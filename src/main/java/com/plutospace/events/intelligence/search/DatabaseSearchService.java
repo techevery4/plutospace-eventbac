@@ -273,4 +273,27 @@ public class DatabaseSearchService {
 		// Return a Page object
 		return new PageImpl<>(plans, pageable, total);
 	}
+
+	public Page<PromoCode> findPromoCodeByDynamicFilter(String searchText, List<String> fields, Pageable pageable) {
+		Query query = new Query();
+
+		if (StringUtils.isNotBlank(searchText)) {
+			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
+			for (String field : fields) {
+				criteriaList.add(Criteria.where(field).regex(pattern));
+			}
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			query.addCriteria(fullSearchCriteria);
+		}
+
+		long total = mongoTemplate.count(query, PromoCode.class);
+		query.with(pageable);
+
+		List<PromoCode> promoCodes = mongoTemplate.find(query, PromoCode.class);
+
+		// Return a Page object
+		return new PageImpl<>(promoCodes, pageable, total);
+	}
 }

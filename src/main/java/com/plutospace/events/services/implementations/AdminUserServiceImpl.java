@@ -185,6 +185,15 @@ public class AdminUserServiceImpl implements AdminUserService {
 		return adminUserMapper.toPagedResponse(adminUsers);
 	}
 
+	@Override
+	public CustomPageResponse<AdminUserResponse> retrieveAdminUsers(int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		Page<AdminUser> adminUsers = adminUserRepository.findAllByOrderByCreatedOnDesc(pageable);
+
+		return adminUserMapper.toPagedResponse(adminUsers);
+	}
+
 	private AdminUser retrieveAdminUserByEmail(String email) {
 		return adminUserRepository.findByEmailIgnoreCase(email)
 				.orElseThrow(() -> new ResourceNotFoundException("Admin User Not Found"));
