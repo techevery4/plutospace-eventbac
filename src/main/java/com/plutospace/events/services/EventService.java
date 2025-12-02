@@ -7,6 +7,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.domain.data.request.CreateEventRequest;
 import com.plutospace.events.domain.data.response.EventFormResponse;
 import com.plutospace.events.domain.data.response.EventResponse;
+import com.plutospace.events.domain.data.response.OperationalResponse;
 
 public interface EventService {
 
@@ -25,4 +26,10 @@ public interface EventService {
 	EventResponse retrieveEvent(String id);
 
 	CustomPageResponse<EventResponse> searchEvent(String accountId, String text, int pageNo, int pageSize);
+
+	OperationalResponse updateEventWithPoll(String id, String pollPublicId);
+
+	OperationalResponse removePollFromEvent(String id);
+
+	EventResponse retrieveEventByForeignPublicId(String publicId, int type);
 }

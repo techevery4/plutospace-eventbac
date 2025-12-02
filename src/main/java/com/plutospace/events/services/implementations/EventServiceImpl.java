@@ -230,6 +230,54 @@ public class EventServiceImpl implements EventService {
 		return eventMapper.toPagedResponse(events, eventCategoryResponseMap);
 	}
 
+	@Override
+	public OperationalResponse updateEventWithPoll(String id, String pollPublicId) {
+		Event existingEvent = retrieveEventById(id);
+
+		existingEvent.setPollsLink(pollPublicId);
+
+		try {
+			eventRepository.save(existingEvent);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public OperationalResponse removePollFromEvent(String id) {
+		Event existingEvent = retrieveEventById(id);
+
+		existingEvent.setPollsLink(null);
+
+		try {
+			eventRepository.save(existingEvent);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public EventResponse retrieveEventByForeignPublicId(String publicId, int type) {
+		Event event = null;
+		if (type == 1) {
+			event = eventRepository.findByPollsLink(publicId);
+		}
+
+		if (event != null) {
+			List<EventCategoryResponse> eventCategoryResponses = eventCategoryService
+					.retrieveEventCategory(List.of(event.getCategoryId()));
+			if (eventCategoryResponses.isEmpty())
+				throw new ResourceNotFoundException("Event Category Not Found");
+
+			return eventMapper.toResponse(event, eventCategoryResponses.get(0));
+		}
+		return null;
+	}
+
 	private Event retrieveEventById(String id) {
 		return eventRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Event Not Found"));
 	}

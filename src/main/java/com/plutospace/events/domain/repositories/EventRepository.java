@@ -22,4 +22,6 @@ public interface EventRepository extends BaseRepository<Event, String> {
 	Page<Event> findByAccountIdOrderByCreatedOnDesc(String accountId, Pageable pageable);
 
 	long countByCategoryId(String categoryId);
+
+	Event findByPollsLink(String publicId);
 }

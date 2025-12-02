@@ -4,6 +4,8 @@ package com.plutospace.events.domain.repositories;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.plutospace.events.commons.repositories.BaseRepository;
@@ -15,4 +17,7 @@ public interface MeetingRepository extends BaseRepository<Meeting, String> {
 
 	List<Meeting> findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(String accountId, LocalDateTime startDate,
 			LocalDateTime endDate);
+
+	Page<Meeting> findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(String accountId, LocalDateTime startDate,
+			LocalDateTime endDate, Pageable pageable);
 }

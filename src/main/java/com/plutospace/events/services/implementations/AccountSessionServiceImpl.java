@@ -72,7 +72,7 @@ public class AccountSessionServiceImpl implements AccountSessionService {
 			throw new UnauthorizedAccessException("Your session has expired. Kindly login again to restart session");
 
 		AccountSession accountSession = accountSessionRepository
-				.findByAccountIdAndUserIdAndUserAgentIgnoreCase(words[1], words[2], userAgent);
+				.findByAccountIdAndUserIdAndUserAgentIgnoreCase(words[2], words[1], userAgent);
 		if (accountSession == null)
 			throw new UnauthorizedAccessException("Kindly login to start a new session");
 		if (!hashPassword.validatePass(token, accountSession.getToken()))

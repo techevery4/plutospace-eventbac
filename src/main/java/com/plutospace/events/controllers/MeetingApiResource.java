@@ -49,6 +49,17 @@ public class MeetingApiResource {
 		return ResponseEntity.created(uri).body(meetingResponse);
 	}
 
+	@GetMapping(path = "/between", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint retrieves meetings between specified dates")
+	public ResponseEntity<CustomPageResponse<MeetingResponse>> retrieveMeetingsBetween(
+			@RequestParam(name = "startTime") Long startTime, @RequestParam(name = "endTime") Long endTime,
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity
+				.ok(meetingService.retrieveMeetingsBetween(accountId, startTime, endTime, pageNo, pageSize));
+	}
+
 	@PostMapping(path = "/bulk-ids", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves bulk meetings by ids")
 	public ResponseEntity<List<MeetingResponse>> retrieveMeeting(@RequestBody List<String> ids) {

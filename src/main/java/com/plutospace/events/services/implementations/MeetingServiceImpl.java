@@ -136,6 +136,19 @@ public class MeetingServiceImpl implements MeetingService {
 	}
 
 	@Override
+	public CustomPageResponse<MeetingResponse> retrieveMeetingsBetween(String accountId, Long startTime, Long endTime,
+			int pageNo, int pageSize) {
+		LocalDateTime startDate = dateConverter.convertTimestamp(startTime);
+		LocalDateTime endDate = dateConverter.convertTimestamp(endTime);
+
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+		Page<Meeting> meetings = meetingRepository.findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(accountId,
+				startDate, endDate, pageable);
+
+		return meetingMapper.toPagedResponse(meetings);
+	}
+
+	@Override
 	public MeetingResponse retrieveMeeting(String id) {
 		Meeting existingMeeting = retrieveMeetingById(id);
 
