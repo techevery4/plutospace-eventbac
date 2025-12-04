@@ -20,6 +20,9 @@ public interface MeetingService {
 	CustomPageResponse<MeetingResponse> retrieveMeetingsBetween(String accountId, Long startTime, Long endTime,
 			int pageNo, int pageSize);
 
+	CustomPageResponse<MeetingResponse> retrieveUpcomingMeetingsBetween(String accountId, Long startTime, Long endTime,
+			int pageNo, int pageSize);
+
 	MeetingResponse retrieveMeeting(String id);
 
 	CustomPageResponse<MeetingResponse> searchMeeting(String accountId, String text, int pageNo, int pageSize);

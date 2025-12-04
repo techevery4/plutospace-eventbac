@@ -28,6 +28,12 @@ public class Poll extends BaseEntity {
 	@Data
 	public static class Body {
 		private String question;
-		private List<String> options;
+		private List<Option> options;
+	}
+
+	@Data
+	public static class Option {
+		private String text;
+		private Long vote;
 	}
 }

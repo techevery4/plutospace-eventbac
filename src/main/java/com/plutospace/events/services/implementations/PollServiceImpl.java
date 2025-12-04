@@ -16,14 +16,18 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
+import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.LinkGenerator;
 import com.plutospace.events.domain.data.PollType;
+import com.plutospace.events.domain.data.request.CreatePollResultRequest;
 import com.plutospace.events.domain.data.request.SavePollRequest;
 import com.plutospace.events.domain.data.response.EventResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.data.response.PollResponse;
+import com.plutospace.events.domain.data.response.PollResultResponse;
 import com.plutospace.events.domain.entities.Poll;
+import com.plutospace.events.domain.entities.PollResult;
 import com.plutospace.events.domain.repositories.PollRepository;
 import com.plutospace.events.domain.repositories.PollResultRepository;
 import com.plutospace.events.services.EventService;
@@ -89,7 +93,6 @@ public class PollServiceImpl implements PollService {
 		if (pollResultRepository.existsByPollId(id))
 			throw new GeneralPlatformDomainRuleException("You can no longer edit this poll");
 
-		Poll updatePoll = pollMapper.toEntity(savePollRequest, existingPoll.getAccountId());
 		existingPoll.setTitle(savePollRequest.getTitle());
 		existingPoll.setType(pollType);
 		existingPoll.setBodies(savePollRequest.getBodies());
@@ -181,6 +184,78 @@ public class PollServiceImpl implements PollService {
 		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityViolationException(e.getLocalizedMessage());
 		}
+	}
+
+	@Override
+	public OperationalResponse createPollResult(String publicId, CreatePollResultRequest createPollResultRequest) {
+		pollValidator.validate(createPollResultRequest);
+		String decryptedPublicId = linkGenerator.extractDetailsFromPublicLink(publicId,
+				propertyConstants.getEventsEncryptionSecretKey());
+		String[] words = decryptedPublicId.split(":");
+
+		Poll poll = retrievePollById(words[0]);
+
+		if (pollResultRepository.existsByPollIdAndEmailIgnoreCase(words[0], createPollResultRequest.getEmail()))
+			throw new ResourceAlreadyExistsException("You already took this poll");
+		if (!poll.getIsPublished())
+			throw new GeneralPlatformDomainRuleException("Poll is not yet opened by the owner");
+
+		PollResult pollResult = pollMapper.toEntity(createPollResultRequest, poll.getId());
+
+		try {
+			pollResultRepository.save(pollResult);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public OperationalResponse checkIfUserAlreadySubmittedResponse(String publicId, String email) {
+		String decryptedPublicId = linkGenerator.extractDetailsFromPublicLink(publicId,
+				propertyConstants.getEventsEncryptionSecretKey());
+		String[] words = decryptedPublicId.split(":");
+
+		Poll poll = retrievePollById(words[0]);
+
+		if (pollResultRepository.existsByPollIdAndEmailIgnoreCase(poll.getId(), email))
+			throw new ResourceAlreadyExistsException("You already took this poll");
+
+		return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+	}
+
+	@Override
+	public OperationalResponse deleteResponse(String publicId, String email) {
+		String decryptedPublicId = linkGenerator.extractDetailsFromPublicLink(publicId,
+				propertyConstants.getEventsEncryptionSecretKey());
+		String[] words = decryptedPublicId.split(":");
+
+		Poll poll = retrievePollById(words[0]);
+		if (!poll.getIsPublished())
+			throw new GeneralPlatformDomainRuleException("Poll is not yet opened by the owner");
+
+		PollResult existingPollResult = pollResultRepository.findByPollIdAndEmailIgnoreCase(poll.getId(), email);
+
+		if (existingPollResult == null)
+			throw new ResourceAlreadyExistsException("You have not taken this poll before");
+
+		try {
+			pollResultRepository.delete(existingPollResult);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public CustomPageResponse<PollResultResponse> retrievePollResults(String pollId, int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		Page<PollResult> pollResults = pollResultRepository.findByPollIdOrderByCreatedOnDesc(pollId, pageable);
+
+		return pollMapper.toPagedResultResponse(pollResults);
 	}
 
 	private Poll retrievePollById(String id) {

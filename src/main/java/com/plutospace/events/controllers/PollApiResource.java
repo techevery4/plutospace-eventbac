@@ -13,6 +13,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.utils.SecurityMapper;
+import com.plutospace.events.domain.data.request.CreatePollResultRequest;
 import com.plutospace.events.domain.data.request.SavePollRequest;
 import com.plutospace.events.domain.data.response.*;
 import com.plutospace.events.services.PollService;
@@ -87,5 +88,33 @@ public class PollApiResource {
 	@Operation(description = "This endpoint unpublishes a poll")
 	public ResponseEntity<OperationalResponse> unpublishPoll(@PathVariable String id) {
 		return ResponseEntity.ok(pollService.unpublishPoll(id));
+	}
+
+	@PutMapping(path = "/result", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint creates a poll result")
+	public ResponseEntity<OperationalResponse> createPollResult(@RequestParam(name = "pid") String pid,
+			@RequestBody CreatePollResultRequest createPollResultRequest) {
+		return ResponseEntity.ok(pollService.createPollResult(pid, createPollResultRequest));
+	}
+
+	@GetMapping(path = "/result/check-user", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint checks if user has filled a particular poll")
+	public ResponseEntity<OperationalResponse> checkIfUserAlreadySubmittedResponse(
+			@RequestParam(name = "pid") String pid, @RequestParam(name = "email") String email) {
+		return ResponseEntity.ok(pollService.checkIfUserAlreadySubmittedResponse(pid, email));
+	}
+
+	@DeleteMapping(path = "/result", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint deletes a poll result")
+	public ResponseEntity<OperationalResponse> deleteResponse(@RequestParam(name = "pid") String pid,
+			@RequestParam(name = "email") String email) {
+		return ResponseEntity.ok(pollService.deleteResponse(pid, email));
+	}
+
+	@GetMapping(path = RESOURCE_ID + "/result", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint deletes a poll result")
+	public ResponseEntity<CustomPageResponse<PollResultResponse>> retrievePollResults(@PathVariable String id,
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+		return ResponseEntity.ok(pollService.retrievePollResults(id, pageNo, pageSize));
 	}
 }

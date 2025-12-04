@@ -51,7 +51,7 @@ public class MeetingServiceImpl implements MeetingService {
 		LocalDateTime firstStartTime = dateConverter.mergeLocalDateAndTimeString(createMeetingRequest.getStartDate(),
 				createMeetingRequest.getStartTime());
 		LocalDateTime firstEndTime = dateConverter.mergeLocalDateAndTimeString(createMeetingRequest.getStartDate(),
-				createMeetingRequest.getStartTime());
+				createMeetingRequest.getEndTime());
 		if (firstStartTime.isAfter(firstEndTime))
 			throw new GeneralPlatformDomainRuleException("Start time selected cannot be after end time");
 
@@ -143,6 +143,19 @@ public class MeetingServiceImpl implements MeetingService {
 
 		Pageable pageable = PageRequest.of(pageNo, pageSize);
 		Page<Meeting> meetings = meetingRepository.findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(accountId,
+				startDate, endDate, pageable);
+
+		return meetingMapper.toPagedResponse(meetings);
+	}
+
+	@Override
+	public CustomPageResponse<MeetingResponse> retrieveUpcomingMeetingsBetween(String accountId, Long startTime,
+			Long endTime, int pageNo, int pageSize) {
+		LocalDateTime startDate = dateConverter.convertTimestamp(startTime);
+		LocalDateTime endDate = dateConverter.convertTimestamp(endTime);
+
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+		Page<Meeting> meetings = meetingRepository.findByAccountIdAndCreatedOnBetweenOrderByStartTimeAsc(accountId,
 				startDate, endDate, pageable);
 
 		return meetingMapper.toPagedResponse(meetings);
