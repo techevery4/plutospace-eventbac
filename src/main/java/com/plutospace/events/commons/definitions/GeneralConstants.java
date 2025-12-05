@@ -18,6 +18,8 @@ public class GeneralConstants {
 	public static final String POLL = "POLL";
 	public static final String EVENT_REGISTRATION = "EVENT_REGISTRATION";
 	public static final String FREE_SLOT = "FREE_SLOT";
+	public static final String MEDIA = "MEDIA";
+	public static final String PROPOSAL = "PROPOSAL";
 	public static final String TRUE = "true";
 	public static final String FALSE = "false";
 	public static final int EVENT_MEETING_PARTICIPANTS = 50;

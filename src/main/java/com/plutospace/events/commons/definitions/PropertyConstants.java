@@ -21,4 +21,22 @@ public class PropertyConstants {
 
 	@Value("${events.iv-key}")
 	private String eventsIvKey;
+
+	@Value("${access.key.id}")
+	private String accessKeyId;
+
+	@Value("${access.key.secret}")
+	private String accessKeySecret;
+
+	@Value("${s3.region.name}")
+	private String s3RegionName;
+
+	@Value("${s3.bucket.name}")
+	private String s3BucketName;
+
+	@Value("${s3.endpoint}")
+	private String s3Endpoint;
+
+	@Value("${s3.display-endpoint}")
+	private String s3DisplayEndpoint;
 }

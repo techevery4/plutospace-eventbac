@@ -35,4 +35,8 @@ public class ApiResourceConstants {
 	public static final String PROMO_CODES_RESOURCE_ID = PROMO_CODES + RESOURCE_ID;
 	public static final String POLLS = API_VERSION + "/polls";
 	public static final String POLLS_RESOURCE_ID = POLLS + RESOURCE_ID;
+	public static final String PROPOSALS = API_VERSION + "/proposals";
+	public static final String PROPOSALS_RESOURCE_ID = PROPOSALS + RESOURCE_ID;
+	public static final String MEDIA = API_VERSION + "/media";
+	public static final String MEDIA_RESOURCE_ID = MEDIA + RESOURCE_ID;
 }

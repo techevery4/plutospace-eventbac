@@ -1,0 +1,11 @@
+/* Developed by TechEveryWhere Engineering (C)2025 */
+package com.plutospace.events.domain.repositories;
+
+import org.springframework.stereotype.Repository;
+
+import com.plutospace.events.commons.repositories.BaseRepository;
+import com.plutospace.events.domain.entities.Media;
+
+@Repository
+public interface MediaRepository extends BaseRepository<Media, String> {
+}
