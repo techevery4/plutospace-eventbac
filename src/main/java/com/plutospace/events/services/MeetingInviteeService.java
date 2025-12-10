@@ -14,6 +14,8 @@ public interface MeetingInviteeService {
 
 	OperationalResponse checkIfAlreadyInvited(String meetingId, String email);
 
+	OperationalResponse joinMeeting(String meetingPublicId, String accountUserId);
+
 	OperationalResponse changeInviteeStatus(String meetingId, String email, String status);
 
 	CustomPageResponse<MeetingInviteeResponse> searchMeetingInvitee(String meetingId, String text, int pageNo,

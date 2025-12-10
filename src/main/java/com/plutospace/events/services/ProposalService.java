@@ -34,4 +34,7 @@ public interface ProposalService {
 	CustomPageResponse<ProposalSubmissionResponse> retrieveSubmittedProposals(String id, int pageNo, int pageSize);
 
 	OperationalResponse deleteProposal(String id);
+
+	List<ProposalSubmissionResponse> searchProposalSubmissions(String accountId, String proposalId, List<String> texts,
+			int pageNo, int pageSize);
 }

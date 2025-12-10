@@ -43,7 +43,10 @@ public class EventResponse {
 	private Boolean enableRegistration;
 	private Boolean enableWaitlist;
 	private Long attendeeSize;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime registrationCutOffTime;
+
 	private Boolean isPaidEvent;
 	private BigDecimal amount;
 	private String currency; // NGN, USD
@@ -58,6 +61,8 @@ public class EventResponse {
 	private String qAndALink;
 	private String pollsLink;
 	private String registrationLink;
+
+	private Boolean isCanceled;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdOn;

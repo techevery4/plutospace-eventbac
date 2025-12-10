@@ -120,4 +120,15 @@ public class ProposalApiResource {
 	public ResponseEntity<OperationalResponse> deleteProposal(@PathVariable String id) {
 		return ResponseEntity.ok(proposalService.deleteProposal(id));
 	}
+
+	@PostMapping(path = "/submissions/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through proposal submissions")
+	public ResponseEntity<List<ProposalSubmissionResponse>> searchProposalSubmissions(@RequestBody List<String> texts,
+			@RequestParam(name = "proposalId") String proposalId, @RequestParam(name = "pageNo") int pageNo,
+			@RequestParam(name = "pageSize") int pageSize) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity
+				.ok(proposalService.searchProposalSubmissions(accountId, proposalId, texts, pageNo, pageSize));
+	}
 }

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.plutospace.events.commons.entities.BaseEntity;
+import com.plutospace.events.domain.data.MeetingType;
 
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Meeting extends BaseEntity {
 
 	private String title;
 	private String accountId;
+	private MeetingType type;
 	private String description;
 	private LocalDateTime startTime;
 	private LocalDateTime endTime;

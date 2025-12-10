@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.domain.data.MeetingType;
 import com.plutospace.events.domain.data.request.CreateMeetingRequest;
 import com.plutospace.events.domain.data.response.MeetingResponse;
 import com.plutospace.events.domain.entities.Meeting;
@@ -17,19 +18,20 @@ import com.plutospace.events.domain.entities.Meeting;
 public class MeetingMapper {
 
 	public MeetingResponse toResponse(Meeting meeting) {
-		return MeetingResponse.instance(meeting.getId(), meeting.getTitle(), meeting.getAccountId(),
+		return MeetingResponse.instance(meeting.getId(), meeting.getTitle(), meeting.getAccountId(), meeting.getType(),
 				meeting.getDescription(), meeting.getStartTime(), meeting.getEndTime(), meeting.getTimezone(),
 				meeting.getMaximumParticipants(), meeting.getPublicId(), meeting.getMuteParticipantsOnEntry(),
 				meeting.getEnableWaitingRoom(), meeting.getCreatedOn());
 	}
 
 	public Meeting toEntity(CreateMeetingRequest createMeetingRequest, LocalDateTime startTime, LocalDateTime endTime) {
+		MeetingType type = MeetingType.fromValue(createMeetingRequest.getType());
 		Meeting.Timezone timezone = new Meeting.Timezone();
 		timezone.setRepresentation(createMeetingRequest.getTimezoneString());
 		timezone.setValue(createMeetingRequest.getTimezoneValue());
 
-		return Meeting.instance(createMeetingRequest.getTitle(), null, createMeetingRequest.getDescription(), startTime,
-				endTime, timezone, createMeetingRequest.getMaximumParticipants(), null,
+		return Meeting.instance(createMeetingRequest.getTitle(), null, type, createMeetingRequest.getDescription(),
+				startTime, endTime, timezone, createMeetingRequest.getMaximumParticipants(), null,
 				createMeetingRequest.getMuteParticipantsOnEntry(), createMeetingRequest.getEnableWaitingRoom());
 	}
 

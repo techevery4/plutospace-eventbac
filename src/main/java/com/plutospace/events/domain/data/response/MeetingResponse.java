@@ -4,6 +4,7 @@ package com.plutospace.events.domain.data.response;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.plutospace.events.domain.data.MeetingType;
 import com.plutospace.events.domain.entities.Meeting;
 
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ public class MeetingResponse {
 	private String id;
 	private String title;
 	private String accountId;
+	private MeetingType type;
 	private String description;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

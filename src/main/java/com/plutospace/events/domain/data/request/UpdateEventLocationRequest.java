@@ -1,0 +1,6 @@
+/* Developed by TechEveryWhere Engineering (C)2025 */
+package com.plutospace.events.domain.data.request;
+
+public record UpdateEventLocationRequest(String virtualRoomName, String street, String city, String state,
+		String country) {
+}

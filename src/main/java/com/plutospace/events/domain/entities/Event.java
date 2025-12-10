@@ -55,6 +55,8 @@ public class Event extends BaseEntity {
 	private String pollsLink;
 	private String registrationLink;
 
+	private Boolean isCanceled;
+
 	@Data
 	public static class Timezone {
 		private Integer value;

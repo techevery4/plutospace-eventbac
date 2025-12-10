@@ -1,12 +1,16 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.services.implementations;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,12 +23,12 @@ import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
+import com.plutospace.events.commons.utils.CurrencyManager;
 import com.plutospace.events.commons.utils.DateConverter;
 import com.plutospace.events.commons.utils.LinkGenerator;
 import com.plutospace.events.domain.data.LocationType;
-import com.plutospace.events.domain.data.request.CreateEventFormRequest;
-import com.plutospace.events.domain.data.request.CreateEventRequest;
-import com.plutospace.events.domain.data.request.CreateMeetingRequest;
+import com.plutospace.events.domain.data.MeetingType;
+import com.plutospace.events.domain.data.request.*;
 import com.plutospace.events.domain.data.response.*;
 import com.plutospace.events.domain.entities.Event;
 import com.plutospace.events.domain.entities.EventForm;
@@ -59,11 +63,12 @@ public class EventServiceImpl implements EventService {
 	private final LinkGenerator linkGenerator;
 	private final PropertyConstants propertyConstants;
 	private final DateConverter dateConverter;
+	private final CurrencyManager currencyManager;
 
 	@Transactional
 	@Override
 	public EventResponse createEvent(CreateEventRequest createEventRequest, String accountId) {
-		eventValidator.validate(createEventRequest);
+		eventValidator.validate(createEventRequest, dateConverter.getCurrentTimestamp());
 
 		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService
 				.retrieveEventCategory(List.of(createEventRequest.categoryId()));
@@ -73,6 +78,8 @@ public class EventServiceImpl implements EventService {
 				&& (createEventRequest.eventFormRequests() == null || createEventRequest.eventFormRequests().isEmpty()))
 			throw new GeneralPlatformDomainRuleException(
 					"Kindly customize your registration form for this event. It requires registration");
+		if (ObjectUtils.isNotEmpty(createEventRequest.isPaidEvent()) && createEventRequest.isPaidEvent())
+			currencyManager.checkCurrency(createEventRequest.currency());
 
 		Event event = eventMapper.toEntity(createEventRequest);
 		event.setAccountId(accountId);
@@ -92,7 +99,7 @@ public class EventServiceImpl implements EventService {
 				LocalDateTime startTime = dateConverter.convertTimestamp(event.getStartTime());
 				LocalDateTime endTime = dateConverter.convertTimestamp(event.getEndTime());
 				CreateMeetingRequest createMeetingRequest = new CreateMeetingRequest("Meeting for " + event.getName(),
-						event.getDescription(), event.getDate(), event.getDate(),
+						MeetingType.SCHEDULED.name(), event.getDescription(), event.getDate(), event.getDate(),
 						dateConverter.convertLocalDateTimeToTimestring(startTime),
 						dateConverter.convertLocalDateTimeToTimestring(endTime), createEventRequest.timezoneValue(),
 						createEventRequest.timezoneString(), false, null, GeneralConstants.EVENT_MEETING_PARTICIPANTS,
@@ -276,6 +283,232 @@ public class EventServiceImpl implements EventService {
 			return eventMapper.toResponse(event, eventCategoryResponses.get(0));
 		}
 		return null;
+	}
+
+	@Override
+	public EventResponse updateEvent(String id, UpdateEventRequest updateEventRequest) {
+		Event existingEvent = retrieveEventById(id);
+
+		if (StringUtils.isNotBlank(updateEventRequest.categoryId()))
+			existingEvent.setCategoryId(updateEventRequest.categoryId());
+		if (StringUtils.isNotBlank(updateEventRequest.name()))
+			existingEvent.setName(updateEventRequest.name());
+		if (StringUtils.isNotBlank(updateEventRequest.additionalInstructions()))
+			existingEvent.setAdditionalInstructions(updateEventRequest.additionalInstructions());
+		if (StringUtils.isNotBlank(updateEventRequest.description()))
+			existingEvent.setDescription(updateEventRequest.description());
+
+		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService
+				.retrieveEventCategory(List.of(existingEvent.getCategoryId()));
+		if (eventCategoryResponses.isEmpty())
+			throw new ResourceNotFoundException("Event Category Not Found");
+
+		try {
+			Event savedEvent = eventRepository.save(existingEvent);
+
+			return eventMapper.toResponse(savedEvent, eventCategoryResponses.get(0));
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public EventResponse updateEventTime(String id, UpdateEventTimeRequest updateEventTimeRequest) {
+		Event existingEvent = retrieveEventById(id);
+
+		if (StringUtils.isNotBlank(updateEventTimeRequest.timezoneString())
+				|| ObjectUtils.isNotEmpty(updateEventTimeRequest.timezoneValue())) {
+			if (StringUtils.isBlank(updateEventTimeRequest.timezoneString())
+					&& ObjectUtils.isEmpty(updateEventTimeRequest.timezoneValue()))
+				throw new GeneralPlatformDomainRuleException("Kindly update the timezone properly");
+
+			Event.Timezone timezone = new Event.Timezone();
+			timezone.setRepresentation(updateEventTimeRequest.timezoneString());
+			timezone.setValue(updateEventTimeRequest.timezoneValue());
+			existingEvent.setTimezone(timezone);
+		}
+		if (ObjectUtils.isNotEmpty(updateEventTimeRequest.date())) {
+			if (updateEventTimeRequest.date().isBefore(LocalDate.now())) {
+				throw new GeneralPlatformDomainRuleException("Date cannot be invalid");
+			}
+			existingEvent.setDate(updateEventTimeRequest.date());
+		}
+		if (ObjectUtils.isNotEmpty(updateEventTimeRequest.startTime())
+				|| ObjectUtils.isNotEmpty(updateEventTimeRequest.endTime())) {
+			existingEvent.setStartTime(ObjectUtils.isNotEmpty(updateEventTimeRequest.startTime())
+					? updateEventTimeRequest.startTime()
+					: existingEvent.getStartTime());
+			existingEvent.setEndTime(ObjectUtils.isNotEmpty(updateEventTimeRequest.endTime())
+					? updateEventTimeRequest.endTime()
+					: existingEvent.getEndTime());
+			if (ObjectUtils.isEmpty(existingEvent.getStartTime())
+					|| existingEvent.getStartTime() < dateConverter.getCurrentTimestamp()) {
+				throw new GeneralPlatformDomainRuleException("Start time cannot be empty");
+			}
+			if (ObjectUtils.isNotEmpty(existingEvent.getEndTime())
+					&& existingEvent.getStartTime() >= existingEvent.getEndTime()) {
+				throw new GeneralPlatformDomainRuleException("Start time cannot be greater than end time");
+			}
+		}
+
+		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService
+				.retrieveEventCategory(List.of(existingEvent.getCategoryId()));
+		if (eventCategoryResponses.isEmpty())
+			throw new ResourceNotFoundException("Event Category Not Found");
+
+		try {
+			Event savedEvent = eventRepository.save(existingEvent);
+
+			return eventMapper.toResponse(savedEvent, eventCategoryResponses.get(0));
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public EventResponse updateEventForm(String id, UpdateEventFormRequest updateEventFormRequest) {
+		Event existingEvent = retrieveEventById(id);
+
+		if (updateEventFormRequest.eventFormRequests().isEmpty())
+			throw new GeneralPlatformDomainRuleException("Kindly create at least one form field");
+		if (!existingEvent.getEnableRegistration())
+			throw new GeneralPlatformDomainRuleException("You cannot update form for this particular event");
+
+		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService
+				.retrieveEventCategory(List.of(existingEvent.getCategoryId()));
+		if (eventCategoryResponses.isEmpty())
+			throw new ResourceNotFoundException("Event Category Not Found");
+
+		try {
+			eventFormRepository.deleteAllByEventId(id);
+			createEventForms(updateEventFormRequest.eventFormRequests(), existingEvent.getId());
+
+			return eventMapper.toResponse(existingEvent, eventCategoryResponses.get(0));
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public EventResponse updateEventLocation(String id, UpdateEventLocationRequest updateEventLocationRequest) {
+		Event existingEvent = retrieveEventById(id);
+
+		if (StringUtils.isNotBlank(updateEventLocationRequest.virtualRoomName()))
+			existingEvent.setVirtualRoomName(updateEventLocationRequest.virtualRoomName());
+		if (StringUtils.isNotBlank(updateEventLocationRequest.street())
+				|| StringUtils.isNotBlank(updateEventLocationRequest.city())
+				|| StringUtils.isNotBlank(updateEventLocationRequest.state())
+				|| StringUtils.isNotBlank(updateEventLocationRequest.country())) {
+			if (StringUtils.isBlank(updateEventLocationRequest.street())
+					|| StringUtils.isBlank(updateEventLocationRequest.city())
+					|| StringUtils.isBlank(updateEventLocationRequest.state())
+					|| StringUtils.isBlank(updateEventLocationRequest.country()))
+				throw new GeneralPlatformDomainRuleException("Address is incomplete");
+
+			Event.PhysicalAddress physicalAddress = new Event.PhysicalAddress();
+			physicalAddress.setStreet(updateEventLocationRequest.street());
+			physicalAddress.setCity(updateEventLocationRequest.city());
+			physicalAddress.setState(updateEventLocationRequest.state());
+			physicalAddress.setCountry(updateEventLocationRequest.country());
+			existingEvent.setPhysicalAddress(physicalAddress);
+		}
+
+		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService
+				.retrieveEventCategory(List.of(existingEvent.getCategoryId()));
+		if (eventCategoryResponses.isEmpty())
+			throw new ResourceNotFoundException("Event Category Not Found");
+
+		try {
+			Event savedEvent = eventRepository.save(existingEvent);
+
+			return eventMapper.toResponse(savedEvent, eventCategoryResponses.get(0));
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public EventResponse updateEventBasicSettings(String id,
+			UpdateEventBasicSettingsRequest updateEventBasicSettingsRequest) {
+		Event existingEvent = retrieveEventById(id);
+
+		if (ObjectUtils.isNotEmpty(updateEventBasicSettingsRequest.requireApproval()))
+			existingEvent.setRequireApproval(updateEventBasicSettingsRequest.requireApproval());
+		if (ObjectUtils.isNotEmpty(updateEventBasicSettingsRequest.enableWaitlist()))
+			existingEvent.setEnableWaitlist(updateEventBasicSettingsRequest.enableWaitlist());
+		if (ObjectUtils.isNotEmpty(updateEventBasicSettingsRequest.attendeeSize()))
+			existingEvent.setAttendeeSize(updateEventBasicSettingsRequest.attendeeSize());
+		if (ObjectUtils.isNotEmpty(updateEventBasicSettingsRequest.registrationCutOffTime())) {
+			if (!existingEvent.getEnableRegistration())
+				throw new GeneralPlatformDomainRuleException(
+						"You cannot update registration cut-off time for this event");
+			if (updateEventBasicSettingsRequest.registrationCutOffTime()
+					.isAfter(existingEvent.getDate().atStartOfDay()))
+				throw new GeneralPlatformDomainRuleException("Registration cut off time is invalid");
+			existingEvent.setRegistrationCutOffTime(updateEventBasicSettingsRequest.registrationCutOffTime());
+		}
+		if (StringUtils.isNotBlank(updateEventBasicSettingsRequest.confirmationMessage()))
+			existingEvent.setConfirmationMessage(updateEventBasicSettingsRequest.confirmationMessage());
+		if (StringUtils.isNotBlank(updateEventBasicSettingsRequest.termsAndConditions()))
+			existingEvent.setTermsAndConditions(updateEventBasicSettingsRequest.termsAndConditions());
+		if (ObjectUtils.isNotEmpty(updateEventBasicSettingsRequest.sendReminder())) {
+			if (updateEventBasicSettingsRequest.sendReminder()
+					&& ObjectUtils.isEmpty(updateEventBasicSettingsRequest.reminderHour()))
+				throw new GeneralPlatformDomainRuleException("Reminder hour cannot be empty");
+			if (updateEventBasicSettingsRequest.reminderHour() <= 0)
+				throw new GeneralPlatformDomainRuleException("Reminder hour cannot be invalid");
+			existingEvent.setSendReminder(updateEventBasicSettingsRequest.sendReminder());
+			existingEvent.setReminderHour(updateEventBasicSettingsRequest.reminderHour());
+		}
+		if (StringUtils.isNotBlank(updateEventBasicSettingsRequest.logo()))
+			existingEvent.setLogo(updateEventBasicSettingsRequest.logo());
+		if (StringUtils.isNotBlank(updateEventBasicSettingsRequest.thumbnail()))
+			existingEvent.setThumbnail(updateEventBasicSettingsRequest.thumbnail());
+
+		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService
+				.retrieveEventCategory(List.of(existingEvent.getCategoryId()));
+		if (eventCategoryResponses.isEmpty())
+			throw new ResourceNotFoundException("Event Category Not Found");
+
+		try {
+			Event savedEvent = eventRepository.save(existingEvent);
+
+			return eventMapper.toResponse(savedEvent, eventCategoryResponses.get(0));
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public EventResponse updateEventPaymentDetails(String id,
+			UpdateEventPaymentSettingsRequest updateEventPaymentSettingsRequest) {
+		Event existingEvent = retrieveEventById(id);
+
+		if (ObjectUtils.isEmpty(updateEventPaymentSettingsRequest.isPaidEvent()))
+			throw new GeneralPlatformDomainRuleException("Please specify whether it is a paid event or not");
+		existingEvent.setIsPaidEvent(updateEventPaymentSettingsRequest.isPaidEvent());
+		if (existingEvent.getIsPaidEvent()) {
+			if (ObjectUtils.isEmpty(updateEventPaymentSettingsRequest.amount()))
+				throw new GeneralPlatformDomainRuleException("Amount cannot be empty");
+			if (updateEventPaymentSettingsRequest.amount().compareTo(BigDecimal.ZERO) <= 0)
+				throw new GeneralPlatformDomainRuleException("Amount cannot be invalid");
+			currencyManager.checkCurrency(updateEventPaymentSettingsRequest.currency());
+			existingEvent.setCurrency(updateEventPaymentSettingsRequest.currency());
+			existingEvent.setAmount(updateEventPaymentSettingsRequest.amount());
+		}
+
+		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService
+				.retrieveEventCategory(List.of(existingEvent.getCategoryId()));
+		if (eventCategoryResponses.isEmpty())
+			throw new ResourceNotFoundException("Event Category Not Found");
+
+		try {
+			Event savedEvent = eventRepository.save(existingEvent);
+
+			return eventMapper.toResponse(savedEvent, eventCategoryResponses.get(0));
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
 	}
 
 	private Event retrieveEventById(String id) {

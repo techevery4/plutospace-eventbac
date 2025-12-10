@@ -4,6 +4,7 @@ package com.plutospace.events.commons.utils;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -59,5 +60,9 @@ public class DateConverter {
 
 	public String convertLocalDateTimeToTimestring(LocalDateTime localDateTime) {
 		return localDateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+	}
+
+	public Long getCurrentTimestamp() {
+		return new Date().getTime();
 	}
 }

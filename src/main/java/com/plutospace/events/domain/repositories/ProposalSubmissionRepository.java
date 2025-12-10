@@ -1,6 +1,8 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.domain.repositories;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -13,4 +15,6 @@ public interface ProposalSubmissionRepository extends BaseRepository<ProposalSub
 	Page<ProposalSubmission> findByProposalIdOrderByCreatedOnDesc(String proposalId, Pageable pageable);
 
 	void deleteByProposalId(String proposalId);
+
+	List<ProposalSubmission> findByIdIn(List<String> proposalSubmissionIds);
 }

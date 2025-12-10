@@ -62,13 +62,14 @@ public class MeetingApiResource {
 
 	@GetMapping(path = "/upcoming", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint retrieves upcoming meetings between specified dates")
-	public ResponseEntity<CustomPageResponse<MeetingResponse>> retrieveUpcomingMeetingsBetween(
-			@RequestParam(name = "startTime") Long startTime, @RequestParam(name = "endTime") Long endTime,
-			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+	public ResponseEntity<List<MeetingResponse>> retrieveUpcomingMeetingsBetween(
+			@RequestParam(name = "startTime") Long startTime, @RequestParam(name = "endTime") Long endTime) {
 		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
+		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
 		return ResponseEntity
-				.ok(meetingService.retrieveUpcomingMeetingsBetween(accountId, startTime, endTime, pageNo, pageSize));
+				.ok(meetingService.retrieveUpcomingMeetingsBetween(accountId, accountUserId, startTime, endTime));
 	}
 
 	@PostMapping(path = "/bulk-ids", produces = MediaType.APPLICATION_JSON_VALUE)

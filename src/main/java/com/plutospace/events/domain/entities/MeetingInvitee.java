@@ -18,9 +18,8 @@ import lombok.*;
 public class MeetingInvitee extends BaseEntity {
 
 	private String meetingId;
-	private String firstName;
-	private String lastName;
-	private String email;
+	private LocalDateTime meetingStartTime;
+	private String email; // user email on plutospace events
 	private MeetingAcceptanceStatus meetingAcceptanceStatus;
 	private LocalDateTime lastStatusTime;
 }

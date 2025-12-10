@@ -4,6 +4,7 @@ package com.plutospace.events.services.implementations;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,10 +21,14 @@ import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.DateConverter;
 import com.plutospace.events.commons.utils.LinkGenerator;
 import com.plutospace.events.domain.data.request.CreateMeetingRequest;
+import com.plutospace.events.domain.data.response.AccountUserResponse;
 import com.plutospace.events.domain.data.response.MeetingResponse;
 import com.plutospace.events.domain.entities.Meeting;
+import com.plutospace.events.domain.entities.MeetingInvitee;
+import com.plutospace.events.domain.repositories.MeetingInviteeRepository;
 import com.plutospace.events.domain.repositories.MeetingRepository;
 import com.plutospace.events.intelligence.search.DatabaseSearchService;
+import com.plutospace.events.services.AccountUserService;
 import com.plutospace.events.services.MeetingService;
 import com.plutospace.events.services.mappers.MeetingMapper;
 import com.plutospace.events.validation.MeetingValidator;
@@ -37,6 +42,8 @@ import lombok.extern.slf4j.Slf4j;
 public class MeetingServiceImpl implements MeetingService {
 
 	private final MeetingRepository meetingRepository;
+	private final MeetingInviteeRepository meetingInviteeRepository;
+	private final AccountUserService accountUserService;
 	private final DatabaseSearchService databaseSearchService;
 	private final MeetingMapper meetingMapper;
 	private final MeetingValidator meetingValidator;
@@ -149,16 +156,26 @@ public class MeetingServiceImpl implements MeetingService {
 	}
 
 	@Override
-	public CustomPageResponse<MeetingResponse> retrieveUpcomingMeetingsBetween(String accountId, Long startTime,
-			Long endTime, int pageNo, int pageSize) {
+	public List<MeetingResponse> retrieveUpcomingMeetingsBetween(String accountId, String accountUserId, Long startTime,
+			Long endTime) {
+		AccountUserResponse accountUserResponse = accountUserService.retrieveAccountUser(accountUserId);
 		LocalDateTime startDate = dateConverter.convertTimestamp(startTime);
 		LocalDateTime endDate = dateConverter.convertTimestamp(endTime);
 
-		Pageable pageable = PageRequest.of(pageNo, pageSize);
-		Page<Meeting> meetings = meetingRepository.findByAccountIdAndCreatedOnBetweenOrderByStartTimeAsc(accountId,
-				startDate, endDate, pageable);
+		List<Meeting> meetings = meetingRepository.findByAccountIdAndStartTimeBetweenOrderByStartTimeAsc(accountId,
+				startDate, endDate);
+		List<MeetingInvitee> meetingInvitees = meetingInviteeRepository
+				.findByEmailIgnoreCaseAndMeetingStartTimeBetweenOrderByMeetingStartTimeAsc(
+						accountUserResponse.getEmail(), startDate, endDate);
+		if (!meetingInvitees.isEmpty()) {
+			List<String> inviteeMeetingIds = meetingInvitees.stream().map(MeetingInvitee::getMeetingId).toList();
+			List<Meeting> inviteeMeetings = meetingRepository.findByIdIn(inviteeMeetingIds);
+			meetings.addAll(inviteeMeetings);
+		}
 
-		return meetingMapper.toPagedResponse(meetings);
+		meetings.sort(Comparator.comparing(Meeting::getStartTime));
+
+		return meetings.stream().map(meetingMapper::toResponse).toList();
 	}
 
 	@Override

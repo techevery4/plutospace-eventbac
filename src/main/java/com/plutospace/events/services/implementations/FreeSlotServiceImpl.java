@@ -19,6 +19,7 @@ import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleExceptio
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.DateConverter;
 import com.plutospace.events.commons.utils.LinkGenerator;
+import com.plutospace.events.domain.data.MeetingType;
 import com.plutospace.events.domain.data.request.BookFreeSlotRequest;
 import com.plutospace.events.domain.data.request.CreateMeetingInviteRequest;
 import com.plutospace.events.domain.data.request.CreateMeetingRequest;
@@ -153,8 +154,8 @@ public class FreeSlotServiceImpl implements FreeSlotService {
 			throw new GeneralPlatformDomainRuleException("Slot no longer available");
 
 		// Creating a meeting
-		CreateMeetingRequest createMeetingRequest = new CreateMeetingRequest(existingFreeSlot.getTitle(), null,
-				existingFreeSlot.getDate(), existingFreeSlot.getDate(),
+		CreateMeetingRequest createMeetingRequest = new CreateMeetingRequest(existingFreeSlot.getTitle(),
+				MeetingType.SCHEDULED.name(), null, existingFreeSlot.getDate(), existingFreeSlot.getDate(),
 				dateConverter.convertLocalDateTimeToTimestring(existingFreeSlot.getStartTime()),
 				dateConverter.convertLocalDateTimeToTimestring(existingFreeSlot.getEndTime()),
 				existingFreeSlot.getTimezone().getValue(), existingFreeSlot.getTimezone().getRepresentation(), false,
@@ -191,8 +192,6 @@ public class FreeSlotServiceImpl implements FreeSlotService {
 		CreateMeetingInviteRequest createMeetingInviteRequest = new CreateMeetingInviteRequest();
 		CreateMeetingInviteRequest.Invitee invitee = new CreateMeetingInviteRequest.Invitee();
 		invitee.setEmail(bookFreeSlotRequest.email());
-		invitee.setLastName(bookFreeSlotRequest.lastName());
-		invitee.setFirstName(bookFreeSlotRequest.firstName());
 		createMeetingInviteRequest.setInvitees(List.of(invitee));
 		createMeetingInviteRequest.setMeetingId(meetingResponse.getId());
 		return createMeetingInviteRequest;

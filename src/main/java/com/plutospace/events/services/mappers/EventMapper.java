@@ -30,7 +30,7 @@ public class EventMapper {
 				event.getIsPaidEvent(), event.getAmount(), event.getCurrency(), event.getConfirmationMessage(),
 				event.getTermsAndConditions(), event.getSendReminder(), event.getReminderHour(), event.getLogo(),
 				event.getThumbnail(), event.getMeetingLink(), event.getQAndALink(), event.getPollsLink(),
-				event.getRegistrationLink(), event.getCreatedOn());
+				event.getRegistrationLink(), event.getIsCanceled(), event.getCreatedOn());
 	}
 
 	public Event toEntity(CreateEventRequest createEventRequest) {
@@ -58,7 +58,7 @@ public class EventMapper {
 				createEventRequest.amount(), createEventRequest.currency(), createEventRequest.confirmationMessage(),
 				createEventRequest.termsAndConditions(), createEventRequest.sendReminder(),
 				createEventRequest.reminderHour(), createEventRequest.logo(), createEventRequest.thumbnail(), null,
-				null, null, null);
+				null, null, null, false);
 	}
 
 	public CustomPageResponse<EventResponse> toPagedResponse(Page<Event> events,

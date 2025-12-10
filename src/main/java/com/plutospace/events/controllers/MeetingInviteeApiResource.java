@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.commons.definitions.GeneralConstants;
+import com.plutospace.events.commons.definitions.PropertyConstants;
+import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.request.CreateMeetingInviteRequest;
 import com.plutospace.events.domain.data.response.MeetingInviteeResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
@@ -13,6 +16,7 @@ import com.plutospace.events.services.MeetingInviteeService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
@@ -24,6 +28,9 @@ import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
 public class MeetingInviteeApiResource {
 
 	private final MeetingInviteeService meetingInviteeService;
+	private final SecurityMapper securityMapper;
+	private final PropertyConstants propertyConstants;
+	private final HttpServletRequest request;
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint creates meeting invites")
@@ -60,5 +67,13 @@ public class MeetingInviteeApiResource {
 			@PathVariable String meetingId, @RequestParam(name = "text") String text,
 			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(meetingInviteeService.searchMeetingInvitee(meetingId, text, pageNo, pageSize));
+	}
+
+	@GetMapping(path = "/join", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint allows invitee to join a meeting")
+	public ResponseEntity<OperationalResponse> joinMeeting(@RequestParam(name = "pid") String pid) {
+		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(meetingInviteeService.joinMeeting(pid, accountUserId));
 	}
 }

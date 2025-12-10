@@ -13,7 +13,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.utils.SecurityMapper;
-import com.plutospace.events.domain.data.request.CreateEventRequest;
+import com.plutospace.events.domain.data.request.*;
 import com.plutospace.events.domain.data.response.EventFormResponse;
 import com.plutospace.events.domain.data.response.EventResponse;
 import com.plutospace.events.services.EventService;
@@ -86,5 +86,52 @@ public class EventApiResource {
 		String id = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
 		return ResponseEntity.ok(eventService.searchEvent(id, text, pageNo, pageSize));
+	}
+
+	@PutMapping(path = RESOURCE_ID, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint updates an event on PlutoSpace Events")
+	public ResponseEntity<EventResponse> updateEvent(@PathVariable String id,
+			@RequestBody UpdateEventRequest updateEventRequest) {
+		return ResponseEntity.ok(eventService.updateEvent(id, updateEventRequest));
+	}
+
+	@PutMapping(path = RESOURCE_ID
+			+ "/time", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint updates an event time on PlutoSpace Events")
+	public ResponseEntity<EventResponse> updateEventTime(@PathVariable String id,
+			@RequestBody UpdateEventTimeRequest updateEventTimeRequest) {
+		return ResponseEntity.ok(eventService.updateEventTime(id, updateEventTimeRequest));
+	}
+
+	@PutMapping(path = RESOURCE_ID
+			+ "/form", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint updates an event form on PlutoSpace Events")
+	public ResponseEntity<EventResponse> updateEventForm(@PathVariable String id,
+			@RequestBody UpdateEventFormRequest updateEventFormRequest) {
+		return ResponseEntity.ok(eventService.updateEventForm(id, updateEventFormRequest));
+	}
+
+	@PutMapping(path = RESOURCE_ID
+			+ "/location", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint updates an event location on PlutoSpace Events")
+	public ResponseEntity<EventResponse> updateEventLocation(@PathVariable String id,
+			@RequestBody UpdateEventLocationRequest updateEventLocationRequest) {
+		return ResponseEntity.ok(eventService.updateEventLocation(id, updateEventLocationRequest));
+	}
+
+	@PutMapping(path = RESOURCE_ID
+			+ "/basic-settings", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint updates an event basic settings on PlutoSpace Events")
+	public ResponseEntity<EventResponse> updateEventBasicSettings(@PathVariable String id,
+			@RequestBody UpdateEventBasicSettingsRequest updateEventBasicSettingsRequest) {
+		return ResponseEntity.ok(eventService.updateEventBasicSettings(id, updateEventBasicSettingsRequest));
+	}
+
+	@PutMapping(path = RESOURCE_ID
+			+ "/payment", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint updates an event payment details on PlutoSpace Events")
+	public ResponseEntity<EventResponse> updateEventPaymentDetails(@PathVariable String id,
+			@RequestBody UpdateEventPaymentSettingsRequest updateEventPaymentSettingsRequest) {
+		return ResponseEntity.ok(eventService.updateEventPaymentDetails(id, updateEventPaymentSettingsRequest));
 	}
 }

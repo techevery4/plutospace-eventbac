@@ -4,7 +4,7 @@ package com.plutospace.events.services;
 import java.util.List;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
-import com.plutospace.events.domain.data.request.CreateEventRequest;
+import com.plutospace.events.domain.data.request.*;
 import com.plutospace.events.domain.data.response.EventFormResponse;
 import com.plutospace.events.domain.data.response.EventResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
@@ -32,4 +32,17 @@ public interface EventService {
 	OperationalResponse removePollFromEvent(String id);
 
 	EventResponse retrieveEventByForeignPublicId(String publicId, int type);
+
+	EventResponse updateEvent(String id, UpdateEventRequest updateEventRequest);
+
+	EventResponse updateEventTime(String id, UpdateEventTimeRequest updateEventTimeRequest);
+
+	EventResponse updateEventForm(String id, UpdateEventFormRequest updateEventFormRequest);
+
+	EventResponse updateEventLocation(String id, UpdateEventLocationRequest updateEventLocationRequest);
+
+	EventResponse updateEventBasicSettings(String id, UpdateEventBasicSettingsRequest updateEventBasicSettingsRequest);
+
+	EventResponse updateEventPaymentDetails(String id,
+			UpdateEventPaymentSettingsRequest updateEventPaymentSettingsRequest);
 }

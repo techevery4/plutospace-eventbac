@@ -21,6 +21,6 @@ public interface MeetingRepository extends BaseRepository<Meeting, String> {
 	Page<Meeting> findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(String accountId, LocalDateTime startDate,
 			LocalDateTime endDate, Pageable pageable);
 
-	Page<Meeting> findByAccountIdAndCreatedOnBetweenOrderByStartTimeAsc(String accountId, LocalDateTime startDate,
-			LocalDateTime endDate, Pageable pageable);
+	List<Meeting> findByAccountIdAndStartTimeBetweenOrderByStartTimeAsc(String accountId, LocalDateTime startDate,
+			LocalDateTime endDate);
 }

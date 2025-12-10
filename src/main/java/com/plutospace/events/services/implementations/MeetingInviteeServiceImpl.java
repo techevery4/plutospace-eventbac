@@ -60,8 +60,8 @@ public class MeetingInviteeServiceImpl implements MeetingInviteeService {
 				throw new GeneralPlatformDomainRuleException(
 						invitee.getEmail() + " already sent an invite to this meeting");
 
-			MeetingInvitee meetingInvitee = meetingInviteeMapper.toEntity(invitee.getFirstName(), invitee.getLastName(),
-					invitee.getEmail(), createMeetingInviteRequest.getMeetingId());
+			MeetingInvitee meetingInvitee = meetingInviteeMapper.toEntity(invitee.getEmail(),
+					createMeetingInviteRequest.getMeetingId(), meetingResponse.getStartTime());
 			meetingInvitees.add(meetingInvitee);
 			emailMaps.putIfAbsent(invitee.getEmail(), invitee.getEmail());
 		}
@@ -104,6 +104,19 @@ public class MeetingInviteeServiceImpl implements MeetingInviteeService {
 	}
 
 	@Override
+	public OperationalResponse joinMeeting(String meetingPublicId, String accountUserId) {
+		AccountUserResponse accountUserResponse = accountUserService.retrieveAccountUser(accountUserId);
+		MeetingResponse meetingResponse = meetingService.retrieveMeetingByPublicId(meetingPublicId);
+
+		if (!meetingInviteeRepository.existsByMeetingIdAndEmailIgnoreCase(meetingResponse.getId(),
+				accountUserResponse.getEmail()))
+			throw new GeneralPlatformDomainRuleException(
+					"You were not invited to this meeting. Please meet the organizer");
+
+		return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+	}
+
+	@Override
 	public OperationalResponse changeInviteeStatus(String meetingId, String email, String status) {
 		MeetingInvitee meetingInvitee = meetingInviteeRepository.findByMeetingIdAndEmailIgnoreCase(meetingId, email);
 		if (meetingInvitee == null)
@@ -131,7 +144,7 @@ public class MeetingInviteeServiceImpl implements MeetingInviteeService {
 			int pageSize) {
 		Pageable pageable = PageRequest.of(pageNo, pageSize);
 
-		List<String> fields = List.of("firstName", "lastName", "email", "meetingAcceptanceStatus");
+		List<String> fields = List.of("email", "meetingAcceptanceStatus");
 		Page<MeetingInvitee> meetingInvitees = databaseSearchService.findMeetingInviteeByDynamicFilter(meetingId, text,
 				fields, pageable);
 		if (meetingInvitees.getTotalElements() == 0)

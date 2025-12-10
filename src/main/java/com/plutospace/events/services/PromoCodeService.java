@@ -27,4 +27,7 @@ public interface PromoCodeService {
 	OperationalResponse markAsNotSettled(String registrationLogId);
 
 	CustomPageResponse<PromoCodeResponse> searchPromoCodes(String text, int pageNo, int pageSize);
+
+	CustomPageResponse<PromoCodeRegistrationLogResponse> searchPromoCodeRegistrationLogs(String text, String code,
+			int pageNo, int pageSize);
 }

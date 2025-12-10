@@ -81,4 +81,12 @@ public class PromoCodeApiResource {
 			@RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(promoCodeService.searchPromoCodes(text, pageNo, pageSize));
 	}
+
+	@GetMapping(path = "/logs/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint searches through promo code registration logs")
+	public ResponseEntity<CustomPageResponse<PromoCodeRegistrationLogResponse>> searchPromoCodeRegistrationLogs(
+			@RequestParam(name = "text") String text, @RequestParam(name = "code") String code,
+			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
+		return ResponseEntity.ok(promoCodeService.searchPromoCodeRegistrationLogs(text, code, pageNo, pageSize));
+	}
 }

@@ -17,8 +17,6 @@ public class CreateMeetingInviteRequest {
 
 	@Data
 	public static class Invitee {
-		private String firstName;
-		private String lastName;
 		private String email;
 	}
 }

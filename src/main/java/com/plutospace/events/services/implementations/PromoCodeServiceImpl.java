@@ -25,6 +25,7 @@ import com.plutospace.events.domain.entities.*;
 import com.plutospace.events.domain.repositories.PromoCodeRegistrationLogRepository;
 import com.plutospace.events.domain.repositories.PromoCodeRepository;
 import com.plutospace.events.intelligence.search.DatabaseSearchService;
+import com.plutospace.events.services.AccountUserService;
 import com.plutospace.events.services.AdminUserService;
 import com.plutospace.events.services.PromoCodeService;
 import com.plutospace.events.services.mappers.PromoCodeMapper;
@@ -42,6 +43,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
 	private final PromoCodeRegistrationLogRepository promoCodeRegistrationLogRepository;
 	private final DatabaseSearchService databaseSearchService;
 	private final AdminUserService adminUserService;
+	private final AccountUserService accountUserService;
 	private final PromoCodeMapper promoCodeMapper;
 	private final PromoCodeValidator promoCodeValidator;
 
@@ -110,6 +112,14 @@ public class PromoCodeServiceImpl implements PromoCodeService {
 
 	@Override
 	public OperationalResponse registerWithPromoCode(RegisterWithPromoCodeRequest registerWithPromoCodeRequest) {
+		List<AccountUserResponse> accountUserResponses = accountUserService
+				.retrieveAccountUserByEmail(List.of(registerWithPromoCodeRequest.userEmail()));
+		if (accountUserResponses.isEmpty())
+			throw new GeneralPlatformDomainRuleException("This user is invalid");
+		AccountResponse accountResponse = accountUserService
+				.retrieveMyAccount(accountUserResponses.get(0).getAccountId());
+		if (!registerWithPromoCodeRequest.planId().equals(accountResponse.getPlanId()))
+			throw new GeneralPlatformDomainRuleException("You did not purchase this plan");
 		PromoCodeRegistrationLog promoCodeRegistrationLog = promoCodeMapper.toEntity(registerWithPromoCodeRequest);
 
 		try {
@@ -196,6 +206,28 @@ public class PromoCodeServiceImpl implements PromoCodeService {
 		}
 
 		return promoCodeMapper.toPagedResponse(adminUserResponseMap, promoCodes);
+	}
+
+	@Override
+	public CustomPageResponse<PromoCodeRegistrationLogResponse> searchPromoCodeRegistrationLogs(String text,
+			String code, int pageNo, int pageSize) {
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+		List<String> fields = List.of("userEmail", "userPaidAmount");
+		Page<PromoCodeRegistrationLog> promoCodeRegistrationLogs = databaseSearchService
+				.findPromoCodeRegistrationLogByDynamicFilter(code, text, fields, pageable);
+		if (promoCodeRegistrationLogs.getTotalElements() == 0)
+			return new CustomPageResponse<>();
+
+		List<String> adminUserIds = promoCodeRegistrationLogs.getContent().stream()
+				.map(PromoCodeRegistrationLog::getUpdatedBy).toList();
+		List<AdminUserResponse> adminUserResponses = adminUserService.retrieveAdminUser(adminUserIds);
+		Map<String, AdminUserResponse> adminUserResponseMap = new HashMap<>();
+		for (AdminUserResponse adminUserResponse : adminUserResponses) {
+			adminUserResponseMap.putIfAbsent(adminUserResponse.getId(), adminUserResponse);
+		}
+
+		return promoCodeMapper.toPagedResponse(promoCodeRegistrationLogs, adminUserResponseMap);
 	}
 
 	private PromoCode retrievePromoCodeById(String id) {

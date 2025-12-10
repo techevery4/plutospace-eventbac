@@ -17,8 +17,10 @@ public class MeetingInviteeResponse {
 
 	private String id;
 	private String meetingId;
-	private String firstName;
-	private String lastName;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime meetingStartTime;
+
 	private String email;
 	private AccountUserResponse accountUserResponse;
 	private MeetingAcceptanceStatus meetingAcceptanceStatus;

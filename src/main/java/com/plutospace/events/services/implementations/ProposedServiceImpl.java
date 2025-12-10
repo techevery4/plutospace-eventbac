@@ -9,13 +9,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
+import com.plutospace.events.commons.exception.GeneralPlatformServiceException;
 import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
+import com.plutospace.events.commons.utils.DocumentManager;
 import com.plutospace.events.commons.utils.LinkGenerator;
 import com.plutospace.events.domain.data.request.CreateProposalRequest;
 import com.plutospace.events.domain.data.request.CreateProposalSubmissionRequest;
@@ -24,8 +27,11 @@ import com.plutospace.events.domain.data.response.ProposalResponse;
 import com.plutospace.events.domain.data.response.ProposalSubmissionResponse;
 import com.plutospace.events.domain.entities.Proposal;
 import com.plutospace.events.domain.entities.ProposalSubmission;
+import com.plutospace.events.domain.entities.ProposalSubmissionData;
 import com.plutospace.events.domain.repositories.ProposalRepository;
+import com.plutospace.events.domain.repositories.ProposalSubmissionDataRepository;
 import com.plutospace.events.domain.repositories.ProposalSubmissionRepository;
+import com.plutospace.events.domain.repositories.ProposalSubmissionSearchRepository;
 import com.plutospace.events.services.ProposalService;
 import com.plutospace.events.services.mappers.ProposalMapper;
 import com.plutospace.events.validation.ProposalValidator;
@@ -40,10 +46,13 @@ public class ProposedServiceImpl implements ProposalService {
 
 	private final ProposalRepository proposalRepository;
 	private final ProposalSubmissionRepository proposalSubmissionRepository;
+	private final ProposalSubmissionDataRepository proposalSubmissionDataRepository;
+	private final ProposalSubmissionSearchRepository proposalSubmissionSearchRepository;
 	private final ProposalMapper proposalMapper;
 	private final ProposalValidator proposalValidator;
 	private final LinkGenerator linkGenerator;
 	private final PropertyConstants propertyConstants;
+	private final DocumentManager documentManager;
 
 	@Override
 	public ProposalResponse createProposal(CreateProposalRequest createProposalRequest, String accountId) {
@@ -159,6 +168,7 @@ public class ProposedServiceImpl implements ProposalService {
 		return proposalMapper.toResponse(proposal);
 	}
 
+	@Transactional
 	@Override
 	public OperationalResponse submitProposal(CreateProposalSubmissionRequest createProposalSubmissionRequest,
 			String publicId) {
@@ -175,11 +185,21 @@ public class ProposedServiceImpl implements ProposalService {
 				proposal.getId());
 
 		try {
-			proposalSubmissionRepository.save(proposalSubmission);
+			DocumentManager.TikaResult tikaResult = documentManager
+					.extractContentAndMetadata(proposalSubmission.getMediaUrl());
+			ProposalSubmission savedProposalSubmission = proposalSubmissionRepository.save(proposalSubmission);
+			ProposalSubmissionData proposalSubmissionData = new ProposalSubmissionData();
+			proposalSubmissionData.setProposalId(savedProposalSubmission.getProposalId());
+			proposalSubmissionData.setProposalSubmissionId(savedProposalSubmission.getId());
+			proposalSubmissionData.setContent(tikaResult.getContent());
+			proposalSubmissionDataRepository.save(proposalSubmissionData);
 
 			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
 		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		} catch (Exception e) {
+			throw new GeneralPlatformServiceException(
+					"There is an issue processing your proposal submission at the moment. Please try again later");
 		}
 	}
 
@@ -209,6 +229,29 @@ public class ProposedServiceImpl implements ProposalService {
 		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityViolationException(e.getLocalizedMessage());
 		}
+	}
+
+	@Override
+	public List<ProposalSubmissionResponse> searchProposalSubmissions(String accountId, String proposalId,
+			List<String> texts, int pageNo, int pageSize) {
+		if (pageSize > 30)
+			throw new GeneralPlatformDomainRuleException("Kindly reduce page size");
+		if (texts.isEmpty())
+			throw new GeneralPlatformDomainRuleException("Please provide search texts");
+		Proposal existingProposal = retrieveProposalById(proposalId);
+		if (!accountId.equals(existingProposal.getAccountId()))
+			throw new GeneralPlatformServiceException("This action is not allowed");
+
+		List<ProposalSubmissionData> proposalSubmissionData = proposalSubmissionSearchRepository
+				.searchMultipleSubstringsIgnoreCaseByProposalId(texts, existingProposal.getId(), pageNo, pageSize);
+		if (proposalSubmissionData.isEmpty())
+			return new ArrayList<>();
+
+		List<String> proposalSubmissionIds = proposalSubmissionData.stream()
+				.map(ProposalSubmissionData::getProposalSubmissionId).toList();
+		List<ProposalSubmission> proposalSubmissions = proposalSubmissionRepository.findByIdIn(proposalSubmissionIds);
+
+		return proposalSubmissions.stream().map(proposalMapper::toResponse).toList();
 	}
 
 	private Proposal retrieveProposalById(String id) {

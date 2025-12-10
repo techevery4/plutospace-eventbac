@@ -11,4 +11,6 @@ import com.plutospace.events.domain.entities.EventForm;
 @Repository
 public interface EventFormRepository extends BaseRepository<EventForm, String> {
 	Page<EventForm> findByEventId(String eventId, Pageable pageable);
+
+	void deleteAllByEventId(String id);
 }

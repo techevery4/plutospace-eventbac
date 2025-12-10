@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class CreateMeetingRequest {
 
 	private String title;
+	private String type;
 	private String description;
 	private LocalDate startDate;
 	private LocalDate endDate;
