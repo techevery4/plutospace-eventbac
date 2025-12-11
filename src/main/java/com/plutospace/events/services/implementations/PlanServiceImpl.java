@@ -3,6 +3,7 @@ package com.plutospace.events.services.implementations;
 
 import java.util.List;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
+import com.plutospace.events.commons.exception.GeneralPlatformServiceException;
 import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.domain.data.PlanType;
@@ -38,13 +40,18 @@ public class PlanServiceImpl implements PlanService {
 	private final PlanRepository planRepository;
 	private final PlanMapper planMapper;
 	private final DatabaseSearchService databaseSearchService;
+	private static final String PLAN_EXISTS = "Plan already exists";
 
 	@Override
 	public PlanResponse createPlan(PlanRequest request) {
 		planValidator.validate(request);
 		Plan plan = planMapper.toEntity(request);
 		if (planRepository.existsByNameIgnoreCase(request.getName()))
-			throw new ResourceAlreadyExistsException("Plan already exists");
+			throw new ResourceAlreadyExistsException(PLAN_EXISTS);
+		if (planRepository.existsByTypeAndPriceNaira(plan.getType(), request.getPriceNaira()))
+			throw new ResourceAlreadyExistsException(PLAN_EXISTS);
+		if (planRepository.existsByTypeAndPriceUsd(plan.getType(), request.getPriceUsd()))
+			throw new ResourceAlreadyExistsException(PLAN_EXISTS);
 
 		try {
 			Plan saved = planRepository.save(plan);
@@ -59,11 +66,31 @@ public class PlanServiceImpl implements PlanService {
 	public PlanResponse updatePlan(PlanRequest request, String id) {
 		planValidator.validate(request);
 		Plan plan = retrievePlanById(id);
+
+		if (StringUtils.isNotBlank(request.getType())) {
+			PlanType planType = PlanType.fromValue(request.getType());
+			plan.setType(planType);
+		}
 		if (StringUtils.isNotBlank(request.getName())) {
 			Plan checkPlan = planRepository.findByNameIgnoreCase(request.getName());
 			if (!checkPlan.getId().equals(id))
-				throw new ResourceAlreadyExistsException("Plan already exists");
+				throw new ResourceAlreadyExistsException(PLAN_EXISTS);
+			plan.setName(request.getName());
 		}
+		if (ObjectUtils.isNotEmpty(request.getPriceNaira())) {
+			Plan checkPlan = planRepository.findByTypeAndPriceNaira(plan.getType(), request.getPriceNaira());
+			if (!checkPlan.getId().equals(id))
+				throw new ResourceAlreadyExistsException(PLAN_EXISTS);
+			plan.setPriceNaira(request.getPriceNaira());
+		}
+		if (ObjectUtils.isNotEmpty(request.getPriceUsd())) {
+			Plan checkPlan = planRepository.findByTypeAndPriceUsd(plan.getType(), request.getPriceUsd());
+			if (!checkPlan.getId().equals(id))
+				throw new ResourceAlreadyExistsException(PLAN_EXISTS);
+			plan.setPriceUsd(request.getPriceUsd());
+		}
+		if (ObjectUtils.isNotEmpty(request.getFeatures()))
+			plan.setFeatures(request.getFeatures());
 
 		try {
 			Plan saved = planRepository.save(plan);
@@ -93,6 +120,17 @@ public class PlanServiceImpl implements PlanService {
 		List<Plan> plans = planRepository.findByIdIn(ids);
 
 		return plans.stream().map(planMapper::toResponse).toList();
+	}
+
+	@Override
+	public PlanResponse retrieveFreePlan(String type) {
+		PlanType planType = PlanType.fromValue(type);
+		Plan plan = planRepository.findByTypeAndPriceNairaAndPriceUsd(planType, 0.0, 0.0);
+		if (plan == null)
+			throw new GeneralPlatformServiceException(
+					"There is no free plan at the moment. Please contact the TechEveryWhere team");
+
+		return planMapper.toResponse(plan);
 	}
 
 	@Override

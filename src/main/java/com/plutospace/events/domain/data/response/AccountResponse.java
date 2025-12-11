@@ -20,6 +20,7 @@ public class AccountResponse {
 	private String accountOwner; // id of the customer that created the account
 	private AccountUserResponse accountOwnerResponse;
 	private Long numberOfMembers;
+	private Boolean isDefaulted;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdOn;

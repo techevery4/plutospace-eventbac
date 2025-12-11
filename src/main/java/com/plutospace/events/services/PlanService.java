@@ -20,6 +20,8 @@ public interface PlanService {
 
 	List<PlanResponse> retrievePlan(List<String> ids);
 
+	PlanResponse retrieveFreePlan(String type);
+
 	CustomPageResponse<PlanResponse> retrieveActivePlanByType(String type, int pageNo, int pageSize);
 
 	OperationalResponse setPlanAsActive(String id);

@@ -20,4 +20,5 @@ public class Account extends BaseEntity {
 	private String planId;
 	private String accountOwner; // id of the customer that created the account
 	private Long numberOfMembers;
+	private Boolean isDefaulted;
 }

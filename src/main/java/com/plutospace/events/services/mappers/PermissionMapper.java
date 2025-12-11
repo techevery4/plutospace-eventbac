@@ -18,13 +18,13 @@ public class PermissionMapper {
 	public PermissionResponse toResponse(Permission permission) {
 		return PermissionResponse.instance(permission.getId(), permission.getName(), permission.getModule(),
 				permission.getDescription(), permission.getEndpoint(), permission.getMethod(),
-				permission.getTiedToPlan(), permission.getIsGeneral(), permission.getCreatedOn());
+				permission.getPlanFeature(), permission.getIsGeneral(), permission.getCreatedOn());
 	}
 
 	public Permission toEntity(SavePermissionRequest savePermissionRequest) {
 		return Permission.instance(savePermissionRequest.name(), savePermissionRequest.module(),
 				savePermissionRequest.description(), savePermissionRequest.endpoint(), savePermissionRequest.method(),
-				savePermissionRequest.tiedToPlan(), savePermissionRequest.isGeneral());
+				savePermissionRequest.planFeature(), savePermissionRequest.isGeneral());
 	}
 
 	public CustomPageResponse<PermissionResponse> toPagedResponse(Page<Permission> permissions) {

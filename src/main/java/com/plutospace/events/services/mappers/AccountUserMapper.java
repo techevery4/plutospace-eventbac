@@ -29,7 +29,7 @@ public class AccountUserMapper {
 	public AccountResponse toResponse(Account account, AccountUserResponse accountUserResponse,
 			PlanResponse planResponse) {
 		return AccountResponse.instance(account.getId(), account.getPlanId(), planResponse, account.getAccountOwner(),
-				accountUserResponse, account.getNumberOfMembers(), account.getCreatedOn());
+				accountUserResponse, account.getNumberOfMembers(), account.getIsDefaulted(), account.getCreatedOn());
 	}
 
 	public AccountUser toEntity(RegisterPersonalAccountRequest registerPersonalAccountRequest) {

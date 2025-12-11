@@ -65,4 +65,8 @@ public class DateConverter {
 	public Long getCurrentTimestamp() {
 		return new Date().getTime();
 	}
+
+	public LocalDateTime getStartOfMonth(LocalDateTime anyDateTime) {
+		return anyDateTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+	}
 }

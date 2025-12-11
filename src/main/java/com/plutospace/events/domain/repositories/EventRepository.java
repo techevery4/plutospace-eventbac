@@ -2,6 +2,7 @@
 package com.plutospace.events.domain.repositories;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -23,4 +24,6 @@ public interface EventRepository extends BaseRepository<Event, String> {
 
 	List<Event> findByAccountIdAndCreatedByAndDateBetweenOrderByStartTimeAsc(String accountId, String accountUserId,
 			LocalDate startDate, LocalDate endDate);
+
+	Long countByAccountIdAndCreatedOnBetween(String accountId, LocalDateTime startTime, LocalDateTime endTime);
 }

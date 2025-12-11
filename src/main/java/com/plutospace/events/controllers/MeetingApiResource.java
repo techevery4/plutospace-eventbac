@@ -15,6 +15,7 @@ import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.request.CreateMeetingRequest;
 import com.plutospace.events.domain.data.response.MeetingResponse;
+import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.services.MeetingService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -93,5 +94,13 @@ public class MeetingApiResource {
 		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
 		return ResponseEntity.ok(meetingService.searchMeeting(accountId, accountUserId, text, pageNo, pageSize));
+	}
+
+	@GetMapping(path = "/record", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint records a meeting")
+	public ResponseEntity<OperationalResponse> startRecordingMeeting(@RequestParam(name = "pid") String pid) {
+		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(meetingService.startRecordingMeeting(accountUserId, pid));
 	}
 }

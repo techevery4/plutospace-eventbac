@@ -16,6 +16,8 @@ public interface ProposalRepository extends BaseRepository<Proposal, String> {
 
 	Page<Proposal> findByAccountIdOrderByCreatedOnDesc(String accountId, Pageable pageable);
 
+	List<Proposal> findByAccountIdOrderByCreatedOnDesc(String accountId);
+
 	Page<Proposal> findByAccountIdAndTitleContainingIgnoreCaseOrderByCreatedOnDesc(String accountId, String title,
 			Pageable pageable);
 

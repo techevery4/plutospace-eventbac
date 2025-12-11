@@ -20,4 +20,6 @@ public interface MeetingRepository extends BaseRepository<Meeting, String> {
 
 	List<Meeting> findByAccountIdAndCreatedByAndStartTimeBetweenOrderByStartTimeAsc(String accountId,
 			String accountUserId, LocalDateTime startDate, LocalDateTime endDate);
+
+	Long countByAccountIdAndCreatedOnBetween(String accountId, LocalDateTime startTime, LocalDateTime endTime);
 }

@@ -13,4 +13,6 @@ public interface AccountSessionRepository extends BaseRepository<AccountSession,
 	AccountSession findByAccountIdAndUserIdAndUserAgentIgnoreCase(String accountId, String userId, String userAgent);
 
 	List<AccountSession> findByUserIdOrderByLastUseTimeDesc(String userId);
+
+	Long countByAccountId(String accountId);
 }

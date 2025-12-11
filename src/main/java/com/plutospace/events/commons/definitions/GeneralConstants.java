@@ -7,6 +7,7 @@ public class GeneralConstants {
 	}
 
 	public static final String SUCCESS_MESSAGE = "Request Processed Successfully";
+	public static final String PLAN_UPGRADE_MESSAGE = "Please upgrade your plan to access this feature";
 	public static final String PERMISSION_ALLOW_MESSAGE = "Permission Allowed";
 	public static final String ENCRYPTION_TYPE = "AES";
 	public static final String CONTENT_TYPE = "UTF-8";
@@ -23,4 +24,9 @@ public class GeneralConstants {
 	public static final String TRUE = "true";
 	public static final String FALSE = "false";
 	public static final int EVENT_MEETING_PARTICIPANTS = 50;
+	public static final String POST = "POST";
+	public static final String GET = "GET";
+	public static final String PUT = "PUT";
+	public static final String PATCH = "PATCH";
+	public static final String DELETE = "DELETE";
 }

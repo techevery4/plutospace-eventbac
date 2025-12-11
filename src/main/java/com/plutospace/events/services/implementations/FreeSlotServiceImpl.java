@@ -135,6 +135,8 @@ public class FreeSlotServiceImpl implements FreeSlotService {
 	@Override
 	public OperationalResponse deleteFreeSlot(String id) {
 		FreeSlot existingFreeSlot = retrieveFreeSlotById(id);
+		if (!existingFreeSlot.getIsAvailable())
+			throw new GeneralPlatformDomainRuleException("This slot has been booked and can no longer be deleted");
 
 		try {
 			freeSlotRepository.delete(existingFreeSlot);
@@ -169,6 +171,8 @@ public class FreeSlotServiceImpl implements FreeSlotService {
 			CreateMeetingInviteRequest createMeetingInviteRequest = getCreateMeetingInviteRequest(bookFreeSlotRequest,
 					meetingResponse);
 			meetingInviteeService.createMeetingInvite(createMeetingInviteRequest);
+			existingFreeSlot.setIsAvailable(false);
+			freeSlotRepository.save(existingFreeSlot);
 
 			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
 		} catch (DataIntegrityViolationException e) {

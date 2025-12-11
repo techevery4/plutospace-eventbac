@@ -19,5 +19,15 @@ public interface PlanRepository extends BaseRepository<Plan, String> {
 
 	List<Plan> findByIdIn(List<String> ids);
 
-	Page<Plan> findByTypeAndIsActiveOrderByPriceNairaDesc(PlanType planType, boolean b, Pageable pageable);
+	Page<Plan> findByTypeAndIsActiveOrderByPriceNairaDesc(PlanType planType, boolean isActive, Pageable pageable);
+
+	Plan findByTypeAndPriceNaira(PlanType planType, double priceNaira);
+
+	boolean existsByTypeAndPriceNaira(PlanType type, Double priceNaira);
+
+	boolean existsByTypeAndPriceUsd(PlanType type, Double priceUsd);
+
+	Plan findByTypeAndPriceUsd(PlanType type, Double priceUsd);
+
+	Plan findByTypeAndPriceNairaAndPriceUsd(PlanType planType, Double priceNaira, Double priceUsd);
 }

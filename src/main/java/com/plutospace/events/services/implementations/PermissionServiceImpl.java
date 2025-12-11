@@ -111,8 +111,8 @@ public class PermissionServiceImpl implements PermissionService {
 			existingPermission.setDescription(savePermissionRequest.description());
 		if (ObjectUtils.isNotEmpty(savePermissionRequest.isGeneral()))
 			existingPermission.setIsGeneral(savePermissionRequest.isGeneral());
-		if (ObjectUtils.isNotEmpty(savePermissionRequest.tiedToPlan()))
-			existingPermission.setIsGeneral(savePermissionRequest.tiedToPlan());
+		if (ObjectUtils.isNotEmpty(savePermissionRequest.planFeature()))
+			existingPermission.setPlanFeature(savePermissionRequest.planFeature());
 
 		try {
 			Permission savedPermission = permissionRepository.save(existingPermission);

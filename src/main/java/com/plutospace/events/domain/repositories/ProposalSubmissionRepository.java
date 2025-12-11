@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.domain.repositories;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -17,4 +18,7 @@ public interface ProposalSubmissionRepository extends BaseRepository<ProposalSub
 	void deleteByProposalId(String proposalId);
 
 	List<ProposalSubmission> findByIdIn(List<String> proposalSubmissionIds);
+
+	Long countByProposalIdInAndCreatedOnBetween(List<String> proposalIds, LocalDateTime startTime,
+			LocalDateTime endTime);
 }

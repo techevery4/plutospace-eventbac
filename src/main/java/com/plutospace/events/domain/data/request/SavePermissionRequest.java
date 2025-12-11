@@ -2,5 +2,5 @@
 package com.plutospace.events.domain.data.request;
 
 public record SavePermissionRequest(String name, String description, String module, String endpoint, String method,
-		Boolean tiedToPlan, Boolean isGeneral) {
+		String planFeature, Boolean isGeneral) {
 }

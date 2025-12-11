@@ -20,9 +20,11 @@ import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleExceptio
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.DateConverter;
 import com.plutospace.events.commons.utils.LinkGenerator;
+import com.plutospace.events.domain.data.MeetingType;
 import com.plutospace.events.domain.data.request.CreateMeetingRequest;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
 import com.plutospace.events.domain.data.response.MeetingResponse;
+import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.entities.Meeting;
 import com.plutospace.events.domain.entities.MeetingInvitee;
 import com.plutospace.events.domain.repositories.MeetingInviteeRepository;
@@ -120,13 +122,7 @@ public class MeetingServiceImpl implements MeetingService {
 
 	@Override
 	public MeetingResponse retrieveMeetingByPublicId(String publicId) {
-		String decryptedLink = linkGenerator.extractDetailsFromPublicLink(publicId,
-				propertyConstants.getEventsEncryptionSecretKey());
-		String[] words = decryptedLink.split(":");
-		if (words.length < 1)
-			throw new GeneralPlatformDomainRuleException("Meeting link has been corrupted");
-
-		Meeting meeting = retrieveMeetingById(words[0]);
+		Meeting meeting = retrieveMeetingFromPublicId(publicId);
 
 		return meetingMapper.toResponse(meeting);
 	}
@@ -186,7 +182,31 @@ public class MeetingServiceImpl implements MeetingService {
 		return meetingMapper.toPagedResponse(meetings);
 	}
 
+	@Override
+	public OperationalResponse startRecordingMeeting(String accountUserId, String publicId) {
+		Meeting meeting = retrieveMeetingFromPublicId(publicId);
+		AccountUserResponse accountUserResponse = accountUserService.retrieveAccountUser(accountUserId);
+		if (meeting.getType().equals(MeetingType.INSTANT) && !meeting.getCreatedBy().equals(accountUserId))
+			throw new GeneralPlatformDomainRuleException(
+					"You cannot record this meeting. Kindly reach out to the host");
+		if (meeting.getType().equals(MeetingType.SCHEDULED)
+				&& !accountUserResponse.getAccountId().equals(meeting.getAccountId()))
+			throw new GeneralPlatformDomainRuleException("You cannot record this meeting.");
+
+		return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+	}
+
 	private Meeting retrieveMeetingById(String id) {
 		return meetingRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Meeting Not Found"));
+	}
+
+	private Meeting retrieveMeetingFromPublicId(String publicId) {
+		String decryptedLink = linkGenerator.extractDetailsFromPublicLink(publicId,
+				propertyConstants.getEventsEncryptionSecretKey());
+		String[] words = decryptedLink.split(":");
+		if (words.length < 1)
+			throw new GeneralPlatformDomainRuleException("Meeting link has been corrupted");
+
+		return retrieveMeetingById(words[0]);
 	}
 }

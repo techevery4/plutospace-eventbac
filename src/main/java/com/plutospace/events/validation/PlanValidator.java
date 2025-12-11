@@ -25,10 +25,10 @@ public class PlanValidator {
 		if (StringUtils.isBlank(request.getName())) {
 			throw new GeneralPlatformDomainRuleException(nameCannotBeNullValidationMessage);
 		}
-		if (request.getPriceNaira() <= 0) {
+		if (request.getPriceNaira() < 0) {
 			throw new GeneralPlatformDomainRuleException(priceNairaCannotBeNullValidationMessage);
 		}
-		if (request.getPriceUsd() <= 0) {
+		if (request.getPriceUsd() < 0) {
 			throw new GeneralPlatformDomainRuleException(priceUsdCannotBeNullValidationMessage);
 		}
 	}

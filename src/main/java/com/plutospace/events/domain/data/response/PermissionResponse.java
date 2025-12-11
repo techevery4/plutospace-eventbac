@@ -20,7 +20,7 @@ public class PermissionResponse {
 	private String description;
 	private String endpoint;
 	private String method;
-	private Boolean tiedToPlan; // This is an endpoint that will trigger plan check
+	private String planFeature; // This is an endpoint that will trigger plan check if not null
 	private Boolean isGeneral; // This is a general endpoint and must be available to all roles
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.domain.repositories;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -17,4 +18,6 @@ public interface PollRepository extends BaseRepository<Poll, String> {
 	List<Poll> findByIdIn(List<String> ids);
 
 	Poll findByPublicIdAndIsPublished(String publicId, boolean isPublished);
+
+	Long countByAccountIdAndCreatedOnBetween(String accountId, LocalDateTime startTime, LocalDateTime endTime);
 }
