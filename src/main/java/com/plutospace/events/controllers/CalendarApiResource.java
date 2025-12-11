@@ -36,6 +36,9 @@ public class CalendarApiResource {
 			@RequestParam(name = "startTime") Long startTime, @RequestParam(name = "endTime") Long endTime) {
 		String id = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
-		return ResponseEntity.ok(calendarService.retrieveCalendarBookingsBetween(id, startTime, endTime));
+		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity
+				.ok(calendarService.retrieveCalendarBookingsBetween(id, accountUserId, startTime, endTime));
 	}
 }

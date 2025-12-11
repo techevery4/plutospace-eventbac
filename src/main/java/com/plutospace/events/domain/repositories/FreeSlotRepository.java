@@ -12,9 +12,9 @@ import com.plutospace.events.domain.entities.FreeSlot;
 
 @Repository
 public interface FreeSlotRepository extends BaseRepository<FreeSlot, String> {
-	Page<FreeSlot> findByAccountIdAndCreatedByOrderByCreatedOnDesc(String accountId, String createdBy,
+	Page<FreeSlot> findByAccountIdAndCreatedByOrderByStartTimeDesc(String accountId, String createdBy,
 			Pageable pageable);
 
-	List<FreeSlot> findByAccountIdAndCreatedByAndIsAvailableOrderByCreatedOnDesc(String accountId, String createdBy,
+	List<FreeSlot> findByAccountIdAndCreatedByAndIsAvailableOrderByStartTimeDesc(String accountId, String createdBy,
 			boolean isAvailable);
 }

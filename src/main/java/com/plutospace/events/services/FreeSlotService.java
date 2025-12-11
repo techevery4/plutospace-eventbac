@@ -26,5 +26,6 @@ public interface FreeSlotService {
 
 	OperationalResponse bookFreeSlot(BookFreeSlotRequest bookFreeSlotRequest);
 
-	CustomPageResponse<FreeSlotResponse> searchFreeSlot(String accountId, String text, int pageNo, int pageSize);
+	CustomPageResponse<FreeSlotResponse> searchFreeSlot(String accountId, String accountUserId, String text, int pageNo,
+			int pageSize);
 }

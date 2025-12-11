@@ -15,8 +15,6 @@ public interface MeetingService {
 
 	MeetingResponse retrieveMeetingByPublicId(String publicId);
 
-	List<MeetingResponse> retrieveMeetingsBetween(String accountId, Long startTime, Long endTime);
-
 	CustomPageResponse<MeetingResponse> retrieveMeetingsBetween(String accountId, Long startTime, Long endTime,
 			int pageNo, int pageSize);
 
@@ -25,5 +23,6 @@ public interface MeetingService {
 
 	MeetingResponse retrieveMeeting(String id);
 
-	CustomPageResponse<MeetingResponse> searchMeeting(String accountId, String text, int pageNo, int pageSize);
+	CustomPageResponse<MeetingResponse> searchMeeting(String accountId, String accountUserId, String text, int pageNo,
+			int pageSize);
 }

@@ -113,7 +113,7 @@ public class FreeSlotServiceImpl implements FreeSlotService {
 			int pageSize) {
 		Pageable pageable = PageRequest.of(pageNo, pageSize);
 
-		Page<FreeSlot> freeSlots = freeSlotRepository.findByAccountIdAndCreatedByOrderByCreatedOnDesc(accountId,
+		Page<FreeSlot> freeSlots = freeSlotRepository.findByAccountIdAndCreatedByOrderByStartTimeDesc(accountId,
 				accountUserId, pageable);
 		return freeSlotMapper.toPagedResponse(freeSlots);
 	}
@@ -128,7 +128,7 @@ public class FreeSlotServiceImpl implements FreeSlotService {
 					"Your available slot link is broken. Kindly ask for a reshare from your administrator.");
 
 		List<FreeSlot> freeSlots = freeSlotRepository
-				.findByAccountIdAndCreatedByAndIsAvailableOrderByCreatedOnDesc(words[1], words[0], true);
+				.findByAccountIdAndCreatedByAndIsAvailableOrderByStartTimeDesc(words[1], words[0], true);
 		return freeSlots.stream().map(freeSlotMapper::toResponse).toList();
 	}
 
@@ -177,12 +177,13 @@ public class FreeSlotServiceImpl implements FreeSlotService {
 	}
 
 	@Override
-	public CustomPageResponse<FreeSlotResponse> searchFreeSlot(String accountId, String text, int pageNo,
-			int pageSize) {
+	public CustomPageResponse<FreeSlotResponse> searchFreeSlot(String accountId, String accountUserId, String text,
+			int pageNo, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNo, pageSize);
 
 		List<String> fields = List.of("title", "timezone.representation");
-		Page<FreeSlot> freeSlots = databaseSearchService.findFreeSlotByDynamicFilter(accountId, text, fields, pageable);
+		Page<FreeSlot> freeSlots = databaseSearchService.findFreeSlotByDynamicFilter(accountId, accountUserId, text,
+				fields, pageable);
 
 		return freeSlotMapper.toPagedResponse(freeSlots);
 	}

@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
+import com.plutospace.events.commons.utils.DateConverter;
 import com.plutospace.events.domain.data.response.EventResponse;
 import com.plutospace.events.domain.data.response.MeetingResponse;
 import com.plutospace.events.services.CalendarService;
@@ -25,11 +26,15 @@ public class CalendarServiceImpl implements CalendarService {
 
 	private final EventService eventService;
 	private final MeetingService meetingService;
+	private final DateConverter dateConverter;
 
 	@Override
-	public List<Object> retrieveCalendarBookingsBetween(String accountId, Long startTime, Long endTime) {
-		List<MeetingResponse> meetingResponses = meetingService.retrieveMeetingsBetween(accountId, startTime, endTime);
-		List<EventResponse> eventResponses = eventService.retrieveEventsBetween(accountId, startTime, endTime);
+	public List<Object> retrieveCalendarBookingsBetween(String accountId, String accountUserId, Long startTime,
+			Long endTime) {
+		List<MeetingResponse> meetingResponses = meetingService.retrieveUpcomingMeetingsBetween(accountId,
+				accountUserId, startTime, endTime);
+		List<EventResponse> eventResponses = eventService.retrieveUpcomingEventsBetween(accountId, accountUserId,
+				startTime, endTime);
 
 		// Combine and sort by createdOn descending
 		return Stream.concat(meetingResponses.stream(), eventResponses.stream())
@@ -39,9 +44,9 @@ public class CalendarServiceImpl implements CalendarService {
 
 	private LocalDateTime getCreatedOn(Object obj) {
 		if (obj instanceof MeetingResponse) {
-			return ((MeetingResponse) obj).getCreatedOn();
+			return ((MeetingResponse) obj).getStartTime();
 		} else if (obj instanceof EventResponse) {
-			return ((EventResponse) obj).getCreatedOn();
+			return dateConverter.convertTimestamp(((EventResponse) obj).getStartTime());
 		}
 		return LocalDateTime.now();
 	}

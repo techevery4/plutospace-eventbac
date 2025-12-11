@@ -15,12 +15,9 @@ import com.plutospace.events.domain.entities.Meeting;
 public interface MeetingRepository extends BaseRepository<Meeting, String> {
 	List<Meeting> findByIdIn(List<String> ids);
 
-	List<Meeting> findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(String accountId, LocalDateTime startDate,
-			LocalDateTime endDate);
-
 	Page<Meeting> findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(String accountId, LocalDateTime startDate,
 			LocalDateTime endDate, Pageable pageable);
 
-	List<Meeting> findByAccountIdAndStartTimeBetweenOrderByStartTimeAsc(String accountId, LocalDateTime startDate,
-			LocalDateTime endDate);
+	List<Meeting> findByAccountIdAndCreatedByAndStartTimeBetweenOrderByStartTimeAsc(String accountId,
+			String accountUserId, LocalDateTime startDate, LocalDateTime endDate);
 }

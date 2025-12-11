@@ -132,17 +132,6 @@ public class MeetingServiceImpl implements MeetingService {
 	}
 
 	@Override
-	public List<MeetingResponse> retrieveMeetingsBetween(String accountId, Long startTime, Long endTime) {
-		LocalDateTime startDate = dateConverter.convertTimestamp(startTime);
-		LocalDateTime endDate = dateConverter.convertTimestamp(endTime);
-
-		List<Meeting> meetings = meetingRepository.findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(accountId,
-				startDate, endDate);
-
-		return meetings.stream().map(meetingMapper::toResponse).toList();
-	}
-
-	@Override
 	public CustomPageResponse<MeetingResponse> retrieveMeetingsBetween(String accountId, Long startTime, Long endTime,
 			int pageNo, int pageSize) {
 		LocalDateTime startDate = dateConverter.convertTimestamp(startTime);
@@ -162,8 +151,8 @@ public class MeetingServiceImpl implements MeetingService {
 		LocalDateTime startDate = dateConverter.convertTimestamp(startTime);
 		LocalDateTime endDate = dateConverter.convertTimestamp(endTime);
 
-		List<Meeting> meetings = meetingRepository.findByAccountIdAndStartTimeBetweenOrderByStartTimeAsc(accountId,
-				startDate, endDate);
+		List<Meeting> meetings = meetingRepository.findByAccountIdAndCreatedByAndStartTimeBetweenOrderByStartTimeAsc(
+				accountId, accountUserId, startDate, endDate);
 		List<MeetingInvitee> meetingInvitees = meetingInviteeRepository
 				.findByEmailIgnoreCaseAndMeetingStartTimeBetweenOrderByMeetingStartTimeAsc(
 						accountUserResponse.getEmail(), startDate, endDate);
@@ -186,11 +175,13 @@ public class MeetingServiceImpl implements MeetingService {
 	}
 
 	@Override
-	public CustomPageResponse<MeetingResponse> searchMeeting(String accountId, String text, int pageNo, int pageSize) {
+	public CustomPageResponse<MeetingResponse> searchMeeting(String accountId, String accountUserId, String text,
+			int pageNo, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNo, pageSize);
 
 		List<String> fields = List.of("title", "description", "timezone.representation", "publicId");
-		Page<Meeting> meetings = databaseSearchService.findMeetingByDynamicFilter(accountId, text, fields, pageable);
+		Page<Meeting> meetings = databaseSearchService.findMeetingByDynamicFilter(accountId, accountUserId, text,
+				fields, pageable);
 
 		return meetingMapper.toPagedResponse(meetings);
 	}

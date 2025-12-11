@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface CalendarService {
 
-	List<Object> retrieveCalendarBookingsBetween(String accountId, Long startTime, Long endTime);
+	List<Object> retrieveCalendarBookingsBetween(String accountId, String accountUserId, Long startTime, Long endTime);
 }

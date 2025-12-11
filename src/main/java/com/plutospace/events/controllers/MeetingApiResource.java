@@ -90,6 +90,8 @@ public class MeetingApiResource {
 			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
-		return ResponseEntity.ok(meetingService.searchMeeting(accountId, text, pageNo, pageSize));
+		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(meetingService.searchMeeting(accountId, accountUserId, text, pageNo, pageSize));
 	}
 }

@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.services.mappers;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +39,9 @@ public class EventRegistrationMapper {
 		}
 
 		return EventRegistrationResponse.instance(eventRegistration.getId(), eventRegistration.getEmail(),
-				eventRegistration.getEventId(), eventRegistration.getEventRegistrationStatus(),
-				eventRegistrationDataResponses, eventRegistration.getCreatedOn());
+				eventRegistration.getEventId(), eventRegistration.getEventDate(),
+				eventRegistration.getEventRegistrationStatus(), eventRegistrationDataResponses,
+				eventRegistration.getCreatedOn());
 	}
 
 	public EventRegistrationLogResponse toResponse(EventRegistrationLog eventRegistrationLog,
@@ -50,9 +52,10 @@ public class EventRegistrationMapper {
 				eventRegistrationLog.getCreatedBy(), accountUserResponse, eventRegistrationLog.getCreatedOn());
 	}
 
-	public EventRegistration toEntity(CreateEventRegistrationRequest createEventRegistrationRequest) {
+	public EventRegistration toEntity(CreateEventRegistrationRequest createEventRegistrationRequest,
+			LocalDate eventDate) {
 		return EventRegistration.instance(createEventRegistrationRequest.email(),
-				createEventRegistrationRequest.eventId(), EventRegistrationStatus.PENDING);
+				createEventRegistrationRequest.eventId(), eventDate, EventRegistrationStatus.PENDING);
 	}
 
 	public EventRegistrationData toEntity(CreateEventRegistrationDataRequest createEventRegistrationDataRequest,

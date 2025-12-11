@@ -1,6 +1,7 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.domain.data.response;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class EventRegistrationResponse {
 	private String id;
 	private String email; // email of the person filling the form
 	private String eventId;
+	private LocalDate eventDate;
 	private EventRegistrationStatus eventRegistrationStatus;
 	private List<EventRegistrationDataResponse> eventRegistrationDataResponses;
 

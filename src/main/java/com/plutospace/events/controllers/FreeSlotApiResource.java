@@ -104,6 +104,8 @@ public class FreeSlotApiResource {
 			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
-		return ResponseEntity.ok(freeSlotService.searchFreeSlot(accountId, text, pageNo, pageSize));
+		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(freeSlotService.searchFreeSlot(accountId, accountUserId, text, pageNo, pageSize));
 	}
 }

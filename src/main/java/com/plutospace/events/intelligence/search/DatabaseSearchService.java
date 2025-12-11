@@ -150,8 +150,8 @@ public class DatabaseSearchService {
 		return new PageImpl<>(events, pageable, total);
 	}
 
-	public Page<FreeSlot> findFreeSlotByDynamicFilter(String accountId, String searchText, List<String> fields,
-			Pageable pageable) {
+	public Page<FreeSlot> findFreeSlotByDynamicFilter(String accountId, String accountUserId, String searchText,
+			List<String> fields, Pageable pageable) {
 		Query query = new Query();
 
 		if (StringUtils.isNotBlank(searchText)) {
@@ -163,7 +163,8 @@ public class DatabaseSearchService {
 			}
 
 			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
-			Criteria accountCriteria = Criteria.where("accountId").is(accountId).andOperator(fullSearchCriteria);
+			Criteria accountCriteria = Criteria.where("accountId").is(accountId).and("createdBy").is(accountUserId)
+					.andOperator(fullSearchCriteria);
 			query.addCriteria(accountCriteria);
 		}
 
@@ -176,8 +177,8 @@ public class DatabaseSearchService {
 		return new PageImpl<>(freeSlots, pageable, total);
 	}
 
-	public Page<Meeting> findMeetingByDynamicFilter(String accountId, String searchText, List<String> fields,
-			Pageable pageable) {
+	public Page<Meeting> findMeetingByDynamicFilter(String accountId, String accountUserId, String searchText,
+			List<String> fields, Pageable pageable) {
 		Query query = new Query();
 
 		if (StringUtils.isNotBlank(searchText)) {
@@ -189,7 +190,8 @@ public class DatabaseSearchService {
 			}
 
 			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
-			Criteria accountCriteria = Criteria.where("accountId").is(accountId).andOperator(fullSearchCriteria);
+			Criteria accountCriteria = Criteria.where("accountId").is(accountId).and("createdBy").is(accountUserId)
+					.andOperator(fullSearchCriteria);
 			query.addCriteria(accountCriteria);
 		}
 

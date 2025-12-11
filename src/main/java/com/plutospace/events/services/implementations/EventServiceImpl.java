@@ -4,10 +4,7 @@ package com.plutospace.events.services.implementations;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,11 +27,12 @@ import com.plutospace.events.domain.data.LocationType;
 import com.plutospace.events.domain.data.MeetingType;
 import com.plutospace.events.domain.data.request.*;
 import com.plutospace.events.domain.data.response.*;
-import com.plutospace.events.domain.entities.Event;
-import com.plutospace.events.domain.entities.EventForm;
+import com.plutospace.events.domain.entities.*;
 import com.plutospace.events.domain.repositories.EventFormRepository;
+import com.plutospace.events.domain.repositories.EventRegistrationRepository;
 import com.plutospace.events.domain.repositories.EventRepository;
 import com.plutospace.events.intelligence.search.DatabaseSearchService;
+import com.plutospace.events.services.AccountUserService;
 import com.plutospace.events.services.EventCategoryService;
 import com.plutospace.events.services.EventService;
 import com.plutospace.events.services.MeetingService;
@@ -53,7 +51,9 @@ public class EventServiceImpl implements EventService {
 
 	private final EventRepository eventRepository;
 	private final EventFormRepository eventFormRepository;
+	private final EventRegistrationRepository eventRegistrationRepository;
 	private final DatabaseSearchService databaseSearchService;
+	private final AccountUserService accountUserService;
 	private final EventCategoryService eventCategoryService;
 	private final MeetingService meetingService;
 	private final EventMapper eventMapper;
@@ -196,11 +196,36 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public List<EventResponse> retrieveEventsBetween(String accountId, Long startTime, Long endTime) {
-		LocalDateTime startDate = dateConverter.convertTimestamp(startTime);
-		LocalDateTime endDate = dateConverter.convertTimestamp(endTime);
+	public List<EventResponse> retrieveUpcomingEventsBetween(String accountId, String accountUserId, Long startTime,
+			Long endTime) {
+		AccountUserResponse accountUserResponse = accountUserService.retrieveAccountUser(accountUserId);
+		LocalDate startDate = dateConverter.convertTimestamp(startTime).toLocalDate();
+		LocalDate endDate = dateConverter.convertTimestamp(endTime).toLocalDate();
 
-		return eventRepository.findByAccountIdAndCreatedOnBetweenOrderByCreatedOnDesc(accountId, startDate, endDate);
+		List<Event> events = eventRepository.findByAccountIdAndCreatedByAndDateBetweenOrderByStartTimeAsc(accountId,
+				accountUserId, startDate, endDate);
+		List<EventRegistration> eventRegistrations = eventRegistrationRepository
+				.findByEmailIgnoreCaseAndEventDateBetweenOrderByEventDateAsc(accountUserResponse.getEmail(), startDate,
+						endDate);
+		if (!eventRegistrations.isEmpty()) {
+			List<String> registrationEventIds = eventRegistrations.stream().map(EventRegistration::getEventId).toList();
+			List<Event> registrationEvents = eventRepository.findByIdIn(registrationEventIds);
+			events.addAll(registrationEvents);
+		}
+
+		events.sort(Comparator.comparing(Event::getStartTime));
+
+		List<String> categoryIds = events.stream().map(Event::getCategoryId).toList();
+		List<EventCategoryResponse> eventCategoryResponses = eventCategoryService.retrieveEventCategory(categoryIds);
+		Map<String, EventCategoryResponse> eventCategoryResponseMap = new HashMap<>();
+		for (EventCategoryResponse eventCategoryResponse : eventCategoryResponses) {
+			eventCategoryResponseMap.putIfAbsent(eventCategoryResponse.getId(), eventCategoryResponse);
+		}
+
+		return events.stream().map(event -> {
+			EventCategoryResponse eventCategoryResponse = eventCategoryResponseMap.get(event.getCategoryId());
+			return eventMapper.toResponse(event, eventCategoryResponse);
+		}).toList();
 	}
 
 	@Override
@@ -358,6 +383,9 @@ public class EventServiceImpl implements EventService {
 
 		try {
 			Event savedEvent = eventRepository.save(existingEvent);
+			if (ObjectUtils.isNotEmpty(updateEventTimeRequest.date())) {
+				eventRegistrationRepository.updateEventDateByEventId(savedEvent.getId(), updateEventTimeRequest.date());
+			}
 
 			return eventMapper.toResponse(savedEvent, eventCategoryResponses.get(0));
 		} catch (DataIntegrityViolationException e) {

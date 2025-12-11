@@ -134,4 +134,16 @@ public class EventApiResource {
 			@RequestBody UpdateEventPaymentSettingsRequest updateEventPaymentSettingsRequest) {
 		return ResponseEntity.ok(eventService.updateEventPaymentDetails(id, updateEventPaymentSettingsRequest));
 	}
+
+	@GetMapping(path = "/upcoming", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint retrieves upcoming events between specified dates")
+	public ResponseEntity<List<EventResponse>> retrieveUpcomingEventsBetween(
+			@RequestParam(name = "startTime") Long startTime, @RequestParam(name = "endTime") Long endTime) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity
+				.ok(eventService.retrieveUpcomingEventsBetween(accountId, accountUserId, startTime, endTime));
+	}
 }

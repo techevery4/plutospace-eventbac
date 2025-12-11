@@ -80,7 +80,8 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 			eventRegistrationDataList.add(eventRegistrationData);
 		}
 
-		EventRegistration eventRegistration = eventRegistrationMapper.toEntity(createEventRegistrationRequest);
+		EventRegistration eventRegistration = eventRegistrationMapper.toEntity(createEventRegistrationRequest,
+				eventResponse.getDate());
 
 		try {
 			eventRegistrationRepository.save(eventRegistration);
