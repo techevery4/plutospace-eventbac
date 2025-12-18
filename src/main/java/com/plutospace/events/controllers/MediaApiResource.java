@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.plutospace.events.commons.definitions.GeneralConstants;
+import com.plutospace.events.commons.definitions.PropertyConstants;
+import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.request.UploadMediaRequest;
 import com.plutospace.events.domain.data.response.MediaResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
@@ -20,6 +23,7 @@ import com.plutospace.events.services.MediaService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
@@ -31,6 +35,9 @@ import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
 public class MediaApiResource {
 
 	private final MediaService mediaService;
+	private final SecurityMapper securityMapper;
+	private final PropertyConstants propertyConstants;
+	private final HttpServletRequest request;
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint uploads a new media on PlutoSpace Events")
@@ -90,6 +97,8 @@ public class MediaApiResource {
 	@DeleteMapping(path = RESOURCE_ID, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint deletes a media")
 	public ResponseEntity<OperationalResponse> deleteMedia(@PathVariable String id) {
-		return ResponseEntity.ok(mediaService.deleteMedia(id));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(mediaService.deleteMedia(id, accountId));
 	}
 }

@@ -13,7 +13,7 @@ public interface FreeSlotService {
 
 	FreeSlotResponse createFreeSlot(SaveFreeSlotRequest saveFreeSlotRequest, String accountId);
 
-	FreeSlotResponse updateFreeSlot(String id, SaveFreeSlotRequest saveFreeSlotRequest);
+	FreeSlotResponse updateFreeSlot(String id, String accountId, SaveFreeSlotRequest saveFreeSlotRequest);
 
 	String generateAvailableSlotLink(String accountId, String accountUserId);
 
@@ -22,7 +22,7 @@ public interface FreeSlotService {
 
 	List<FreeSlotResponse> retrieveMyAvailableSlots(String slotLink, Long startTime, Long endTime);
 
-	OperationalResponse deleteFreeSlot(String id);
+	OperationalResponse deleteFreeSlot(String id, String accountId);
 
 	OperationalResponse bookFreeSlot(BookFreeSlotRequest bookFreeSlotRequest);
 

@@ -39,4 +39,13 @@ public class PropertyConstants {
 
 	@Value("${s3.display-endpoint}")
 	private String s3DisplayEndpoint;
+
+	@Value("${paystack.verify-url}")
+	private String paystackVerifyUrl;
+
+	@Value("${paystack.secret-key}")
+	private String paystackSecretKey;
+
+	@Value("${paystack.base-url}")
+	private String paystackBaseUrl;
 }

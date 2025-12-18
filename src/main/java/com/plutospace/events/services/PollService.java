@@ -14,7 +14,7 @@ public interface PollService {
 
 	PollResponse createPoll(SavePollRequest savePollRequest, String accountId);
 
-	PollResponse updatePoll(String id, SavePollRequest savePollRequest);
+	PollResponse updatePoll(String id, String accountId, SavePollRequest savePollRequest);
 
 	CustomPageResponse<PollResponse> retrievePolls(String accountId, int pageNo, int pageSize);
 
@@ -22,9 +22,9 @@ public interface PollService {
 
 	PollResponse retrievePublishedPollByPublicId(String publicId);
 
-	OperationalResponse publishPoll(String id);
+	OperationalResponse publishPoll(String id, String accountId);
 
-	OperationalResponse unpublishPoll(String id);
+	OperationalResponse unpublishPoll(String id, String accountId);
 
 	OperationalResponse createPollResult(String publicId, CreatePollResultRequest createPollResultRequest);
 

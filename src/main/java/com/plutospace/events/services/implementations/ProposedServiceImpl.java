@@ -77,8 +77,10 @@ public class ProposedServiceImpl implements ProposalService {
 	}
 
 	@Override
-	public ProposalResponse updateProposal(String id, String title) {
+	public ProposalResponse updateProposal(String id, String accountId, String title) {
 		Proposal existingProposal = retrieveProposalById(id);
+		if (!existingProposal.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (proposalRepository.existsByAccountIdAndTitleIgnoreCase(existingProposal.getAccountId(), title))
 			throw new ResourceAlreadyExistsException("Proposal already exists");
@@ -124,8 +126,10 @@ public class ProposedServiceImpl implements ProposalService {
 	}
 
 	@Override
-	public OperationalResponse openProposal(String id) {
+	public OperationalResponse openProposal(String id, String accountId) {
 		Proposal existingProposal = retrieveProposalById(id);
+		if (!existingProposal.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (existingProposal.getIsOpen())
 			throw new GeneralPlatformDomainRuleException("Proposal already opened");
@@ -142,8 +146,10 @@ public class ProposedServiceImpl implements ProposalService {
 	}
 
 	@Override
-	public OperationalResponse closeProposal(String id) {
+	public OperationalResponse closeProposal(String id, String accountId) {
 		Proposal existingProposal = retrieveProposalById(id);
+		if (!existingProposal.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (!existingProposal.getIsOpen())
 			throw new GeneralPlatformDomainRuleException("Proposal already closed");
@@ -215,8 +221,10 @@ public class ProposedServiceImpl implements ProposalService {
 	}
 
 	@Override
-	public OperationalResponse deleteProposal(String id) {
+	public OperationalResponse deleteProposal(String id, String accountId) {
 		Proposal existingProposal = retrieveProposalById(id);
+		if (!existingProposal.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 		if (existingProposal.getIsOpen())
 			throw new GeneralPlatformDomainRuleException(
 					"Please close the proposal submissions before performing this action");

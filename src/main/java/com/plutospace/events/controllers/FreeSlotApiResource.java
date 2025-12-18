@@ -55,7 +55,9 @@ public class FreeSlotApiResource {
 	@Operation(description = "This endpoint updates a free slot on PlutoSpace Events")
 	public ResponseEntity<FreeSlotResponse> updateFreeSlot(@PathVariable String id,
 			@RequestBody SaveFreeSlotRequest saveFreeSlotRequest) {
-		return ResponseEntity.ok(freeSlotService.updateFreeSlot(id, saveFreeSlotRequest));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(freeSlotService.updateFreeSlot(id, accountId, saveFreeSlotRequest));
 	}
 
 	@GetMapping(path = "/public-link", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -89,7 +91,9 @@ public class FreeSlotApiResource {
 	@DeleteMapping(path = RESOURCE_ID, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint deletes a free slot")
 	public ResponseEntity<OperationalResponse> deleteFreeSlot(@PathVariable String id) {
-		return ResponseEntity.ok(freeSlotService.deleteFreeSlot(id));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(freeSlotService.deleteFreeSlot(id, accountId));
 	}
 
 	@PostMapping(path = "/book", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)

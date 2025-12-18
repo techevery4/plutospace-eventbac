@@ -16,6 +16,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
+import com.plutospace.events.commons.exception.GeneralPlatformServiceException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.DateConverter;
 import com.plutospace.events.commons.utils.LinkGenerator;
@@ -72,11 +73,13 @@ public class FreeSlotServiceImpl implements FreeSlotService {
 	}
 
 	@Override
-	public FreeSlotResponse updateFreeSlot(String id, SaveFreeSlotRequest saveFreeSlotRequest) {
+	public FreeSlotResponse updateFreeSlot(String id, String accountId, SaveFreeSlotRequest saveFreeSlotRequest) {
 		FreeSlot existingFreeSlot = retrieveFreeSlotById(id);
 
 		if (!existingFreeSlot.getIsAvailable())
 			throw new GeneralPlatformDomainRuleException("Slot is no longer available");
+		if (!existingFreeSlot.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (ObjectUtils.isNotEmpty(saveFreeSlotRequest.date()))
 			existingFreeSlot.setDate(saveFreeSlotRequest.date());
@@ -133,8 +136,11 @@ public class FreeSlotServiceImpl implements FreeSlotService {
 	}
 
 	@Override
-	public OperationalResponse deleteFreeSlot(String id) {
+	public OperationalResponse deleteFreeSlot(String id, String accountId) {
 		FreeSlot existingFreeSlot = retrieveFreeSlotById(id);
+		if (!existingFreeSlot.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
+
 		if (!existingFreeSlot.getIsAvailable())
 			throw new GeneralPlatformDomainRuleException("This slot has been booked and can no longer be deleted");
 

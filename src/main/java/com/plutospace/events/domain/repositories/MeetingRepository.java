@@ -22,4 +22,8 @@ public interface MeetingRepository extends BaseRepository<Meeting, String> {
 			String accountUserId, LocalDateTime startDate, LocalDateTime endDate);
 
 	Long countByAccountIdAndCreatedOnBetween(String accountId, LocalDateTime startTime, LocalDateTime endTime);
+
+	long countByPublicId(String publicId);
+
+	List<Meeting> findByPublicId(String publicId);
 }

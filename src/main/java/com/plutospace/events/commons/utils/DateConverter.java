@@ -69,4 +69,12 @@ public class DateConverter {
 	public LocalDateTime getStartOfMonth(LocalDateTime anyDateTime) {
 		return anyDateTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
 	}
+
+	public LocalDateTime getXDaysTime(LocalDateTime anyDateTime, int xDays) {
+		return anyDateTime.plusDays(xDays);
+	}
+
+	public LocalDateTime convertPaystackVerifyTime(String date) {
+		return Instant.parse(date).atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
 }

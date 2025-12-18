@@ -16,6 +16,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
+import com.plutospace.events.commons.exception.GeneralPlatformServiceException;
 import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.LinkGenerator;
@@ -85,11 +86,13 @@ public class PollServiceImpl implements PollService {
 	}
 
 	@Override
-	public PollResponse updatePoll(String id, SavePollRequest savePollRequest) {
+	public PollResponse updatePoll(String id, String accountId, SavePollRequest savePollRequest) {
 		pollValidator.validate(savePollRequest);
 		PollType pollType = PollType.fromValue(savePollRequest.getType());
 
 		Poll existingPoll = retrievePollById(id);
+		if (!existingPoll.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 		if (pollResultRepository.existsByPollId(id))
 			throw new GeneralPlatformDomainRuleException("You can no longer edit this poll");
 
@@ -151,8 +154,10 @@ public class PollServiceImpl implements PollService {
 	}
 
 	@Override
-	public OperationalResponse publishPoll(String id) {
+	public OperationalResponse publishPoll(String id, String accountId) {
 		Poll existingPoll = retrievePollById(id);
+		if (!existingPoll.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (existingPoll.getIsPublished())
 			throw new GeneralPlatformDomainRuleException("Poll was already published");
@@ -169,8 +174,10 @@ public class PollServiceImpl implements PollService {
 	}
 
 	@Override
-	public OperationalResponse unpublishPoll(String id) {
+	public OperationalResponse unpublishPoll(String id, String accountId) {
 		Poll existingPoll = retrievePollById(id);
+		if (!existingPoll.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (!existingPoll.getIsPublished())
 			throw new GeneralPlatformDomainRuleException("Poll was already unpublished");

@@ -16,5 +16,5 @@ public interface MediaService {
 
 	MediaResponse retrieveMediaUsingPublicId(String publicId);
 
-	OperationalResponse deleteMedia(String id);
+	OperationalResponse deleteMedia(String id, String accountId);
 }

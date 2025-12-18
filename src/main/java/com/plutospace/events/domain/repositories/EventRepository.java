@@ -26,4 +26,6 @@ public interface EventRepository extends BaseRepository<Event, String> {
 			LocalDate startDate, LocalDate endDate);
 
 	Long countByAccountIdAndCreatedOnBetween(String accountId, LocalDateTime startTime, LocalDateTime endTime);
+
+	Long countByAccountId(String accountId);
 }

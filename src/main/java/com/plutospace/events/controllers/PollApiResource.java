@@ -54,7 +54,9 @@ public class PollApiResource {
 	@Operation(description = "This endpoint updates a poll")
 	public ResponseEntity<PollResponse> updatePoll(@PathVariable String id,
 			@RequestBody SavePollRequest savePollRequest) {
-		return ResponseEntity.ok(pollService.updatePoll(id, savePollRequest));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(pollService.updatePoll(id, accountId, savePollRequest));
 	}
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -81,13 +83,17 @@ public class PollApiResource {
 	@GetMapping(path = RESOURCE_ID + "/publish", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint publishes a poll")
 	public ResponseEntity<OperationalResponse> publishPoll(@PathVariable String id) {
-		return ResponseEntity.ok(pollService.publishPoll(id));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(pollService.publishPoll(id, accountId));
 	}
 
 	@GetMapping(path = RESOURCE_ID + "/unpublish", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint unpublishes a poll")
 	public ResponseEntity<OperationalResponse> unpublishPoll(@PathVariable String id) {
-		return ResponseEntity.ok(pollService.unpublishPoll(id));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(pollService.unpublishPoll(id, accountId));
 	}
 
 	@PutMapping(path = "/result", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)

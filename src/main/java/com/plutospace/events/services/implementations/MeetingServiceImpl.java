@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,11 +19,12 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
+import com.plutospace.events.commons.exception.GeneralPlatformServiceException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.DateConverter;
 import com.plutospace.events.commons.utils.LinkGenerator;
 import com.plutospace.events.domain.data.MeetingType;
-import com.plutospace.events.domain.data.request.CreateMeetingRequest;
+import com.plutospace.events.domain.data.request.*;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
 import com.plutospace.events.domain.data.response.MeetingResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
@@ -194,6 +197,164 @@ public class MeetingServiceImpl implements MeetingService {
 			throw new GeneralPlatformDomainRuleException("You cannot record this meeting.");
 
 		return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+	}
+
+	@Override
+	public MeetingResponse updateMeeting(String id, String accountId, UpdateMeetingRequest updateMeetingRequest) {
+		Meeting existingMeeting = retrieveMeetingById(id);
+		if (!existingMeeting.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
+
+		if (StringUtils.isNotBlank(updateMeetingRequest.title()))
+			existingMeeting.setTitle(updateMeetingRequest.title());
+		if (StringUtils.isNotBlank(updateMeetingRequest.description()))
+			existingMeeting.setDescription(updateMeetingRequest.description());
+
+		try {
+			Meeting savedMeeting = meetingRepository.save(existingMeeting);
+
+			return meetingMapper.toResponse(savedMeeting);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public MeetingResponse updateMeetingBasicSetting(String id, String accountId,
+			UpdateMeetingBasicSettingsRequest updateMeetingBasicSettingsRequest) {
+		Meeting existingMeeting = retrieveMeetingById(id);
+		if (!existingMeeting.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
+
+		if (ObjectUtils.isNotEmpty(updateMeetingBasicSettingsRequest.maximumParticipants()))
+			existingMeeting.setMaximumParticipants(updateMeetingBasicSettingsRequest.maximumParticipants());
+		if (ObjectUtils.isNotEmpty(updateMeetingBasicSettingsRequest.enableWaitingRoom()))
+			existingMeeting.setEnableWaitingRoom(updateMeetingBasicSettingsRequest.enableWaitingRoom());
+		if (ObjectUtils.isNotEmpty(updateMeetingBasicSettingsRequest.muteParticipantsOnEntry()))
+			existingMeeting.setMuteParticipantsOnEntry(updateMeetingBasicSettingsRequest.muteParticipantsOnEntry());
+
+		try {
+			Meeting savedMeeting = meetingRepository.save(existingMeeting);
+
+			return meetingMapper.toResponse(savedMeeting);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public MeetingResponse updateMeetingTime(String id, String accountId,
+			UpdateMeetingTimeRequest updateMeetingTimeRequest) {
+		Meeting existingMeeting = retrieveMeetingById(id);
+		if (!existingMeeting.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
+		if (meetingRepository.countByPublicId(existingMeeting.getPublicId()) > 1)
+			throw new GeneralPlatformDomainRuleException("This is a recurring meeting");
+
+		if (ObjectUtils.isNotEmpty(updateMeetingTimeRequest.timezoneValue())
+				|| StringUtils.isNotBlank(updateMeetingTimeRequest.timezoneString())) {
+			if (ObjectUtils.isNotEmpty(updateMeetingTimeRequest.timezoneValue())
+					&& StringUtils.isNotBlank(updateMeetingTimeRequest.timezoneString()))
+				throw new GeneralPlatformDomainRuleException("Timezone is invalid");
+
+			Meeting.Timezone timezone = new Meeting.Timezone();
+			timezone.setRepresentation(updateMeetingTimeRequest.timezoneString());
+			timezone.setValue(updateMeetingTimeRequest.timezoneValue());
+			existingMeeting.setTimezone(timezone);
+		}
+		if (StringUtils.isNotBlank(updateMeetingTimeRequest.startTime())
+				|| StringUtils.isNotBlank(updateMeetingTimeRequest.endTime())) {
+			if (ObjectUtils.isNotEmpty(updateMeetingTimeRequest.startDate()))
+				throw new GeneralPlatformDomainRuleException("Time is invalid");
+			if (StringUtils.isNotBlank(updateMeetingTimeRequest.startTime())) {
+				LocalDateTime firstStartTime = dateConverter.mergeLocalDateAndTimeString(
+						updateMeetingTimeRequest.startDate(), updateMeetingTimeRequest.startTime());
+				existingMeeting.setStartTime(firstStartTime);
+			}
+			if (StringUtils.isNotBlank(updateMeetingTimeRequest.endTime())) {
+				LocalDateTime firstEndTime = dateConverter.mergeLocalDateAndTimeString(
+						updateMeetingTimeRequest.startDate(), updateMeetingTimeRequest.endTime());
+				existingMeeting.setEndTime(firstEndTime);
+			}
+			if (existingMeeting.getStartTime().isAfter(existingMeeting.getEndTime()))
+				throw new GeneralPlatformDomainRuleException("Start time selected cannot be after end time");
+		}
+
+		try {
+			Meeting savedMeeting = meetingRepository.save(existingMeeting);
+
+			return meetingMapper.toResponse(savedMeeting);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public MeetingResponse updateRecurringMeetingTime(String id, String accountId,
+			UpdateRecurringMeetingTimeRequest updateRecurringMeetingTimeRequest) {
+		Meeting meeting = retrieveMeetingById(id);
+		if (!meeting.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
+		if (meetingRepository.countByPublicId(meeting.getPublicId()) == 1)
+			throw new GeneralPlatformDomainRuleException("This is a non-recurring meeting");
+
+		List<Meeting> existingMeetings = List.of(meeting);
+		if (updateRecurringMeetingTimeRequest.doForAll())
+			existingMeetings = meetingRepository.findByPublicId(meeting.getPublicId());
+
+		if (ObjectUtils.isNotEmpty(updateRecurringMeetingTimeRequest.timezoneValue())
+				|| StringUtils.isNotBlank(updateRecurringMeetingTimeRequest.timezoneString())) {
+			if (ObjectUtils.isNotEmpty(updateRecurringMeetingTimeRequest.timezoneValue())
+					&& StringUtils.isNotBlank(updateRecurringMeetingTimeRequest.timezoneString()))
+				throw new GeneralPlatformDomainRuleException("Timezone is invalid");
+
+			Meeting.Timezone timezone = new Meeting.Timezone();
+			timezone.setRepresentation(updateRecurringMeetingTimeRequest.timezoneString());
+			timezone.setValue(updateRecurringMeetingTimeRequest.timezoneValue());
+			meeting.setTimezone(timezone);
+		}
+		if (ObjectUtils.isNotEmpty(updateRecurringMeetingTimeRequest.startTime())
+				|| ObjectUtils.isNotEmpty(updateRecurringMeetingTimeRequest.endTime())) {
+			if (ObjectUtils.isNotEmpty(updateRecurringMeetingTimeRequest.startTime())) {
+				LocalDateTime firstStartTime = meeting.getStartTime();
+				LocalDateTime updatedStartTime = firstStartTime.with(updateRecurringMeetingTimeRequest.startTime());
+				meeting.setStartTime(updatedStartTime);
+			}
+			if (ObjectUtils.isNotEmpty(updateRecurringMeetingTimeRequest.endTime())) {
+				LocalDateTime firstEndTime = meeting.getEndTime();
+				LocalDateTime updatedEndTime = firstEndTime.with(updateRecurringMeetingTimeRequest.endTime());
+				meeting.setEndTime(updatedEndTime);
+			}
+			if (meeting.getStartTime().isAfter(meeting.getEndTime()))
+				throw new GeneralPlatformDomainRuleException("Start time selected cannot be after end time");
+		}
+
+		List<Meeting> savedMeetings = new ArrayList<>();
+		savedMeetings.add(meeting);
+		for (Meeting existingMeeting : existingMeetings) {
+			if (ObjectUtils.isNotEmpty(updateRecurringMeetingTimeRequest.timezoneValue()))
+				existingMeeting.setTimezone(meeting.getTimezone());
+			if (ObjectUtils.isNotEmpty(updateRecurringMeetingTimeRequest.startTime())) {
+				LocalDateTime firstStartTime = existingMeeting.getStartTime();
+				LocalDateTime updatedStartTime = firstStartTime.with(updateRecurringMeetingTimeRequest.startTime());
+				existingMeeting.setStartTime(updatedStartTime);
+			}
+			if (ObjectUtils.isNotEmpty(updateRecurringMeetingTimeRequest.endTime())) {
+				LocalDateTime firstEndTime = existingMeeting.getEndTime();
+				LocalDateTime updatedEndTime = firstEndTime.with(updateRecurringMeetingTimeRequest.endTime());
+				existingMeeting.setEndTime(updatedEndTime);
+			}
+
+			savedMeetings.add(existingMeeting);
+		}
+
+		try {
+			meetingRepository.saveAll(savedMeetings);
+
+			return meetingMapper.toResponse(meeting);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
 	}
 
 	private Meeting retrieveMeetingById(String id) {

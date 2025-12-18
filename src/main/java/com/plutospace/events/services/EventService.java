@@ -34,16 +34,18 @@ public interface EventService {
 
 	EventResponse retrieveEventByForeignPublicId(String publicId, int type);
 
-	EventResponse updateEvent(String id, UpdateEventRequest updateEventRequest);
+	EventResponse updateEvent(String id, String accountId, UpdateEventRequest updateEventRequest);
 
-	EventResponse updateEventTime(String id, UpdateEventTimeRequest updateEventTimeRequest);
+	EventResponse updateEventTime(String id, String accountId, UpdateEventTimeRequest updateEventTimeRequest);
 
-	EventResponse updateEventForm(String id, UpdateEventFormRequest updateEventFormRequest);
+	EventResponse updateEventForm(String id, String accountId, UpdateEventFormRequest updateEventFormRequest);
 
-	EventResponse updateEventLocation(String id, UpdateEventLocationRequest updateEventLocationRequest);
+	EventResponse updateEventLocation(String id, String accountId,
+			UpdateEventLocationRequest updateEventLocationRequest);
 
-	EventResponse updateEventBasicSettings(String id, UpdateEventBasicSettingsRequest updateEventBasicSettingsRequest);
+	EventResponse updateEventBasicSettings(String id, String accountId,
+			UpdateEventBasicSettingsRequest updateEventBasicSettingsRequest);
 
-	EventResponse updateEventPaymentDetails(String id,
+	EventResponse updateEventPaymentDetails(String id, String accountId,
 			UpdateEventPaymentSettingsRequest updateEventPaymentSettingsRequest);
 }

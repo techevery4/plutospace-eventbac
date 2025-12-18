@@ -27,8 +27,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
-import static com.plutospace.events.commons.definitions.ApiResourceConstants.ADMIN_USERS;
-import static com.plutospace.events.commons.definitions.ApiResourceConstants.ADMIN_USERS_RESOURCE_ID;
+import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
 
 @RestController
 @RequestMapping(ADMIN_USERS)
@@ -89,5 +88,23 @@ public class AdminUserApiResource {
 	public ResponseEntity<CustomPageResponse<AdminUserResponse>> retrieveAdminUsers(
 			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(adminUserService.retrieveAdminUsers(pageNo, pageSize));
+	}
+
+	@GetMapping(path = RESOURCE_ID + "/activate", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint activates an admin user")
+	public ResponseEntity<OperationalResponse> activateAdminUser(@PathVariable String id) {
+		return ResponseEntity.ok(adminUserService.activateAdminUser(id));
+	}
+
+	@GetMapping(path = RESOURCE_ID + "/deactivate", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint deactivates an admin user")
+	public ResponseEntity<OperationalResponse> deactivateAdminUser(@PathVariable String id) {
+		return ResponseEntity.ok(adminUserService.deactivateAdminUser(id));
+	}
+
+	@DeleteMapping(path = RESOURCE_ID, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint deletes a pending admin user")
+	public ResponseEntity<OperationalResponse> deletePendingAdminUser(@PathVariable String id) {
+		return ResponseEntity.ok(adminUserService.deletePendingAdminUser(id));
 	}
 }

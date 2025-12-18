@@ -24,10 +24,7 @@ import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.HashPassword;
 import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.PlanType;
-import com.plutospace.events.domain.data.request.CreateAccountSessionRequest;
-import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
-import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
-import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
+import com.plutospace.events.domain.data.request.*;
 import com.plutospace.events.domain.data.response.AccountResponse;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
@@ -88,6 +85,8 @@ public class AccountUserServiceImpl implements AccountUserService {
 		Account account = new Account();
 		account.setPlanId(request.planId());
 		account.setNumberOfMembers(1L);
+		account.setIsDefaulted(true);
+		account.setPlanDueDate(LocalDateTime.now());
 
 		try {
 			AccountUser savedAccountUser = accountUserRepository.save(accountUser);
@@ -122,6 +121,8 @@ public class AccountUserServiceImpl implements AccountUserService {
 		Account account = new Account();
 		account.setPlanId(request.planId());
 		account.setNumberOfMembers(1L);
+		account.setIsDefaulted(true);
+		account.setPlanDueDate(LocalDateTime.now());
 
 		try {
 			AccountUser savedAccountUser = accountUserRepository.save(accountUser);
@@ -168,6 +169,27 @@ public class AccountUserServiceImpl implements AccountUserService {
 		accountSessionService.createSession(createAccountSessionRequest);
 
 		return accountUserMapper.toResponse(accountUser);
+	}
+
+	@Override
+	public OperationalResponse changeAccountUserPassword(
+			ChangeAccountUserPasswordRequest changeAccountUserPasswordRequest, String accountUserId)
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
+		accountUserValidator.validate(changeAccountUserPasswordRequest);
+		AccountUser accountUser = retrieveAccountUserById(accountUserId);
+
+		if (!hashPassword.validatePass(changeAccountUserPasswordRequest.oldPassword(), accountUser.getPassword()))
+			throw new GeneralPlatformDomainRuleException("Old Password is incorrect");
+
+		accountUser.setPassword(hashPassword.hashPass(changeAccountUserPasswordRequest.newPassword()));
+
+		try {
+			accountUserRepository.save(accountUser);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
 	}
 
 	@Override

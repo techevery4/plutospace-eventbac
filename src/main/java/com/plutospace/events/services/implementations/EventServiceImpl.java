@@ -19,6 +19,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
+import com.plutospace.events.commons.exception.GeneralPlatformServiceException;
 import com.plutospace.events.commons.exception.ResourceNotFoundException;
 import com.plutospace.events.commons.utils.CurrencyManager;
 import com.plutospace.events.commons.utils.DateConverter;
@@ -311,8 +312,10 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public EventResponse updateEvent(String id, UpdateEventRequest updateEventRequest) {
+	public EventResponse updateEvent(String id, String accountId, UpdateEventRequest updateEventRequest) {
 		Event existingEvent = retrieveEventById(id);
+		if (!existingEvent.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (StringUtils.isNotBlank(updateEventRequest.categoryId()))
 			existingEvent.setCategoryId(updateEventRequest.categoryId());
@@ -338,8 +341,10 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public EventResponse updateEventTime(String id, UpdateEventTimeRequest updateEventTimeRequest) {
+	public EventResponse updateEventTime(String id, String accountId, UpdateEventTimeRequest updateEventTimeRequest) {
 		Event existingEvent = retrieveEventById(id);
+		if (!existingEvent.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (StringUtils.isNotBlank(updateEventTimeRequest.timezoneString())
 				|| ObjectUtils.isNotEmpty(updateEventTimeRequest.timezoneValue())) {
@@ -394,8 +399,10 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public EventResponse updateEventForm(String id, UpdateEventFormRequest updateEventFormRequest) {
+	public EventResponse updateEventForm(String id, String accountId, UpdateEventFormRequest updateEventFormRequest) {
 		Event existingEvent = retrieveEventById(id);
+		if (!existingEvent.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (updateEventFormRequest.eventFormRequests().isEmpty())
 			throw new GeneralPlatformDomainRuleException("Kindly create at least one form field");
@@ -418,8 +425,11 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public EventResponse updateEventLocation(String id, UpdateEventLocationRequest updateEventLocationRequest) {
+	public EventResponse updateEventLocation(String id, String accountId,
+			UpdateEventLocationRequest updateEventLocationRequest) {
 		Event existingEvent = retrieveEventById(id);
+		if (!existingEvent.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (StringUtils.isNotBlank(updateEventLocationRequest.virtualRoomName()))
 			existingEvent.setVirtualRoomName(updateEventLocationRequest.virtualRoomName());
@@ -456,9 +466,11 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public EventResponse updateEventBasicSettings(String id,
+	public EventResponse updateEventBasicSettings(String id, String accountId,
 			UpdateEventBasicSettingsRequest updateEventBasicSettingsRequest) {
 		Event existingEvent = retrieveEventById(id);
+		if (!existingEvent.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (ObjectUtils.isNotEmpty(updateEventBasicSettingsRequest.requireApproval()))
 			existingEvent.setRequireApproval(updateEventBasicSettingsRequest.requireApproval());
@@ -508,9 +520,11 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public EventResponse updateEventPaymentDetails(String id,
+	public EventResponse updateEventPaymentDetails(String id, String accountId,
 			UpdateEventPaymentSettingsRequest updateEventPaymentSettingsRequest) {
 		Event existingEvent = retrieveEventById(id);
+		if (!existingEvent.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		if (ObjectUtils.isEmpty(updateEventPaymentSettingsRequest.isPaidEvent()))
 			throw new GeneralPlatformDomainRuleException("Please specify whether it is a paid event or not");

@@ -18,7 +18,7 @@ public interface AdminUserService {
 			throws NoSuchAlgorithmException, InvalidKeySpecException;
 
 	OperationalResponse changeAdminUserPassword(ChangeAdminUserPasswordRequest changeAdminUserPasswordRequest,
-			String accountId) throws NoSuchAlgorithmException, InvalidKeySpecException;
+			String adminUserId) throws NoSuchAlgorithmException, InvalidKeySpecException;
 
 	AdminUserResponse login(LoginAdminUserRequest loginAdminUserRequest)
 			throws NoSuchAlgorithmException, InvalidKeySpecException;

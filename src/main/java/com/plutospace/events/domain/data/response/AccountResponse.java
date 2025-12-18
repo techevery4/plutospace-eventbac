@@ -23,5 +23,8 @@ public class AccountResponse {
 	private Boolean isDefaulted;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime planDueDate;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdOn;
 }

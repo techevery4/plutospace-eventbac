@@ -53,7 +53,9 @@ public class ProposalApiResource {
 	@Operation(description = "This endpoint updates a proposal")
 	public ResponseEntity<ProposalResponse> updateProposal(@PathVariable String id,
 			@RequestBody CreateProposalRequest createProposalRequest) {
-		return ResponseEntity.ok(proposalService.updateProposal(id, createProposalRequest.title()));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(proposalService.updateProposal(id, accountId, createProposalRequest.title()));
 	}
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -84,13 +86,17 @@ public class ProposalApiResource {
 	@GetMapping(path = RESOURCE_ID + "/open", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint opens a proposal for submissions")
 	public ResponseEntity<OperationalResponse> openProposal(@PathVariable String id) {
-		return ResponseEntity.ok(proposalService.openProposal(id));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(proposalService.openProposal(id, accountId));
 	}
 
 	@GetMapping(path = RESOURCE_ID + "/close", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint closes a proposal for submission")
 	public ResponseEntity<OperationalResponse> closeProposal(@PathVariable String id) {
-		return ResponseEntity.ok(proposalService.closeProposal(id));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(proposalService.closeProposal(id, accountId));
 	}
 
 	@GetMapping(path = "/details", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -118,7 +124,9 @@ public class ProposalApiResource {
 	@DeleteMapping(path = RESOURCE_ID, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint deletes a proposal")
 	public ResponseEntity<OperationalResponse> deleteProposal(@PathVariable String id) {
-		return ResponseEntity.ok(proposalService.deleteProposal(id));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(proposalService.deleteProposal(id, accountId));
 	}
 
 	@PostMapping(path = "/submissions/search", produces = MediaType.APPLICATION_JSON_VALUE)

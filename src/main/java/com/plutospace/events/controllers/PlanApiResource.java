@@ -11,6 +11,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.commons.definitions.GeneralConstants;
+import com.plutospace.events.commons.definitions.PropertyConstants;
+import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.request.PlanRequest;
 import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.data.response.PlanResponse;
@@ -18,6 +21,7 @@ import com.plutospace.events.services.PlanService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
@@ -29,6 +33,9 @@ import static com.plutospace.events.commons.definitions.ApiResourceConstants.*;
 public class PlanApiResource {
 
 	private final PlanService planService;
+	private final SecurityMapper securityMapper;
+	private final PropertyConstants propertyConstants;
+	private final HttpServletRequest request;
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint creates a new plan on PlutoSpace Events")
@@ -91,5 +98,13 @@ public class PlanApiResource {
 	public ResponseEntity<CustomPageResponse<PlanResponse>> searchPlan(@RequestParam(name = "text") String text,
 			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(planService.searchPlan(text, pageNo, pageSize));
+	}
+
+	@GetMapping(path = RESOURCE_ID + "/check-compatibility", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint checks the compatibility of new plan with user current plan")
+	public ResponseEntity<OperationalResponse> checkPlansCompatibility(@PathVariable String id) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(planService.checkPlansCompatibility(accountId, id));
 	}
 }

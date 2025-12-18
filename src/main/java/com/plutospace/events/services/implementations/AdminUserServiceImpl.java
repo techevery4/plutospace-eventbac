@@ -75,17 +75,22 @@ public class AdminUserServiceImpl implements AdminUserService {
 
 	@Override
 	public OperationalResponse changeAdminUserPassword(ChangeAdminUserPasswordRequest changeAdminUserPasswordRequest,
-			String accountId) throws NoSuchAlgorithmException, InvalidKeySpecException {
+			String adminUserId) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		adminUserValidator.validate(changeAdminUserPasswordRequest);
-		AdminUser adminUser = retrieveAdminUserById(accountId);
+		AdminUser adminUser = retrieveAdminUserById(adminUserId);
 
 		if (!hashPassword.validatePass(changeAdminUserPasswordRequest.oldPassword(), adminUser.getPassword()))
 			throw new GeneralPlatformDomainRuleException("Old Password is incorrect");
 
 		adminUser.setPassword(hashPassword.hashPass(changeAdminUserPasswordRequest.newPassword()));
-		adminUserRepository.save(adminUser);
 
-		return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		try {
+			adminUserRepository.save(adminUser);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
 	}
 
 	@Override

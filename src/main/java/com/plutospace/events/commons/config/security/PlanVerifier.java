@@ -99,6 +99,11 @@ public class PlanVerifier {
 	private Boolean checkEventFeature(String accountId, LocalDateTime startTime, LocalDateTime endTime,
 			PlanResponse planResponse, String endpoint, String method) {
 		if (endpoint.equals(EVENTS) && method.equalsIgnoreCase(GeneralConstants.POST)) {
+			if (planResponse.getPriceNaira() == 0 && planResponse.getPriceUsd() == 0) {
+				Long eventCount = eventRepository.countByAccountId(accountId);
+				if (eventCount >= 1)
+					throw new GeneralPlatformServiceException(GeneralConstants.PLAN_UPGRADE_MESSAGE);
+			}
 			Long eventCount = eventRepository.countByAccountIdAndCreatedOnBetween(accountId, startTime, endTime);
 			if (ObjectUtils.isEmpty(planResponse.getFeatures().getEventFeature().getNumberAllowed())
 					|| planResponse.getFeatures().getEventFeature().getNumberAllowed() <= eventCount)

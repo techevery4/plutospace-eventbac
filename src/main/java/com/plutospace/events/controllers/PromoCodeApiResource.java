@@ -10,6 +10,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.domain.data.request.CreatePromoCodeRequest;
+import com.plutospace.events.domain.data.request.RegisterWithPromoCodeRequest;
 import com.plutospace.events.domain.data.request.RenewPromoCodeRequest;
 import com.plutospace.events.domain.data.response.*;
 import com.plutospace.events.services.PromoCodeService;
@@ -52,6 +53,13 @@ public class PromoCodeApiResource {
 	public ResponseEntity<CustomPageResponse<PromoCodeResponse>> retrievePromoCodes(
 			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(promoCodeService.retrievePromoCodes(pageNo, pageSize));
+	}
+
+	@PostMapping(path = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint registers promo code usage during user registration")
+	public ResponseEntity<OperationalResponse> registerWithPromoCode(
+			@RequestBody RegisterWithPromoCodeRequest registerWithPromoCodeRequest) {
+		return ResponseEntity.ok(promoCodeService.registerWithPromoCode(registerWithPromoCodeRequest));
 	}
 
 	@GetMapping(path = "/logs", produces = MediaType.APPLICATION_JSON_VALUE)

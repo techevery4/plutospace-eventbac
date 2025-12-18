@@ -29,4 +29,6 @@ public interface PlanService {
 	OperationalResponse setPlanAsInactive(String id);
 
 	CustomPageResponse<PlanResponse> searchPlan(String text, int pageNo, int pageSize);
+
+	OperationalResponse checkPlansCompatibility(String accountId, String newPlanId);
 }

@@ -13,7 +13,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.utils.SecurityMapper;
-import com.plutospace.events.domain.data.request.CreateMeetingRequest;
+import com.plutospace.events.domain.data.request.*;
 import com.plutospace.events.domain.data.response.MeetingResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.services.MeetingService;
@@ -102,5 +102,46 @@ public class MeetingApiResource {
 		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
 				propertyConstants.getEventsLoginEncryptionSecretKey());
 		return ResponseEntity.ok(meetingService.startRecordingMeeting(accountUserId, pid));
+	}
+
+	@PutMapping(path = RESOURCE_ID, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint updates a meeting on PlutoSpace Events")
+	public ResponseEntity<MeetingResponse> updateMeeting(@PathVariable String id,
+			@RequestBody UpdateMeetingRequest updateMeetingRequest) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(meetingService.updateMeeting(id, accountId, updateMeetingRequest));
+	}
+
+	@PutMapping(path = RESOURCE_ID
+			+ "/basic-setting", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint updates a meeting basic setting on PlutoSpace Events")
+	public ResponseEntity<MeetingResponse> updateMeetingBasicSetting(@PathVariable String id,
+			@RequestBody UpdateMeetingBasicSettingsRequest updateMeetingBasicSettingsRequest) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity
+				.ok(meetingService.updateMeetingBasicSetting(id, accountId, updateMeetingBasicSettingsRequest));
+	}
+
+	@PutMapping(path = RESOURCE_ID
+			+ "/time", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint updates a meeting time on PlutoSpace Events")
+	public ResponseEntity<MeetingResponse> updateMeetingTime(@PathVariable String id,
+			@RequestBody UpdateMeetingTimeRequest updateMeetingTimeRequest) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(meetingService.updateMeetingTime(id, accountId, updateMeetingTimeRequest));
+	}
+
+	@PutMapping(path = RESOURCE_ID
+			+ "/recurring-time", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint updates a recurring meeting time on PlutoSpace Events")
+	public ResponseEntity<MeetingResponse> updateRecurringMeetingTime(@PathVariable String id,
+			@RequestBody UpdateRecurringMeetingTimeRequest updateRecurringMeetingTimeRequest) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity
+				.ok(meetingService.updateRecurringMeetingTime(id, accountId, updateRecurringMeetingTimeRequest));
 	}
 }

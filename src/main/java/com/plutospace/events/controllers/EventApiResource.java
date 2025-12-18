@@ -92,7 +92,9 @@ public class EventApiResource {
 	@Operation(description = "This endpoint updates an event on PlutoSpace Events")
 	public ResponseEntity<EventResponse> updateEvent(@PathVariable String id,
 			@RequestBody UpdateEventRequest updateEventRequest) {
-		return ResponseEntity.ok(eventService.updateEvent(id, updateEventRequest));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(eventService.updateEvent(id, accountId, updateEventRequest));
 	}
 
 	@PutMapping(path = RESOURCE_ID
@@ -100,7 +102,9 @@ public class EventApiResource {
 	@Operation(description = "This endpoint updates an event time on PlutoSpace Events")
 	public ResponseEntity<EventResponse> updateEventTime(@PathVariable String id,
 			@RequestBody UpdateEventTimeRequest updateEventTimeRequest) {
-		return ResponseEntity.ok(eventService.updateEventTime(id, updateEventTimeRequest));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(eventService.updateEventTime(id, accountId, updateEventTimeRequest));
 	}
 
 	@PutMapping(path = RESOURCE_ID
@@ -108,7 +112,9 @@ public class EventApiResource {
 	@Operation(description = "This endpoint updates an event form on PlutoSpace Events")
 	public ResponseEntity<EventResponse> updateEventForm(@PathVariable String id,
 			@RequestBody UpdateEventFormRequest updateEventFormRequest) {
-		return ResponseEntity.ok(eventService.updateEventForm(id, updateEventFormRequest));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(eventService.updateEventForm(id, accountId, updateEventFormRequest));
 	}
 
 	@PutMapping(path = RESOURCE_ID
@@ -116,7 +122,9 @@ public class EventApiResource {
 	@Operation(description = "This endpoint updates an event location on PlutoSpace Events")
 	public ResponseEntity<EventResponse> updateEventLocation(@PathVariable String id,
 			@RequestBody UpdateEventLocationRequest updateEventLocationRequest) {
-		return ResponseEntity.ok(eventService.updateEventLocation(id, updateEventLocationRequest));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(eventService.updateEventLocation(id, accountId, updateEventLocationRequest));
 	}
 
 	@PutMapping(path = RESOURCE_ID
@@ -124,7 +132,9 @@ public class EventApiResource {
 	@Operation(description = "This endpoint updates an event basic settings on PlutoSpace Events")
 	public ResponseEntity<EventResponse> updateEventBasicSettings(@PathVariable String id,
 			@RequestBody UpdateEventBasicSettingsRequest updateEventBasicSettingsRequest) {
-		return ResponseEntity.ok(eventService.updateEventBasicSettings(id, updateEventBasicSettingsRequest));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(eventService.updateEventBasicSettings(id, accountId, updateEventBasicSettingsRequest));
 	}
 
 	@PutMapping(path = RESOURCE_ID
@@ -132,7 +142,10 @@ public class EventApiResource {
 	@Operation(description = "This endpoint updates an event payment details on PlutoSpace Events")
 	public ResponseEntity<EventResponse> updateEventPaymentDetails(@PathVariable String id,
 			@RequestBody UpdateEventPaymentSettingsRequest updateEventPaymentSettingsRequest) {
-		return ResponseEntity.ok(eventService.updateEventPaymentDetails(id, updateEventPaymentSettingsRequest));
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity
+				.ok(eventService.updateEventPaymentDetails(id, accountId, updateEventPaymentSettingsRequest));
 	}
 
 	@GetMapping(path = "/upcoming", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -39,4 +39,5 @@ public class ApiResourceConstants {
 	public static final String PROPOSALS_RESOURCE_ID = PROPOSALS + RESOURCE_ID;
 	public static final String MEDIA = API_VERSION + "/media";
 	public static final String MEDIA_RESOURCE_ID = MEDIA + RESOURCE_ID;
+	public static final String PLAN_PAYMENT_HISTORIES = API_VERSION + "/plan-payment-histories";
 }

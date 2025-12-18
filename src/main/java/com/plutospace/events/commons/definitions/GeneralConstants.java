@@ -8,6 +8,7 @@ public class GeneralConstants {
 
 	public static final String SUCCESS_MESSAGE = "Request Processed Successfully";
 	public static final String PLAN_UPGRADE_MESSAGE = "Please upgrade your plan to access this feature";
+	public static final String MODIFY_NOT_ALLOWED_MESSAGE = "This process appears to be broken";
 	public static final String PERMISSION_ALLOW_MESSAGE = "Permission Allowed";
 	public static final String ENCRYPTION_TYPE = "AES";
 	public static final String CONTENT_TYPE = "UTF-8";
@@ -29,4 +30,9 @@ public class GeneralConstants {
 	public static final String PUT = "PUT";
 	public static final String PATCH = "PATCH";
 	public static final String DELETE = "DELETE";
+	public static final int ATTEMPTS_BEFORE_BLOCKING = 5;
+	public static final String PAYSTACK_KEY = "pe-paystack";
+	public static final String PAYSTACK = "PAYSTACK";
+	public static final int PLAN_LIFETIME = 30; // 30 days
+	public static final int PAYMENT_RECONCILIATION_PERIOD = 30; // 30 minutes
 }

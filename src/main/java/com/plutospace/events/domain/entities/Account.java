@@ -1,6 +1,8 @@
 /* Developed by TechEveryWhere Engineering (C)2025 */
 package com.plutospace.events.domain.entities;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.plutospace.events.commons.entities.BaseEntity;
@@ -21,4 +23,5 @@ public class Account extends BaseEntity {
 	private String accountOwner; // id of the customer that created the account
 	private Long numberOfMembers;
 	private Boolean isDefaulted;
+	private LocalDateTime planDueDate;
 }

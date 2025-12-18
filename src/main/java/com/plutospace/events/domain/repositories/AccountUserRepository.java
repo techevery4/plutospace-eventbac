@@ -25,4 +25,6 @@ public interface AccountUserRepository extends BaseRepository<AccountUser, Strin
 	List<AccountUser> findByIdIn(List<String> ids);
 
 	Page<AccountUser> findByAccountIdOrderByLastNameAsc(String accountId, Pageable pageable);
+
+	Long countByAccountId(String accountId);
 }

@@ -15,9 +15,7 @@ import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.utils.SecurityMapper;
-import com.plutospace.events.domain.data.request.LoginAccountUserRequest;
-import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
-import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
+import com.plutospace.events.domain.data.request.*;
 import com.plutospace.events.domain.data.response.AccountResponse;
 import com.plutospace.events.domain.data.response.AccountUserResponse;
 import com.plutospace.events.domain.data.response.OperationalResponse;
@@ -89,6 +87,17 @@ public class AccountUserApiResource {
 	public ResponseEntity<AccountUserResponse> login(@RequestBody LoginAccountUserRequest loginAccountUserRequest)
 			throws NoSuchAlgorithmException, InvalidKeySpecException {
 		return ResponseEntity.ok(accountUserService.login(loginAccountUserRequest));
+	}
+
+	@PostMapping(path = "/change-password", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint changes the password of an account user")
+	public ResponseEntity<OperationalResponse> changeAccountUserPassword(
+			@RequestBody ChangeAccountUserPasswordRequest changeAccountUserPasswordRequest)
+			throws NoSuchAlgorithmException, InvalidKeySpecException {
+		String accountUserId = securityMapper.retrieveAccountUserId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity
+				.ok(accountUserService.changeAccountUserPassword(changeAccountUserPasswordRequest, accountUserId));
 	}
 
 	@GetMapping(path = "/check-user", produces = MediaType.APPLICATION_JSON_VALUE)

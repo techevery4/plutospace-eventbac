@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
+import com.plutospace.events.domain.data.request.ChangeAccountUserPasswordRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
 
@@ -65,6 +66,27 @@ public class AccountUserValidator {
 		}
 		if (!registerBusinessAccountRequest.password().equals(registerBusinessAccountRequest.confirmPassword())) {
 			throw new GeneralPlatformDomainRuleException(passwordDoesNotMatchValidationMessage);
+		}
+	}
+
+	public void validate(ChangeAccountUserPasswordRequest changeAccountUserPasswordRequest) {
+		String oldPasswordCannotBeNullValidationMessage = "Old Password cannot be null";
+		String oldPasswordCannotBeNewPasswordValidationMessage = "Old Password cannot be equal to new password";
+		String passwordCannotBeNullValidationMessage = "New Password cannot be null";
+		String passwordDoesNotMatchValidationMessage = "Password does not match";
+
+		if (StringUtils.isBlank(changeAccountUserPasswordRequest.oldPassword())) {
+			throw new GeneralPlatformDomainRuleException(oldPasswordCannotBeNullValidationMessage);
+		}
+		if (StringUtils.isBlank(changeAccountUserPasswordRequest.newPassword())) {
+			throw new GeneralPlatformDomainRuleException(passwordCannotBeNullValidationMessage);
+		}
+		if (!changeAccountUserPasswordRequest.newPassword()
+				.equals(changeAccountUserPasswordRequest.confirmPassword())) {
+			throw new GeneralPlatformDomainRuleException(passwordDoesNotMatchValidationMessage);
+		}
+		if (changeAccountUserPasswordRequest.newPassword().equals(changeAccountUserPasswordRequest.oldPassword())) {
+			throw new GeneralPlatformDomainRuleException(oldPasswordCannotBeNewPasswordValidationMessage);
 		}
 	}
 

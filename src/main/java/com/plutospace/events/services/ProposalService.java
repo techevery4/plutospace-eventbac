@@ -14,7 +14,7 @@ public interface ProposalService {
 
 	ProposalResponse createProposal(CreateProposalRequest createProposalRequest, String accountId);
 
-	ProposalResponse updateProposal(String id, String title);
+	ProposalResponse updateProposal(String id, String accountId, String title);
 
 	CustomPageResponse<ProposalResponse> retrieveProposals(String accountId, int pageNo, int pageSize);
 
@@ -22,9 +22,9 @@ public interface ProposalService {
 
 	List<ProposalResponse> retrieveProposal(List<String> ids);
 
-	OperationalResponse openProposal(String id);
+	OperationalResponse openProposal(String id, String accountId);
 
-	OperationalResponse closeProposal(String id);
+	OperationalResponse closeProposal(String id, String accountId);
 
 	ProposalResponse retrieveProposalByPublicId(String publicId);
 
@@ -33,7 +33,7 @@ public interface ProposalService {
 
 	CustomPageResponse<ProposalSubmissionResponse> retrieveSubmittedProposals(String id, int pageNo, int pageSize);
 
-	OperationalResponse deleteProposal(String id);
+	OperationalResponse deleteProposal(String id, String accountId);
 
 	List<ProposalSubmissionResponse> searchProposalSubmissions(String accountId, String proposalId, List<String> texts,
 			int pageNo, int pageSize);

@@ -2,6 +2,7 @@
 package com.plutospace.events.services.implementations;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +22,11 @@ import com.plutospace.events.domain.data.PlanType;
 import com.plutospace.events.domain.data.request.PlanRequest;
 import com.plutospace.events.domain.data.response.OperationalResponse;
 import com.plutospace.events.domain.data.response.PlanResponse;
+import com.plutospace.events.domain.entities.Account;
 import com.plutospace.events.domain.entities.Plan;
+import com.plutospace.events.domain.repositories.AccountRepository;
+import com.plutospace.events.domain.repositories.AccountSessionRepository;
+import com.plutospace.events.domain.repositories.AccountUserRepository;
 import com.plutospace.events.domain.repositories.PlanRepository;
 import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.PlanService;
@@ -38,6 +43,9 @@ public class PlanServiceImpl implements PlanService {
 
 	private final PlanValidator planValidator;
 	private final PlanRepository planRepository;
+	private final AccountRepository accountRepository;
+	private final AccountSessionRepository accountSessionRepository;
+	private final AccountUserRepository accountUserRepository;
 	private final PlanMapper planMapper;
 	private final DatabaseSearchService databaseSearchService;
 	private static final String PLAN_EXISTS = "Plan already exists";
@@ -185,6 +193,37 @@ public class PlanServiceImpl implements PlanService {
 		Page<Plan> plans = databaseSearchService.findPlanByDynamicFilter(text, fields, pageable);
 
 		return planMapper.toPagedResponse(plans);
+	}
+
+	@Override
+	public OperationalResponse checkPlansCompatibility(String accountId, String newPlanId) {
+		Plan newPlan = retrievePlanById(newPlanId);
+		if (ObjectUtils.isEmpty(newPlan.getIsActive()) || !newPlan.getIsActive())
+			throw new GeneralPlatformDomainRuleException("This plan is not active");
+
+		Optional<Account> accountOptional = accountRepository.findById(accountId);
+		if (accountOptional.isEmpty())
+			throw new ResourceNotFoundException("Account Not Found");
+		Plan oldPlan = retrievePlanById(accountOptional.get().getPlanId());
+
+		if (newPlan.getFeatures().getAccountFeature().getNumberOfSessions() < oldPlan.getFeatures().getAccountFeature()
+				.getNumberOfSessions()) {
+			Long sessionCount = accountSessionRepository.countByAccountId(accountId);
+			if (newPlan.getFeatures().getAccountFeature().getNumberOfSessions() < sessionCount)
+				throw new GeneralPlatformDomainRuleException("Please logout from at least "
+						+ (sessionCount - newPlan.getFeatures().getAccountFeature().getNumberOfSessions())
+						+ " session(s) before purchasing this plan");
+		}
+		if (newPlan.getFeatures().getAccountFeature().getNumberOfInvites() < oldPlan.getFeatures().getAccountFeature()
+				.getNumberOfInvites()) {
+			Long userCount = accountUserRepository.countByAccountId(accountId);
+			if (newPlan.getFeatures().getAccountFeature().getNumberOfInvites() < userCount)
+				throw new GeneralPlatformDomainRuleException("Please remove at least "
+						+ (userCount - newPlan.getFeatures().getAccountFeature().getNumberOfInvites())
+						+ " user(s) before purchasing this plan");
+		}
+
+		return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
 	}
 
 	private Plan retrievePlanById(String id) {

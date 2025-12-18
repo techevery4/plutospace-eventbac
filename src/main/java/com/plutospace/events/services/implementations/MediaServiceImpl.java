@@ -160,8 +160,10 @@ public class MediaServiceImpl implements MediaService {
 	}
 
 	@Override
-	public OperationalResponse deleteMedia(String id) {
+	public OperationalResponse deleteMedia(String id, String accountId) {
 		Media existingMedia = retrieveMediaById(id);
+		if (!existingMedia.getAccountId().equals(accountId))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
 
 		try {
 			mediaRepository.delete(existingMedia);
