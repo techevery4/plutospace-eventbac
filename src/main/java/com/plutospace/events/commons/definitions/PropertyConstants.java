@@ -48,4 +48,28 @@ public class PropertyConstants {
 
 	@Value("${paystack.base-url}")
 	private String paystackBaseUrl;
+
+	@Value("${frontend.base-url}")
+	private String frontendBaseUrl;
+
+	@Value("${invite-user.url}")
+	private String inviteUserUrl;
+
+	@Value("${go-mailer.base-url}")
+	private String goMailerBaseUrl;
+
+	@Value("${go-mailer.transactionals-api.url}")
+	private String goMailerTransactionalUrl;
+
+	@Value("${go-mailer.api-key}")
+	private String goMailerApiKey;
+
+	@Value("${go-mailer.sender-email}")
+	private String goMailerSenderEmail;
+
+	@Value("${go-mailer.template-code.user-invite}")
+	private String goMailerUserInviteTemplateCode;
+
+	@Value("${techeverywhere.support-email}")
+	private String techEveryWhereSupportEmail;
 }

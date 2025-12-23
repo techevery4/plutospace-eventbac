@@ -32,4 +32,6 @@ public class AccountUser extends BaseEntity {
 	private String imageUrl;
 
 	private LocalDateTime lastLogin;
+
+	private Boolean isActive;
 }

@@ -142,4 +142,37 @@ public class AccountUserApiResource {
 			@RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(accountUserService.searchAccountUser(text, pageNo, pageSize));
 	}
+
+	@PostMapping(path = "/invite", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint invites an account user")
+	public ResponseEntity<AccountUserResponse> inviteAccountUser(
+			@RequestBody InviteAccountUserRequest inviteAccountUserRequest) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(accountUserService.inviteAccountUser(inviteAccountUserRequest, accountId));
+	}
+
+	@PostMapping(path = "/reinvite", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint reinvites account users")
+	public ResponseEntity<OperationalResponse> reInviteAccountUser(@RequestBody List<String> ids) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(accountUserService.reInviteAccountUser(ids, accountId));
+	}
+
+	@GetMapping(path = RESOURCE_ID + "/activate", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint activates an account user")
+	public ResponseEntity<OperationalResponse> activateAccountUser(@PathVariable String id) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(accountUserService.activateAccountUser(id, accountId));
+	}
+
+	@GetMapping(path = RESOURCE_ID + "/deactivate", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(description = "This endpoint deactivates an account user")
+	public ResponseEntity<OperationalResponse> deactivateAccountUser(@PathVariable String id) {
+		String accountId = securityMapper.retrieveAccountId(request.getHeader(GeneralConstants.TOKEN_KEY),
+				propertyConstants.getEventsLoginEncryptionSecretKey());
+		return ResponseEntity.ok(accountUserService.deactivateAccountUser(id, accountId));
+	}
 }

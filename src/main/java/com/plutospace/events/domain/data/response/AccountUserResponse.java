@@ -31,4 +31,6 @@ public class AccountUserResponse {
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime lastLogin;
+
+	private Boolean isActive;
 }

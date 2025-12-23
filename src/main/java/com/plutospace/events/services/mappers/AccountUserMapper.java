@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.plutospace.events.commons.data.CustomPageResponse;
+import com.plutospace.events.domain.data.request.InviteAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
 import com.plutospace.events.domain.data.response.AccountResponse;
@@ -23,7 +24,8 @@ public class AccountUserMapper {
 	public AccountUserResponse toResponse(AccountUser accountUser) {
 		return AccountUserResponse.instance(accountUser.getId(), accountUser.getAccountId(), accountUser.getFirstName(),
 				accountUser.getLastName(), accountUser.getName(), accountUser.getEmail(), accountUser.getImageId(),
-				accountUser.getImageUrl(), accountUser.getCreatedOn(), accountUser.getLastLogin());
+				accountUser.getImageUrl(), accountUser.getCreatedOn(), accountUser.getLastLogin(),
+				accountUser.getIsActive());
 	}
 
 	public AccountResponse toResponse(Account account, AccountUserResponse accountUserResponse,
@@ -36,12 +38,18 @@ public class AccountUserMapper {
 	public AccountUser toEntity(RegisterPersonalAccountRequest registerPersonalAccountRequest) {
 		return AccountUser.instance(null, registerPersonalAccountRequest.firstName(),
 				registerPersonalAccountRequest.lastName(), null, registerPersonalAccountRequest.email(), null, null,
-				null, null);
+				null, null, true);
 	}
 
 	public AccountUser toEntity(RegisterBusinessAccountRequest registerBusinessAccountRequest) {
 		return AccountUser.instance(null, null, null, registerBusinessAccountRequest.name(),
-				registerBusinessAccountRequest.email(), null, null, null, null);
+				registerBusinessAccountRequest.email(), null, null, null, null, true);
+	}
+
+	public AccountUser toEntity(InviteAccountUserRequest inviteAccountUserRequest, String accountId) {
+		return AccountUser.instance(accountId, inviteAccountUserRequest.firstName(),
+				inviteAccountUserRequest.lastName(), null, inviteAccountUserRequest.email(), null, null, null, null,
+				false);
 	}
 
 	public CustomPageResponse<AccountUserResponse> toPagedResponse(Page<AccountUser> accountUsers) {

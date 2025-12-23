@@ -39,17 +39,20 @@ public class MediaApiResource {
 	private final PropertyConstants propertyConstants;
 	private final HttpServletRequest request;
 
-	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(description = "This endpoint uploads a new media on PlutoSpace Events")
 	public ResponseEntity<MediaResponse> save(@RequestBody UploadMediaRequest uploadMediaRequest,
 			@RequestParam(name = "file", required = false) MultipartFile multipartFile,
 			@RequestParam(name = "type", required = false) String type,
+			@RequestParam(name = "accountId", required = false) String accountId,
 			@RequestParam(name = "size", required = false) Long size, UriComponentsBuilder uriComponentsBuilder) {
 		uploadMediaRequest.setMultipartFile(multipartFile);
 		if (StringUtils.isNotBlank(type))
 			uploadMediaRequest.setType(type);
 		if (ObjectUtils.isNotEmpty(size))
 			uploadMediaRequest.setSize(size);
+		if (StringUtils.isNotBlank(accountId))
+			uploadMediaRequest.setAccountId(accountId);
 
 		MediaResponse mediaResponse = mediaService.saveMedia(uploadMediaRequest);
 
@@ -59,17 +62,20 @@ public class MediaApiResource {
 		return ResponseEntity.created(uri).body(mediaResponse);
 	}
 
-	@PostMapping(path = "/large", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/large", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(description = "This endpoint uploads a new large media on PlutoSpace Events")
 	public ResponseEntity<MediaResponse> saveLargeMediaFiles(@RequestBody UploadMediaRequest uploadMediaRequest,
 			@RequestParam(name = "file", required = false) MultipartFile multipartFile,
 			@RequestParam(name = "type", required = false) String type,
+			@RequestParam(name = "accountId", required = false) String accountId,
 			@RequestParam(name = "size", required = false) Long size, UriComponentsBuilder uriComponentsBuilder) {
 		uploadMediaRequest.setMultipartFile(multipartFile);
 		if (StringUtils.isNotBlank(type))
 			uploadMediaRequest.setType(type);
 		if (ObjectUtils.isNotEmpty(size))
 			uploadMediaRequest.setSize(size);
+		if (StringUtils.isNotBlank(accountId))
+			uploadMediaRequest.setAccountId(accountId);
 
 		MediaResponse mediaResponse = mediaService.saveLargeMediaFiles(uploadMediaRequest);
 

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,10 +18,7 @@ import org.springframework.stereotype.Service;
 import com.plutospace.events.commons.data.CustomPageResponse;
 import com.plutospace.events.commons.definitions.GeneralConstants;
 import com.plutospace.events.commons.definitions.PropertyConstants;
-import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
-import com.plutospace.events.commons.exception.LoginDisputeException;
-import com.plutospace.events.commons.exception.ResourceAlreadyExistsException;
-import com.plutospace.events.commons.exception.ResourceNotFoundException;
+import com.plutospace.events.commons.exception.*;
 import com.plutospace.events.commons.utils.HashPassword;
 import com.plutospace.events.commons.utils.SecurityMapper;
 import com.plutospace.events.domain.data.PlanType;
@@ -35,6 +33,7 @@ import com.plutospace.events.domain.entities.Plan;
 import com.plutospace.events.domain.repositories.AccountRepository;
 import com.plutospace.events.domain.repositories.AccountUserRepository;
 import com.plutospace.events.domain.repositories.PlanRepository;
+import com.plutospace.events.integrations.MiddlewareService;
 import com.plutospace.events.intelligence.search.DatabaseSearchService;
 import com.plutospace.events.services.AccountSessionService;
 import com.plutospace.events.services.AccountUserService;
@@ -58,6 +57,7 @@ public class AccountUserServiceImpl implements AccountUserService {
 	private final AccountSessionService accountSessionService;
 	private final PlanService planService;
 	private final DatabaseSearchService databaseSearchService;
+	private final MiddlewareService middlewareService;
 	private final PropertyConstants propertyConstants;
 	private final AccountUserMapper accountUserMapper;
 	private final AccountUserValidator accountUserValidator;
@@ -273,6 +273,116 @@ public class AccountUserServiceImpl implements AccountUserService {
 		log.info("users {}", accountUsers);
 
 		return accountUserMapper.toPagedResponse(accountUsers);
+	}
+
+	@Override
+	public AccountUserResponse inviteAccountUser(InviteAccountUserRequest inviteAccountUserRequest, String accountId) {
+		accountUserValidator.validate(inviteAccountUserRequest);
+		Account account = retrieveAccountById(accountId);
+		AccountUser accountOwner = retrieveAccountUserById(account.getAccountOwner());
+
+		if (accountUserRepository.existsByEmailIgnoreCase(inviteAccountUserRequest.email()))
+			throw new ResourceAlreadyExistsException("User Already Exists");
+		AccountUser accountUser = accountUserMapper.toEntity(inviteAccountUserRequest, accountId);
+
+		try {
+			AccountUser savedAccountUser = accountUserRepository.save(accountUser);
+
+			// Sending email
+			GoMailerRequest goMailerRequest = new GoMailerRequest();
+			GoMailerRequest.MailData mailData = new GoMailerRequest.MailData();
+			mailData.setCompany(accountOwner.getName());
+			mailData.setYear(LocalDateTime.now().getYear());
+			String url = propertyConstants.getFrontendBaseUrl() + propertyConstants.getInviteUserUrl() + "?ixxd="
+					+ savedAccountUser.getId();
+			mailData.setInvitationLink(url);
+			mailData.setFirstName(inviteAccountUserRequest.firstName());
+			mailData.setSupportEmail(propertyConstants.getTechEveryWhereSupportEmail());
+			goMailerRequest.setRecipient_email(inviteAccountUserRequest.email());
+			goMailerRequest.setData(mailData);
+			middlewareService.sendInvite(goMailerRequest);
+
+			return accountUserMapper.toResponse(accountUser);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public OperationalResponse reInviteAccountUser(List<String> ids, String accountId) {
+		List<AccountUser> accountUsers = accountUserRepository.findByIdIn(ids);
+		Account account = retrieveAccountById(accountId);
+		AccountUser accountOwner = retrieveAccountUserById(account.getAccountOwner());
+
+		for (AccountUser accountUser : accountUsers) {
+			if (!accountId.equals(accountUser.getAccountId()))
+				throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
+
+			if (StringUtils.isNotBlank(accountUser.getPassword()))
+				throw new GeneralPlatformDomainRuleException(
+						"One of the users already accepted the invite sent before");
+		}
+
+		try {
+			for (AccountUser accountUser : accountUsers) {
+				GoMailerRequest goMailerRequest = new GoMailerRequest();
+				GoMailerRequest.MailData mailData = new GoMailerRequest.MailData();
+				mailData.setCompany(accountOwner.getName());
+				mailData.setYear(LocalDateTime.now().getYear());
+				String url = propertyConstants.getFrontendBaseUrl() + propertyConstants.getInviteUserUrl() + "?ixxd="
+						+ accountUser.getId();
+				mailData.setInvitationLink(url);
+				mailData.setFirstName(accountUser.getFirstName());
+				mailData.setSupportEmail(propertyConstants.getTechEveryWhereSupportEmail());
+				goMailerRequest.setRecipient_email(accountUser.getEmail());
+				goMailerRequest.setData(mailData);
+				middlewareService.sendInvite(goMailerRequest);
+			}
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public OperationalResponse activateAccountUser(String id, String accountId) {
+		AccountUser existingAccountUser = retrieveAccountUserById(id);
+		if (!accountId.equals(existingAccountUser.getAccountId()))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
+
+		if (existingAccountUser.getIsActive())
+			throw new GeneralPlatformDomainRuleException("This user is already active");
+
+		existingAccountUser.setIsActive(true);
+
+		try {
+			accountUserRepository.save(existingAccountUser);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public OperationalResponse deactivateAccountUser(String id, String accountId) {
+		AccountUser existingAccountUser = retrieveAccountUserById(id);
+		if (!accountId.equals(existingAccountUser.getAccountId()))
+			throw new GeneralPlatformServiceException(GeneralConstants.MODIFY_NOT_ALLOWED_MESSAGE);
+
+		if (!existingAccountUser.getIsActive())
+			throw new GeneralPlatformDomainRuleException("This user is already inactive");
+
+		existingAccountUser.setIsActive(false);
+
+		try {
+			accountUserRepository.save(existingAccountUser);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
 	}
 
 	private Plan retrievePlanById(String id) {

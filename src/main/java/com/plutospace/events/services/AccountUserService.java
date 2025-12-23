@@ -42,4 +42,12 @@ public interface AccountUserService {
 	CustomPageResponse<AccountUserResponse> retrieveAllUsersTiedToAnAccount(String id, int pageNo, int pageSize);
 
 	CustomPageResponse<AccountUserResponse> searchAccountUser(String text, int pageNo, int pageSize);
+
+	AccountUserResponse inviteAccountUser(InviteAccountUserRequest inviteAccountUserRequest, String accountId);
+
+	OperationalResponse reInviteAccountUser(List<String> ids, String accountId);
+
+	OperationalResponse activateAccountUser(String id, String accountId);
+
+	OperationalResponse deactivateAccountUser(String id, String accountId);
 }

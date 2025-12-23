@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
 import com.plutospace.events.domain.data.request.ChangeAccountUserPasswordRequest;
+import com.plutospace.events.domain.data.request.InviteAccountUserRequest;
 import com.plutospace.events.domain.data.request.RegisterBusinessAccountRequest;
 import com.plutospace.events.domain.data.request.RegisterPersonalAccountRequest;
 
@@ -87,6 +88,26 @@ public class AccountUserValidator {
 		}
 		if (changeAccountUserPasswordRequest.newPassword().equals(changeAccountUserPasswordRequest.oldPassword())) {
 			throw new GeneralPlatformDomainRuleException(oldPasswordCannotBeNewPasswordValidationMessage);
+		}
+	}
+
+	public void validate(InviteAccountUserRequest inviteAccountUserRequest) {
+		String firstNameCannotBeNullValidationMessage = "First name cannot be empty";
+		String lastNameCannotBeNullValidationMessage = "Last name cannot be empty";
+		String emailCannotBeNullValidationMessage = "Email cannot be null";
+		String emailInvalidValidationMessage = "Email is invalid";
+
+		if (StringUtils.isBlank(inviteAccountUserRequest.email())) {
+			throw new GeneralPlatformDomainRuleException(emailCannotBeNullValidationMessage);
+		}
+		if (!validateEmail(inviteAccountUserRequest.email())) {
+			throw new GeneralPlatformDomainRuleException(emailInvalidValidationMessage);
+		}
+		if (StringUtils.isBlank(inviteAccountUserRequest.firstName())) {
+			throw new GeneralPlatformDomainRuleException(firstNameCannotBeNullValidationMessage);
+		}
+		if (StringUtils.isBlank(inviteAccountUserRequest.lastName())) {
+			throw new GeneralPlatformDomainRuleException(lastNameCannotBeNullValidationMessage);
 		}
 	}
 
