@@ -39,13 +39,15 @@ public class MediaApiResource {
 	private final PropertyConstants propertyConstants;
 	private final HttpServletRequest request;
 
-	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(description = "This endpoint uploads a new media on PlutoSpace Events")
-	public ResponseEntity<MediaResponse> save(@RequestBody UploadMediaRequest uploadMediaRequest,
+	public ResponseEntity<MediaResponse> save(
 			@RequestParam(name = "file", required = false) MultipartFile multipartFile,
 			@RequestParam(name = "type", required = false) String type,
 			@RequestParam(name = "accountId", required = false) String accountId,
 			@RequestParam(name = "size", required = false) Long size, UriComponentsBuilder uriComponentsBuilder) {
+
+		UploadMediaRequest uploadMediaRequest = new UploadMediaRequest();
 		uploadMediaRequest.setMultipartFile(multipartFile);
 		if (StringUtils.isNotBlank(type))
 			uploadMediaRequest.setType(type);
@@ -64,11 +66,13 @@ public class MediaApiResource {
 
 	@PostMapping(path = "/large", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(description = "This endpoint uploads a new large media on PlutoSpace Events")
-	public ResponseEntity<MediaResponse> saveLargeMediaFiles(@RequestBody UploadMediaRequest uploadMediaRequest,
+	public ResponseEntity<MediaResponse> saveLargeMediaFiles(
 			@RequestParam(name = "file", required = false) MultipartFile multipartFile,
 			@RequestParam(name = "type", required = false) String type,
 			@RequestParam(name = "accountId", required = false) String accountId,
 			@RequestParam(name = "size", required = false) Long size, UriComponentsBuilder uriComponentsBuilder) {
+
+		UploadMediaRequest uploadMediaRequest = new UploadMediaRequest();
 		uploadMediaRequest.setMultipartFile(multipartFile);
 		if (StringUtils.isNotBlank(type))
 			uploadMediaRequest.setType(type);

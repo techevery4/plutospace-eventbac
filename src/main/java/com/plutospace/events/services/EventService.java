@@ -30,7 +30,11 @@ public interface EventService {
 
 	OperationalResponse updateEventWithPoll(String id, String pollPublicId);
 
+	OperationalResponse updateEventWithQuestionAndAnswer(String id, String questionAndAnswerPublicId);
+
 	OperationalResponse removePollFromEvent(String id);
+
+	OperationalResponse removeQuestionAndAnswerFromEvent(String id);
 
 	EventResponse retrieveEventByForeignPublicId(String publicId, int type);
 

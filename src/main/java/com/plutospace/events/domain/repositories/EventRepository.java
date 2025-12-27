@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.plutospace.events.commons.repositories.BaseRepository;
@@ -28,4 +29,7 @@ public interface EventRepository extends BaseRepository<Event, String> {
 	Long countByAccountIdAndCreatedOnBetween(String accountId, LocalDateTime startTime, LocalDateTime endTime);
 
 	Long countByAccountId(String accountId);
+
+	@Query("{ 'qAndALink' : ?0 }")
+	Event findByQAndALink(String publicId);
 }

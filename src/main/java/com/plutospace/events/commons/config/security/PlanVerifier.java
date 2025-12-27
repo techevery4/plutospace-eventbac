@@ -12,8 +12,12 @@ import com.plutospace.events.commons.definitions.PropertyConstants;
 import com.plutospace.events.commons.exception.GeneralPlatformDomainRuleException;
 import com.plutospace.events.commons.exception.GeneralPlatformServiceException;
 import com.plutospace.events.commons.utils.DateConverter;
+import com.plutospace.events.commons.utils.LinkGenerator;
 import com.plutospace.events.commons.utils.SecurityMapper;
+import com.plutospace.events.domain.data.request.CreateEventRequest;
 import com.plutospace.events.domain.data.request.CreateMeetingRequest;
+import com.plutospace.events.domain.data.request.UpdateEventFormRequest;
+import com.plutospace.events.domain.data.request.UpdateEventPaymentSettingsRequest;
 import com.plutospace.events.domain.data.response.AccountResponse;
 import com.plutospace.events.domain.data.response.PlanResponse;
 import com.plutospace.events.domain.entities.AccountSession;
@@ -37,16 +41,20 @@ public class PlanVerifier {
 	private final FreeSlotRepository freeSlotRepository;
 	private final MeetingRepository meetingRepository;
 	private final PollRepository pollRepository;
+	private final PollResultRepository pollResultRepository;
 	private final ProposalRepository proposalRepository;
 	private final ProposalSubmissionRepository proposalSubmissionRepository;
+	private final QuestionAndAnswerRepository questionAndAnswerRepository;
+	private final QuestionAndAnswerDetailRepository questionAndAnswerDetailRepository;
 	private final PlanService planService;
 	private final AccountUserService accountUserService;
 	private final SecurityMapper securityMapper;
 	private final PropertyConstants propertyConstants;
 	private final DateConverter dateConverter;
+	private final LinkGenerator linkGenerator;
 
 	public Boolean checkPlan(String planFeature, String endpoint, String method, String token, Object request,
-			String userAgent, LocalDateTime currentTime) {
+			String userAgent, LocalDateTime currentTime, List<String> queryParams) {
 		String accountId = securityMapper.retrieveAccountId(token,
 				propertyConstants.getEventsLoginEncryptionSecretKey());
 		String accountUserId = securityMapper.retrieveAccountUserId(token,
@@ -63,14 +71,14 @@ public class PlanVerifier {
 			case "MEETING" -> checkMeetingFeature(accountId, dateConverter.getStartOfMonth(currentTime), currentTime,
 					planResponse, endpoint, method, request);
 			case "EVENT" -> checkEventFeature(accountId, dateConverter.getStartOfMonth(currentTime), currentTime,
-					planResponse, endpoint, method);
+					planResponse, endpoint, method, request);
 			case "CALENDAR" -> checkCalendarFeature(accountId, dateConverter.getStartOfMonth(currentTime), currentTime,
 					planResponse, endpoint, method);
 			case "PROPOSAL" -> checkProposalFeature(accountId, dateConverter.getStartOfMonth(currentTime), currentTime,
 					planResponse, endpoint, method);
 			case "ACCOUNT" -> checkAccountFeature(accountId, accountUserId, planResponse, endpoint, method, userAgent);
 			case "POLL" -> checkPollFeature(accountId, dateConverter.getStartOfMonth(currentTime), currentTime,
-					planResponse, endpoint, method);
+					planResponse, endpoint, method, queryParams);
 			default -> false;
 		};
 	}
@@ -97,7 +105,7 @@ public class PlanVerifier {
 	}
 
 	private Boolean checkEventFeature(String accountId, LocalDateTime startTime, LocalDateTime endTime,
-			PlanResponse planResponse, String endpoint, String method) {
+			PlanResponse planResponse, String endpoint, String method, Object request) {
 		if (endpoint.equals(EVENTS) && method.equalsIgnoreCase(GeneralConstants.POST)) {
 			if (planResponse.getPriceNaira() == 0 && planResponse.getPriceUsd() == 0) {
 				Long eventCount = eventRepository.countByAccountId(accountId);
@@ -108,6 +116,35 @@ public class PlanVerifier {
 			if (ObjectUtils.isEmpty(planResponse.getFeatures().getEventFeature().getNumberAllowed())
 					|| planResponse.getFeatures().getEventFeature().getNumberAllowed() <= eventCount)
 				throw new GeneralPlatformServiceException(GeneralConstants.PLAN_UPGRADE_MESSAGE);
+			CreateEventRequest createEventRequest = (CreateEventRequest) request;
+			if (!createEventRequest.eventFormRequests().isEmpty()) {
+				if (ObjectUtils.isEmpty(planResponse.getFeatures().getEventFeature().getNumberOfForms())
+						|| planResponse.getFeatures().getEventFeature().getNumberOfForms() < createEventRequest
+								.eventFormRequests().size())
+					throw new GeneralPlatformServiceException(GeneralConstants.PLAN_UPGRADE_MESSAGE);
+			}
+			if (ObjectUtils.isNotEmpty(createEventRequest.isPaidEvent()) && createEventRequest.isPaidEvent()) {
+				if (ObjectUtils.isEmpty(planResponse.getFeatures().getEventFeature().getAllowPaidEvent())
+						|| !planResponse.getFeatures().getEventFeature().getAllowPaidEvent())
+					throw new GeneralPlatformServiceException(GeneralConstants.PLAN_UPGRADE_MESSAGE);
+			}
+		} else if (endpoint.equals(EVENTS + RESOURCE_ID + "/form") && method.equalsIgnoreCase(GeneralConstants.PUT)) {
+			UpdateEventFormRequest updateEventFormRequest = (UpdateEventFormRequest) request;
+			if (!updateEventFormRequest.eventFormRequests().isEmpty()) {
+				if (ObjectUtils.isEmpty(planResponse.getFeatures().getEventFeature().getNumberOfForms())
+						|| planResponse.getFeatures().getEventFeature().getNumberOfForms() < updateEventFormRequest
+								.eventFormRequests().size())
+					throw new GeneralPlatformServiceException(GeneralConstants.PLAN_UPGRADE_MESSAGE);
+			}
+		} else if (endpoint.equals(EVENTS + RESOURCE_ID + "/payment")
+				&& method.equalsIgnoreCase(GeneralConstants.PUT)) {
+			UpdateEventPaymentSettingsRequest updateEventPaymentSettingsRequest = (UpdateEventPaymentSettingsRequest) request;
+			if (ObjectUtils.isNotEmpty(updateEventPaymentSettingsRequest.isPaidEvent())
+					&& updateEventPaymentSettingsRequest.isPaidEvent()) {
+				if (ObjectUtils.isEmpty(planResponse.getFeatures().getEventFeature().getAllowPaidEvent())
+						|| !planResponse.getFeatures().getEventFeature().getAllowPaidEvent())
+					throw new GeneralPlatformServiceException(GeneralConstants.PLAN_UPGRADE_MESSAGE);
+			}
 		}
 
 		return true;
@@ -164,11 +201,34 @@ public class PlanVerifier {
 	}
 
 	private Boolean checkPollFeature(String accountId, LocalDateTime startTime, LocalDateTime endTime,
-			PlanResponse planResponse, String endpoint, String method) {
+			PlanResponse planResponse, String endpoint, String method, List<String> queryParams) {
 		if (endpoint.equals(POLLS) && method.equalsIgnoreCase(GeneralConstants.POST)) {
 			Long pollCount = pollRepository.countByAccountIdAndCreatedOnBetween(accountId, startTime, endTime);
 			if (ObjectUtils.isEmpty(planResponse.getFeatures().getPollFeature().getNumberOfPolls())
 					|| planResponse.getFeatures().getPollFeature().getNumberOfPolls() <= pollCount)
+				throw new GeneralPlatformServiceException(GeneralConstants.PLAN_UPGRADE_MESSAGE);
+		} else if (endpoint.equals(POLLS + "/result") && method.equalsIgnoreCase(GeneralConstants.PUT)) {
+			String decryptedPublicId = linkGenerator.extractDetailsFromPublicLink(queryParams.get(0),
+					propertyConstants.getEventsEncryptionSecretKey());
+			String[] words = decryptedPublicId.split(":");
+			Long pollResultCount = pollResultRepository.countByPollId(words[0]);
+			if (ObjectUtils.isEmpty(planResponse.getFeatures().getPollFeature().getNumberOfPollVotes())
+					|| planResponse.getFeatures().getPollFeature().getNumberOfPollVotes() <= pollResultCount)
+				throw new GeneralPlatformServiceException(GeneralConstants.PLAN_UPGRADE_MESSAGE);
+		} else if (endpoint.equals(QUESTIONS_AND_ANSWERS) && method.equalsIgnoreCase(GeneralConstants.POST)) {
+			Long questionAndAnswerSessionCount = questionAndAnswerRepository
+					.countByAccountIdAndCreatedOnBetween(accountId, startTime, endTime);
+			if (ObjectUtils.isEmpty(planResponse.getFeatures().getPollFeature().getNumberOfQuestionAndAnswerSessions())
+					|| planResponse.getFeatures().getPollFeature()
+							.getNumberOfQuestionAndAnswerSessions() <= questionAndAnswerSessionCount)
+				throw new GeneralPlatformServiceException(GeneralConstants.PLAN_UPGRADE_MESSAGE);
+		} else if (endpoint.equals(QUESTIONS_AND_ANSWERS + "/ask") && method.equalsIgnoreCase(GeneralConstants.PUT)) {
+			String decryptedPublicId = linkGenerator.extractDetailsFromPublicLink(queryParams.get(0),
+					propertyConstants.getEventsEncryptionSecretKey());
+			String[] words = decryptedPublicId.split(":");
+			Long questionsSentCount = questionAndAnswerDetailRepository.countByQuestionAnswerId(words[0]);
+			if (ObjectUtils.isEmpty(planResponse.getFeatures().getPollFeature().getNumberOfQuestionsSent())
+					|| planResponse.getFeatures().getPollFeature().getNumberOfQuestionsSent() <= questionsSentCount)
 				throw new GeneralPlatformServiceException(GeneralConstants.PLAN_UPGRADE_MESSAGE);
 		}
 

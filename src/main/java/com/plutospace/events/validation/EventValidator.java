@@ -26,6 +26,7 @@ public class EventValidator {
 		String reminderHourCannotBeNullValidationMessage = "Reminder hour cannot be empty";
 		String reminderHourCannotBeInvalidValidationMessage = "Reminder hour cannot be invalid";
 		String amountCannotBeNullValidationMessage = "Amount cannot be empty";
+		String amountCannotBeFilledValidationMessage = "Amount cannot be filled";
 		String amountCannotBeInvalidValidationMessage = "Amount cannot be invalid";
 
 		if (StringUtils.isBlank(createEventRequest.name())) {
@@ -78,6 +79,10 @@ public class EventValidator {
 				throw new GeneralPlatformDomainRuleException(amountCannotBeNullValidationMessage);
 			if (createEventRequest.amount().compareTo(BigDecimal.ZERO) <= 0)
 				throw new GeneralPlatformDomainRuleException(amountCannotBeInvalidValidationMessage);
+		}
+		if (ObjectUtils.isEmpty(createEventRequest.isPaidEvent()) || !createEventRequest.isPaidEvent()) {
+			if (ObjectUtils.isNotEmpty(createEventRequest.amount()))
+				throw new GeneralPlatformDomainRuleException(amountCannotBeFilledValidationMessage);
 		}
 	}
 }

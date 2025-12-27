@@ -17,4 +17,6 @@ public interface PollResultRepository extends BaseRepository<PollResult, String>
 	PollResult findByPollIdAndEmailIgnoreCase(String pollId, String email);
 
 	Page<PollResult> findByPollIdOrderByCreatedOnDesc(String pollId, Pageable pageable);
+
+	Long countByPollId(String pollId);
 }

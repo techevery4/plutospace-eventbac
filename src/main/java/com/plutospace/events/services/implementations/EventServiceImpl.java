@@ -279,6 +279,21 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
+	public OperationalResponse updateEventWithQuestionAndAnswer(String id, String questionAndAnswerPublicId) {
+		Event existingEvent = retrieveEventById(id);
+
+		existingEvent.setQAndALink(questionAndAnswerPublicId);
+
+		try {
+			eventRepository.save(existingEvent);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
 	public OperationalResponse removePollFromEvent(String id) {
 		Event existingEvent = retrieveEventById(id);
 
@@ -294,10 +309,27 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
+	public OperationalResponse removeQuestionAndAnswerFromEvent(String id) {
+		Event existingEvent = retrieveEventById(id);
+
+		existingEvent.setQAndALink(null);
+
+		try {
+			eventRepository.save(existingEvent);
+
+			return OperationalResponse.instance(GeneralConstants.SUCCESS_MESSAGE);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException(e.getLocalizedMessage());
+		}
+	}
+
+	@Override
 	public EventResponse retrieveEventByForeignPublicId(String publicId, int type) {
 		Event event = null;
 		if (type == 1) {
 			event = eventRepository.findByPollsLink(publicId);
+		} else if (type == 2) {
+			event = eventRepository.findByQAndALink(publicId);
 		}
 
 		if (event != null) {

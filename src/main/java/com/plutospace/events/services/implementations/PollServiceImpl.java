@@ -149,8 +149,9 @@ public class PollServiceImpl implements PollService {
 		Poll poll = pollRepository.findByPublicIdAndIsPublished(publicId, true);
 		if (poll == null)
 			throw new ResourceNotFoundException("Poll not available");
+		Poll publicPoll = retrievePollFromPublicId(publicId);
 
-		return pollMapper.toResponse(poll);
+		return pollMapper.toResponse(publicPoll);
 	}
 
 	@Override
@@ -237,6 +238,8 @@ public class PollServiceImpl implements PollService {
 		String decryptedPublicId = linkGenerator.extractDetailsFromPublicLink(publicId,
 				propertyConstants.getEventsEncryptionSecretKey());
 		String[] words = decryptedPublicId.split(":");
+		if (words.length < 1)
+			throw new GeneralPlatformDomainRuleException("Poll link has been corrupted");
 
 		Poll poll = retrievePollById(words[0]);
 		if (!poll.getIsPublished())
@@ -267,5 +270,15 @@ public class PollServiceImpl implements PollService {
 
 	private Poll retrievePollById(String id) {
 		return pollRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Poll Not Found"));
+	}
+
+	private Poll retrievePollFromPublicId(String publicId) {
+		String decryptedLink = linkGenerator.extractDetailsFromPublicLink(publicId,
+				propertyConstants.getEventsEncryptionSecretKey());
+		String[] words = decryptedLink.split(":");
+		if (words.length < 1)
+			throw new GeneralPlatformDomainRuleException("Poll link has been corrupted");
+
+		return retrievePollById(words[0]);
 	}
 }

@@ -375,4 +375,86 @@ public class DatabaseSearchService {
 		// Return a Page object
 		return new PageImpl<>(planPaymentHistories, pageable, total);
 	}
+
+	public Page<QuestionAndAnswer> findQuestionAndAnswerByDynamicFilter(String accountId, String searchText,
+			List<String> fields, Pageable pageable) {
+		Query query = new Query();
+
+		if (StringUtils.isNotBlank(searchText)) {
+			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
+			for (String field : fields) {
+				criteriaList.add(Criteria.where(field).regex(pattern));
+			}
+
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			Criteria accountCriteria = Criteria.where("accountId").is(accountId).andOperator(fullSearchCriteria);
+			query.addCriteria(accountCriteria);
+		}
+
+		long total = mongoTemplate.count(query, QuestionAndAnswer.class);
+		query.with(pageable);
+
+		List<QuestionAndAnswer> questionAndAnswers = mongoTemplate.find(query, QuestionAndAnswer.class);
+
+		// Return a Page object
+		return new PageImpl<>(questionAndAnswers, pageable, total);
+	}
+
+	public Page<QuestionAndAnswerDetail> findQuestionsByAnswerStatusByDynamicFilter(String questionAnswerId,
+			Boolean isAnswered, String searchText, List<String> fields, Pageable pageable) {
+		Query query = new Query();
+
+		if (StringUtils.isNotBlank(searchText)) {
+			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
+			for (String field : fields) {
+				criteriaList.add(Criteria.where(field).regex(pattern));
+			}
+
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			Criteria accountCriteria = Criteria.where("questionAnswerId").is(questionAnswerId).and("isAnswered")
+					.is(isAnswered).andOperator(fullSearchCriteria);
+			query.addCriteria(accountCriteria);
+		}
+
+		long total = mongoTemplate.count(query, QuestionAndAnswerDetail.class);
+		query.with(pageable);
+
+		List<QuestionAndAnswerDetail> questionAndAnswerDetails = mongoTemplate.find(query,
+				QuestionAndAnswerDetail.class);
+
+		// Return a Page object
+		return new PageImpl<>(questionAndAnswerDetails, pageable, total);
+	}
+
+	public Page<QuestionAndAnswerDetail> findQuestionsByDynamicFilter(String questionAnswerId, String searchText,
+			List<String> fields, Pageable pageable) {
+		Query query = new Query();
+
+		if (StringUtils.isNotBlank(searchText)) {
+			Pattern pattern = Pattern.compile(".*" + Pattern.quote(searchText) + ".*", Pattern.CASE_INSENSITIVE);
+
+			List<Criteria> criteriaList = new ArrayList<>();
+			for (String field : fields) {
+				criteriaList.add(Criteria.where(field).regex(pattern));
+			}
+
+			Criteria fullSearchCriteria = new Criteria().orOperator(criteriaList);
+			Criteria accountCriteria = Criteria.where("questionAnswerId").is(questionAnswerId)
+					.andOperator(fullSearchCriteria);
+			query.addCriteria(accountCriteria);
+		}
+
+		long total = mongoTemplate.count(query, QuestionAndAnswerDetail.class);
+		query.with(pageable);
+
+		List<QuestionAndAnswerDetail> questionAndAnswerDetails = mongoTemplate.find(query,
+				QuestionAndAnswerDetail.class);
+
+		// Return a Page object
+		return new PageImpl<>(questionAndAnswerDetails, pageable, total);
+	}
 }

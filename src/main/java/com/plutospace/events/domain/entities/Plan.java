@@ -42,6 +42,8 @@ public class Plan extends BaseEntity {
 	@Data
 	public static class EventFeature {
 		private Long numberAllowed;
+		private Long numberOfForms;
+		private Boolean allowPaidEvent;
 	}
 
 	@Data
@@ -65,6 +67,8 @@ public class Plan extends BaseEntity {
 	@Data
 	public static class PollFeature {
 		private Long numberOfPolls;
+		private Long numberOfPollVotes;
 		private Long numberOfQuestionAndAnswerSessions;
+		private Long numberOfQuestionsSent;
 	}
 }

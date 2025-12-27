@@ -118,7 +118,7 @@ public class PollApiResource {
 	}
 
 	@GetMapping(path = RESOURCE_ID + "/result", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(description = "This endpoint deletes a poll result")
+	@Operation(description = "This endpoint retrieves a poll result")
 	public ResponseEntity<CustomPageResponse<PollResultResponse>> retrievePollResults(@PathVariable String id,
 			@RequestParam(name = "pageNo") int pageNo, @RequestParam(name = "pageSize") int pageSize) {
 		return ResponseEntity.ok(pollService.retrievePollResults(id, pageNo, pageSize));

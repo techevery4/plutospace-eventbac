@@ -10,6 +10,7 @@ public class GeneralConstants {
 	public static final String PLAN_UPGRADE_MESSAGE = "Please upgrade your plan to access this feature";
 	public static final String MODIFY_NOT_ALLOWED_MESSAGE = "This process appears to be broken";
 	public static final String PERMISSION_ALLOW_MESSAGE = "Permission Allowed";
+	public static final String QUESTION_ANSWERED_MESSAGE = "Your question has been marked as answered by the host";
 	public static final String ENCRYPTION_TYPE = "AES";
 	public static final String CONTENT_TYPE = "UTF-8";
 	public static final String MESSAGE_DIGEST = "SHA-1";
